@@ -24,8 +24,8 @@
 \begin{tikzpicture}
 
 \node[AGENT] (n_initiator) {Initiator};
-\node[AGENT, right=0.3\textwidth of n_initiator, text=GaoliangRed] (n_attacker) {Attacker};
-\node[AGENT, right=0.3\textwidth of n_attacker] (n_responder) {Responder};
+\node[AGENT, right=0.4\textwidth of n_initiator, text=GaoliangRed] (n_attacker) {Attacker};
+\node[AGENT, right=0.4\textwidth of n_attacker] (n_responder) {Responder};
 \coordinate (end1) at ($(n_initiator.south)+(0,-100ex)$);
 \coordinate (end2) at ($(end1-|n_attacker)$);
 \coordinate (end3) at ($(end2-|n_responder)$);
@@ -41,14 +41,14 @@
 \coordinate (c_init_req) at ($(n_initiator.south)+(0,-8ex)$);
 \coordinate (c_atta_req) at ($(c_init_req-|n_attacker)$);
 \coordinate (c_resp_req) at ($(c_init_req-|n_responder)$);
-\draw[ARROW] (c_init_req) -- (c_atta_req) node[midway,above=-0.3ex]{Pairing Request \{$KeySize: 16$\}};
-\draw[ARROW] (c_atta_req) -- (c_resp_req) node[midway,above=-0.3ex]{Pairing Response \{\textcolor{GaoliangRed}{$KeySize: 8$}\}};
+\draw[ARROW] (c_init_req) -- (c_atta_req) node[midway,above=-0.3ex]{Pairing Request \{$KeySize: 16$, $IRK: 1$, $CSRK: 1$\}};
+\draw[ARROW] (c_atta_req) -- (c_resp_req) node[midway,above=-0.3ex]{Pairing Response \{\textcolor{GaoliangRed}{$KeySize: 8$, $IRK: 0$, $CSRK: 0$}\}};
 
 \coordinate (c_init_rsp) at ($(c_init_req)+(0,-4ex)$);
 \coordinate (c_atta_rsp) at ($(c_init_rsp-|n_attacker)$);
 \coordinate (c_resp_rsp) at ($(c_init_rsp-|n_responder)$);
-\draw[ARROW] (c_resp_rsp) -- (c_atta_rsp) node[midway,above=-0.3ex]{Pairing Response\{$KeySize: 16$\}};
-\draw[ARROW] (c_atta_rsp) -- (c_init_rsp) node[midway,above=-0.3ex]{Pairing Response\{$KeySize: 16$\}};
+\draw[ARROW] (c_resp_rsp) -- (c_atta_rsp) node[midway,above=-0.3ex]{Pairing Response\{$KeySize: 16$, $IRK: 1$, $CSRK: 1$\}};
+\draw[ARROW] (c_atta_rsp) -- (c_init_rsp) node[midway,above=-0.3ex]{Pairing Response\{$KeySize: 16$, \textcolor{GaoliangRed}{$IRK: 0$, $CSRK: 0$}\}};
 
 \coordinate (c_phase1A) at ($(c_init_req)+(-14ex, 5ex)$);
 \coordinate (c_phase1B) at ($(c_resp_rsp)+(14ex,-2ex)$);
@@ -98,48 +98,50 @@
 
 % Phase 3: Transport Specific Key Distribution
 \coordinate (c_init_encreq) at ($(c_init_checkr)+(0,-8ex)$);
-\coordinate (c_atta_encreq) at ($(c_init_encreq-|c_atta_checkr)$);
-\coordinate (c_resp_encreq) at ($(c_init_encreq-|c_resp_checkr)$);
-\draw[ARROW] (c_init_encreq) -- (c_atta_encreq) node[midway,above=-0.3ex]{LL\_ENC\_REQ \{$SKD_I$\}};
-\draw[ARROW] (c_atta_encreq) -- (c_resp_encreq) node[midway,above=-0.3ex]{LL\_ENC\_REQ \{$SKD_I$\}};
+\coordinate (c_attai_encreq) at ($(c_init_encreq-|c_atta_checkr)$);
+\draw[ARROW] (c_init_encreq) -- (c_attai_encreq) node[midway,above=-0.3ex]{LL\_ENC\_REQ \{$SKD_I$\}};
 
 \coordinate (c_init_encrsp) at ($(c_init_encreq)+(0,-4ex)$);
-\coordinate (c_atta_encrsp) at ($(c_init_encrsp-|c_atta_checkr)$);
-\coordinate (c_resp_encrsp) at ($(c_init_encrsp-|c_resp_checkr)$);
-\draw[ARROW] (c_resp_encrsp) -- (c_atta_encrsp) node[midway,above=-0.3ex]{LL\_ENC\_RSP \{$SKD_R$\}};
-\draw[ARROW] (c_atta_encrsp) -- (c_init_encrsp) node[midway,above=-0.3ex]{LL\_ENC\_RSP \{$SKD_R$\}};
+\coordinate (c_attai_encrsp) at ($(c_init_encrsp-|c_atta_checkr)$);
+\draw[ARROW] (c_attai_encrsp) -- (c_init_encrsp) node[midway,above=-0.3ex]{LL\_ENC\_RSP \{$SKD_R$\}};
 
 \coordinate (c_init_startencreq) at ($(c_init_encrsp)+(0,-4ex)$);
-\coordinate (c_atta_startencrsp) at ($(c_init_startencreq-|c_atta_encrsp)$);
-\draw[ARROW] (c_init_startencreq) -- (c_atta_startencrsp) node[midway,above=-0.3ex]{\textcolor{JidanYellow}{LL\_START\_ENC\_RSP}};
+\coordinate (c_attai_startencreq) at ($(c_init_startencreq-|c_attai_encrsp)$);
+\draw[ARROW] (c_attai_startencreq) -- (c_init_startencreq) node[midway,above=-0.3ex]{LL\_START\_ENC\_REQ};
 
+\coordinate (c_init_startencrsp) at ($(c_init_startencreq)+(0,-4ex)$);
+\coordinate (c_attai_startencrsp) at ($(c_init_startencrsp-|c_attai_encrsp)$);
+\draw[ARROW] (c_init_startencrsp) -- (c_attai_startencrsp) node[midway,above=-0.3ex]{\textcolor{JidanYellow}{LL\_START\_ENC\_RSP}}; 
 
-\coordinate (c_resp_term) at ($(c_init_startencreq-|c_resp_encrsp)$);
-\draw[ARROW] (c_atta_startencrsp) -- (c_resp_term) node[midway,above=-0.3ex]{LL Terminate};
+\coordinate (c_resp_term) at ($(c_init_encreq-|c_resp_checkr)$);
+\draw[ARROW] (c_attai_encreq) -- (c_resp_term) node[midway,above=-0.3ex]{LL Terminate};
 
+\coordinate (c_attar_adv) at ($(c_attai_encreq)+(0,-4ex)$);
+\coordinate (c_resp_adv) at ($(c_attar_adv-|c_resp_term)$);
+\draw[ARROW] (c_attar_adv) -- (c_resp_adv) node[midway,above=-0.3ex]{Advertising};
 
-\coordinate (c_atta_adv) at ($(c_atta_startencrsp)+(0,-4ex)$);
-\coordinate (c_resp_adv) at ($(c_atta_adv-|c_resp_term)$);
-\draw[ARROW] (c_atta_adv) -- (c_resp_adv) node[midway,above=-0.3ex]{Advertising};
+\coordinate (c_attar_encreq) at ($(c_attar_adv)+(0,-4ex)$);
+\coordinate (c_resp_encreq) at ($(c_attar_encreq-|c_resp_adv)$);
+\draw[ARROW] (c_resp_encreq) -- (c_attar_encreq) node[midway,above=-0.3ex]{LL\_ENC\_REQ \{$SKD_I$\}};
 
-\coordinate (c_atta_encreq2) at ($(c_atta_adv)+(0,-4ex)$);
-\coordinate (c_resp_encreq2) at ($(c_atta_encreq2-|c_resp_adv)$);
-\draw[ARROW] (c_resp_encreq2) -- (c_atta_encreq2) node[midway,above=-0.3ex]{LL\_ENC\_REQ \{$SKD_I$\}};
+\coordinate (c_attar_encrsp) at ($(c_attar_encreq)+(0,-4ex)$);
+\coordinate (c_resp_encrsp) at ($(c_attar_encrsp-|c_resp_encreq)$);
+\draw[ARROW] (c_attar_encrsp) -- (c_resp_encrsp) node[midway,above=-0.3ex]{LL\_ENC\_RSP \{$SKD_R$\}};
 
-\coordinate (c_atta_encrsp2) at ($(c_atta_encreq2)+(0,-4ex)$);
-\coordinate (c_resp_encrsp2) at ($(c_atta_encrsp2-|c_resp_encreq2)$);
-\draw[ARROW] (c_atta_encrsp2) -- (c_resp_encrsp2) node[midway,above=-0.3ex]{LL\_ENC\_RSP \{$SKD_R$\}};
+\coordinate (c_attar_startencreq) at ($(c_attar_encrsp)+(0,-4ex)$);
+\coordinate (c_resp_startencreq) at ($(c_attar_startencreq-|c_resp_encrsp)$);
+\draw[ARROW] (c_attar_startencreq) -- (c_resp_startencreq) node[midway,above=-0.3ex]{LL\_START\_ENC\_REQ};
 
-\coordinate (c_atta_startencrsp2) at ($(c_atta_encrsp2)+(0,-4ex)$);
-\coordinate (c_resp_startencreq2) at ($(c_atta_startencrsp2-|c_resp_encrsp2)$);
-\draw[ARROW] (c_resp_startencreq2) -- (c_atta_startencrsp2) node[midway,above=-0.3ex]{\textcolor{JidanYellow}{LL\_START\_ENC\_RSP}};
+\coordinate (c_attar_startencrsp) at ($(c_attar_startencreq)+(0,-4ex)$);
+\coordinate (c_resp_startencreq) at ($(c_attar_startencrsp-|c_resp_encrsp)$);
+\draw[ARROW] (c_resp_startencreq) -- (c_attar_startencrsp) node[midway,above=-0.3ex]{\textcolor{JidanYellow}{LL\_START\_ENC\_RSP}};
 
-\coordinate (c_atta_bf) at ($(c_atta_startencrsp2)+(0,-4ex)$);
+\coordinate (c_atta_bf) at ($(c_attar_startencrsp)+(0,-4ex)$);
 \node[ACTION,minimum height=3.5ex] (n_atta_bf) at (c_atta_bf) {Brute Force $LTK_R$ $LTK_I$};
 
 \coordinate (c_atta_startencrsp3) at ($(c_atta_bf)+(0,-5ex)$);
 \coordinate (c_init_startencrsp3) at ($(c_atta_startencrsp3-|c_init_startencreq)$);
-\coordinate (c_resp_startencreq3) at ($(c_atta_startencrsp3-|c_resp_startencreq2)$);
+\coordinate (c_resp_startencreq3) at ($(c_atta_startencrsp3-|c_resp_startencreq)$);
 \draw[ARROW] (c_atta_startencrsp3) -- (c_init_startencrsp3) node[midway,above=-0.3ex]{\textcolor{JidanYellow}{LL\_START\_ENC\_RSP}};
 \draw[ARROW] (c_atta_startencrsp3) -- (c_resp_startencreq3) node[midway,above=-0.3ex]{\textcolor{JidanYellow}{LL\_START\_ENC\_RSP}};
 
