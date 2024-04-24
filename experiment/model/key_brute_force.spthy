@@ -1,0 +1,247 @@
+theory KEY_BF_TEST
+begin
+
+heuristic: S
+
+builtins: diffie-hellman, symmetric-encryption, multiset
+functions: extract/3, KDF/2, and/2,
+  LOW/0, MIDIUNM/0, HIGH/0, CHAOTIC/0,
+  entropy_increase/2, entropy_decrease/2
+// A, B: sharing _ltk
+// A -> B: max_key_size
+// B -> A: max_key_size
+// A, BL: key_size = min(A.max_key_size, B.max_key_size), LTK = _ltk[0:key_size]
+// A -> B: SKD_A
+// B -> A: SKD_B
+// A, B: SKD = SKD_A || SKD_B, LTK = KDF(SKD, LTK)
+
+// extract('0', a + b, k) = extract('0', a, k) | extract(a, a + b, k)  =  extract('0', b, k) | extract(b, a + b, k)
+// extract('0', a, k) = fst(k)
+// extract(a, a+b, k) = snd(k)
+// extract('0', a + b, k) = <fst(k), snd(k)>
+
+// low:         less than the highest entropy of the key which attacker can guess directly, low < 1 midium
+// midium:      the highest entropy of the key which attacker can guess directly
+// high:        the entropy of the key which attacker may have chances to guess, 1 midium < high <= n * midium
+// chaotic:  the entropy of the key which attacker can never be able to guess, chaotic > n * midium
+
+equations: 
+  // low + low = midium
+  entropy_increase(LOW, LOW) = MIDIUNM,
+  // low + midium = midium
+  entropy_increase(LOW, MIDIUNM) = MIDIUNM,
+  entropy_increase(MIDIUNM, LOW) = MIDIUNM,
+  // low + high = high
+  entropy_increase(LOW, HIGH) = HIGH,
+  entropy_increase(HIGH, LOW) = HIGH,
+  // midium + midium = high
+  entropy_increase(MIDIUNM, MIDIUNM) = HIGH,
+  // midium + high = high
+  entropy_increase(MIDIUNM, HIGH) = HIGH,
+  // high + high = high
+  entropy_increase(HIGH, MIDIUNM) = HIGH,
+  entropy_increase(HIGH, HIGH) = HIGH,
+  // chaotic + % = chaotic
+  entropy_increase(x, CHAOTIC) = CHAOTIC,
+  entropy_increase(CHAOTIC, x) = CHAOTIC,
+
+  // low * % = low
+  entropy_decrease(x, LOW) = LOW,
+  entropy_decrease(LOW, x) = LOW,
+  // midium * midium = midium
+  entropy_decrease(MIDIUNM, MIDIUNM) = MIDIUNM,
+  // midium * high = midium
+  entropy_decrease(MIDIUNM, HIGH) = MIDIUNM,
+  entropy_decrease(HIGH, MIDIUNM) = MIDIUNM,
+  // midium * chaotic = midium
+  entropy_decrease(MIDIUNM, CHAOTIC) = MIDIUNM,
+  entropy_decrease(CHAOTIC, MIDIUNM) = MIDIUNM,
+  // high * high = high
+  entropy_decrease(HIGH, HIGH) = HIGH,
+  // high * chaotic = high
+  entropy_decrease(HIGH, CHAOTIC) = HIGH,
+  entropy_decrease(CHAOTIC, HIGH) = HIGH,
+  // chaotic * chaotic = chaotic
+  entropy_decrease(CHAOTIC, CHAOTIC) = CHAOTIC
+
+
+rule entropy_break_low:
+    [!Entropy(key, LOW), In(senc(m, key))]
+    -->
+    [!Leak(key)]
+
+rule entropy_break_midium:
+    [!Entropy(key, MIDIUNM), In(senc(m, key))]
+    -->
+    [!Leak(key)]
+
+rule entropy_break_high1:
+    [!Entropy(<a, b>, HIGH), !Leak(a), !Entropy(b, entropy)]
+    -->
+    [!Entropy(<a, b>, entropy)]
+
+rule entropy_break_high2:
+    [!Entropy(<a, b>, HIGH), !Leak(b), !Entropy(a, entropy)]
+    -->
+    [!Entropy(<a, b>, entropy)]
+
+
+rule CreateInitiator:
+    [] 
+    --[
+        Test0_1(),
+        OnlyOnceV(<'CreateInitiator', $A>)
+    ]->
+    [ 
+        !Device($A, 'high', 'initiator'), !Entropy('high', HIGH)
+    ]
+
+
+rule CreateResponder:
+    [] 
+    --[
+        Test0_2(),
+        OnlyOnceV(<'CreateResponder', $A>)
+    ]->
+    [ 
+        !Device($A, 'high', 'responder'), !Entropy('high', HIGH)
+    ]
+
+rule pair:
+    [!Device($A, mks_A, 'initiator'), !Device($B, mks_B, 'responder'), Fr(~ltk_o)]
+  --[
+      Test1(),
+      OnlyOnceV(<'Pair', $A, $B>)
+    ]->
+    [
+      !Shared(~ltk_o, $A), !Shared(~ltk_o, $B), !SharedPair($A, $B), 
+      !Entropy(~ltk_o, HIGH)
+    ]
+
+rule A_send_max_key_size:
+    [!SharedPair($A, $B), !Device($A, mks_A, role)]
+  --[Test2()]->
+    [Out(<$A, mks_A>)]
+
+rule B_send_max_key_size:
+    [!SharedPair($A, $B), !Device($B, mks_B, role), In(<$A, mks_A>)]
+  --[Test3()]->
+    [Out(<$B, mks_B>), GotMaxKeySize($B, mks_B, mks_A)]
+
+rule A_receive_max_key_size:
+    [!SharedPair($A, $B), !Device($A, mks_A, role), In(<$B, mks_B>)]
+  --[Test4()]->
+    [GotMaxKeySize($A, mks_A, mks_B)]
+
+rule calc_LTK:
+  let 
+    ltk = and(and(user_ks, peer_ks), ~ltk_o)
+    entropy = entropy_decrease(entropy_decrease(ltk_e, user_ks_e), peer_ks_e)
+  in [
+    GotMaxKeySize(user, user_ks, peer_ks), !Shared(~ltk_o, user),
+    !Entropy(user_ks, user_ks_e), !Entropy(peer_ks, peer_ks_e), !Entropy(~ltk_o, ltk_e)
+  ]
+  --[LtkCaculated(user, ltk), Test5()]->
+    [
+      !LTK(user, ltk),
+      !Entropy(ltk, entropy)
+    ]
+
+rule A_send_skd:
+    [Fr(~skda), !LTK($A, ltk)]
+  --[Test6()]->
+    [Out(<$A, ~skda>), SKD($A, ~skda)]
+
+rule B_send_skd:
+  let 
+    skd = <~skda,~skdb>
+    session_key = KDF(skd, ltk)
+  in [Fr(~skdb), In(<$A, ~skda>), !LTK($B, ltk)]
+  --[SessionEstablished($B, session_key), Test7()]-> 
+    [Out(<$B, ~skdb>), !Session($B, $A, session_key)]
+
+rule A_recv_skd:
+  let 
+    skd = <~skda,~skdb>
+    session_key = KDF(skd, ltk)
+  in [In(<$B, ~skdb>), SKD($A, ~skda), !LTK($A, ltk)]
+  --[SessionEstablished($A, session_key), Test8()]->
+    [!Session($A, $B, session_key)]
+
+lemma Test0_1:
+  exists-trace
+  "
+    Ex #i. Test0_1() @i
+  "
+
+lemma Test0_2:
+  exists-trace
+  "
+    Ex #i. Test0_2() @i
+  "
+  
+lemma Test1:
+  exists-trace
+  "
+    Ex #i. Test1() @i
+  "
+
+lemma Test2:
+  exists-trace
+  "
+    Ex #i. Test2() @i
+  "
+  
+  lemma Test3:
+  exists-trace
+  "
+    Ex #i. Test3() @i
+  "
+
+  lemma Test4:
+  exists-trace
+  "
+    Ex #i. Test4() @i
+  "
+
+  lemma Test5:
+  exists-trace
+  "
+    Ex #i. Test5() @i
+  "
+  lemma Test6:
+  exists-trace
+  "
+    Ex #i. Test6() @i
+  "
+  lemma Test7:
+  exists-trace
+  "
+    Ex #i. Test7() @i
+  "
+  lemma Test8:
+  exists-trace
+  "
+    Ex #i. Test8() @i
+  "
+// lemma ltk_consistency:
+// "
+//   All userA, userB, ltkA, ltkB #i.
+//     LTK(userA, ltkA) @i & LTK(userB, ltkB) @i
+//     ==>
+//     ltkA = ltkB
+// "
+
+// lemma session_key_consistency:
+// "
+//   All userA, userB, session_keyA, session_keyB #i.
+//     Session(userA, userB, session_keyA) @i & Session(userB, userA, session_keyB) @i
+//     ==>
+//     session_keyA = session_keyB
+// "
+restriction OnlyOnceV:
+"All #i #j x. OnlyOnceV(x)@#i & OnlyOnceV(x)@#j ==> #i = #j"
+
+    
+
+end
