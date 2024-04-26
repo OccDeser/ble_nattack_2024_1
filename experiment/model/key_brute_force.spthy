@@ -127,7 +127,7 @@ rule I_send_max_key_size:
     Test2(),
     OnlyOnceV(<'ISendMKS', $I, $R>),
   ]->
-    [Out(<'I_MKS', mks_A>)]
+    [Out(<'I_MKS', mks_A>), ISentMKS($I, $R)]
 
 rule R_send_max_key_size:
   let 
@@ -160,7 +160,7 @@ rule I_receive_max_key_size:
     ltk = and(and(ks_A, ks_B), ~ltk_o)
     entropy = entropy_decrease(entropy_decrease(ltk_e, ks_A_e), ks_B_e)
   in [
-    !SharedKey($A, $B, ~ltk_o), !Device($A, mks_A, 'initiator'), In(<'R_MKS', mks_B>), !Entropy(~ltk_o, ltk_e)
+    !SharedKey($A, $B, ~ltk_o), !Device($A, mks_A, 'initiator'), In(<'R_MKS', mks_B>), !Entropy(~ltk_o, ltk_e), ISentMKS($A, $B)
   ]
   --[
     Test4(),
@@ -185,23 +185,62 @@ rule R_send_skd:
     session_key = KDF(skd, ltk)
   in [Fr(~skdb), In(<'I_SKD', ~skda>), !LTK($B, ltk), !Device($B, mks_B, 'responder')]
   --[
-    SessionEstablished($B, 'responder', session_key), 
+    // SessionEstablished($B, 'responder', session_key), 
     Test7(),
     OnlyOnceV(<'RSendSKD', $B>),
   ]-> 
-    [Out(<'R_SKD', ~skdb>), !Session($B, $A, session_key)]
+  [
+    Out(<'R_SKD', ~skdb>), 
+    !Session($B, $A, session_key)
+  ]
 
 rule I_recv_skd:
   let 
     skd = <~skda,~skdb>
     session_key = KDF(skd, ltk)
+    confirm = senc('ISessionConfirm', session_key)
   in [In(<'R_SKD', ~skdb>), SKD($A, ~skda), !LTK($A, ltk), !Device($A, mks_A, 'initiator')]
   --[
-    SessionEstablished($A,'initiator',  session_key), 
+    // SessionEstablished($A,'initiator',  session_key), 
     Test8(),
     OnlyOnceV(<'IRecvSKD', $A>),
   ]->
-    [!Session($A, $B, session_key)]
+  [
+    !Session($A, $B, session_key),
+    Out(<'I_SCFM', confirm>),
+    ISentSCFM($A)
+  ]
+
+rule R_recv_scfm:
+  let 
+    A_scfm = sdec(scfm, session_key)
+    confirm = senc('RSessionConfirm', session_key)
+  in [
+    In(<'I_SCFM', scfm>),
+    !Session($B, $A, session_key),
+  ]
+  --[
+    _restrict(A_scfm='ISessionConfirm'),
+    OnlyOnceV(<'RRecvScfm', $B>),
+    SessionEstablished($B, 'responder', session_key), 
+  ]->
+  [
+    Out(<'R_SCFM', confirm>),
+  ]
+
+rule I_recv_scfm:
+  let 
+    B_scfm = sdec(scfm, session_key)
+  in [
+    In(<'R_SCFM', scfm>),
+    !Session($A, $B, session_key),
+  ]
+  --[
+    _restrict(B_scfm='RSessionConfirm'),
+    OnlyOnceV(<'IRecvScfm', $A>),
+    SessionEstablished($A, 'initiator', session_key), 
+  ]->[] 
+
 
 lemma Test0_1:
   exists-trace
@@ -281,14 +320,14 @@ lemma Test2:
   exists-trace
   "
     Ex userA userB ltkA ltkB ltk #i #j #k.
-      LtkCaculated(userA, 'initiator', ltkA) @i & LtkCaculated(userB, 'responder', ltkB) @j & Paired(userA, userB, ltk) @k
+      LtkCaculated(userA, 'initiator', ltkA) @i & LtkCaculated(userB, 'responder', ltkB) @j & Paired(userA, userB, ltk) @k & ltkA = ltkB
   "
 
   lemma TestSession:
   exists-trace
   "
     Ex userA userB session_keyA session_keyB ltk #i #j #k.
-      SessionEstablished(userA, 'initiator',session_keyA) @i & SessionEstablished(userB, 'responder', session_keyB) @j & Paired(userA, userB, ltk) @k
+      SessionEstablished(userA, 'initiator',session_keyA) @i & SessionEstablished(userB, 'responder', session_keyB) @j & Paired(userA, userB, ltk) @k & session_keyA = session_keyB
   "
 
 lemma ltk_consistency:
