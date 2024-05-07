@@ -127,7 +127,7 @@ rule I_send_max_key_size:
     Test2(),
     OnlyOnceV(<'ISendMKS', $I, $R>),
   ]->
-    [Out(<'I_MKS', mks_A>)]
+    [Out(<'I_MKS', mks_A>), ISentMKS($I, $R)]
 
 rule R_send_max_key_size:
   let 
@@ -160,7 +160,7 @@ rule I_receive_max_key_size:
     ltk = and(and(ks_A, ks_B), ~ltk_o)
     entropy = entropy_decrease(entropy_decrease(ltk_e, ks_A_e), ks_B_e)
   in [
-    !SharedKey($A, $B, ~ltk_o), !Device($A, mks_A, 'initiator'), In(<'R_MKS', mks_B>), !Entropy(~ltk_o, ltk_e)
+    !SharedKey($A, $B, ~ltk_o), !Device($A, mks_A, 'initiator'), In(<'R_MKS', mks_B>), !Entropy(~ltk_o, ltk_e), ISentMKS($A, $B)
   ]
   --[
     Test4(),
@@ -281,14 +281,14 @@ lemma Test2:
   exists-trace
   "
     Ex userA userB ltkA ltkB ltk #i #j #k.
-      LtkCaculated(userA, 'initiator', ltkA) @i & LtkCaculated(userB, 'responder', ltkB) @j & Paired(userA, userB, ltk) @k
+      LtkCaculated(userA, 'initiator', ltkA) @i & LtkCaculated(userB, 'responder', ltkB) @j & Paired(userA, userB, ltk) @k & ltkA = ltkB
   "
 
   lemma TestSession:
   exists-trace
   "
     Ex userA userB session_keyA session_keyB ltk #i #j #k.
-      SessionEstablished(userA, 'initiator',session_keyA) @i & SessionEstablished(userB, 'responder', session_keyB) @j & Paired(userA, userB, ltk) @k
+      SessionEstablished(userA, 'initiator',session_keyA) @i & SessionEstablished(userB, 'responder', session_keyB) @j & Paired(userA, userB, ltk) @k & session_keyA = session_keyB
   "
 
 lemma ltk_consistency:
