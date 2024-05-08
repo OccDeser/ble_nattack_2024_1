@@ -38,7 +38,7 @@
     \item 建模方式通用化，所有存在暴力破解问题的协议都能够使用该方法进行建模。
     \item 拓展 Tamarin-Prover 语法，密钥类型化，优化模型验证流程。
     \item 分析密钥派生过程，自动化生成密钥信息熵继承、迁移规则。
-    \item 密钥暴力破解建模通用化，适用于各类能够使用 Tamarin 的协议。
+    \item 密钥暴力破解建模不影响原有模型的验证功能和验证速度
 \end{enumerate}
 
 
@@ -65,58 +65,69 @@
 
 从攻击者的角度，爆破密钥的难度取决于该密钥所有的随机因素的遍历空间规模。
 
-信息熵的可加性：如果子系统之间的相互作用是已知的，则可以通过子系统的熵来计算一个系统的熵。
+信息熵的可加性：如果子系统之间的相互作用是已知的，可以通过子系统的熵来计算一个系统的熵。
 
 根据信息熵的可加性，设计四种密钥的熵值：
 \begin{itemize}
-    \item 低熵（Low Entropy）：在可忽略的时间内，攻击者可以通过暴力破解获取的密钥的熵值。\\
-            $1\;Low < 1\;Medium$
-    \item 中熵（Medium Entropy）：在可接受的时间内，攻击者通过暴力破解获取的最长密钥的熵值。\\
-            $1\;Low < 1\;Medium < 1\;High$
-    \item 高熵（High Entropy）：在可接受的时间内，攻击者难以通过暴力破解获取的密钥的熵值。\\
-            $2\;Medium <= 1\;High < 1\;Chaotic$
-    \item 混沌熵（Chaotic Entropy）：在多项式时间内，攻击者永远无法通过暴力破解获取的密钥的熵值。\\
-            $1\;High < 1\;Chaotic$
+    \item 零熵（Zero Entropy）：攻击者已知信息的熵。
+    \item 低熵（Low Entropy）：攻击者可以通过暴力破解获取的最长密钥的熵值。\\
+            $1\;Zero < 1\;Low < 1\;High$
+    \item 高熵（High Entropy）：攻击者直接通过暴力破解的方式难以获取的密钥的熵值。\\
+            $1\;Low < 1\;High < 1\;Chaos$
+    \item 混沌熵（Chaos Entropy）：攻击者永远无法通过暴力破解获取的密钥的熵值。\\
+            $1\;High < 1\;Chaos$
 \end{itemize}
 
 根据信息熵的可加性列举出以下规则，用于描述信息熵在密钥派生过程中的传递。
 
 熵增：
 \begin{itemize}
-    \item Low + Low = Low
-    \item Low + Medium = Medium
+    \item Zero + X = X
+    \item Low + Low = Low (completeness)
+    \item Low + Low = High (soundness)
     \item Low + High = High
-    \item Low + Chaotic = Chaotic
-    \item Medium + Medium = High
-    \item Medium + High = High
-    \item Medium + Chaotic = Chaotic
     \item High + High = High
-    \item High + Chaotic = Chaotic
+    \item Chaos + X = Chaos
 \end{itemize}
 
 熵减：
 \begin{itemize}
     \item $<X, Y> - X = Y$
-    \item $<X, Y> - Y = X$
 \end{itemize}
 
 \subsubsection{文法描述}
-\begin{lstlisting}
-    ident       :=  alphaNum (alphaNum | '_')*
-    rule        :=  simple_rule [variants]
-    diff_rule   :=  simple_rule ['left' rule 'right' rule]
-    simple_rule :=  'rule' [modulo] ident [rule_attrs] ':'
-                    [let_block]
-                    '[' [facts] ']' ( '-->' | '--[' facts ']->') '[' [facts] ']'
-    variants    :=  'variants' simple_rule (',' simple_rule)*
-    modulo      :=  '(' 'modulo' ('E' | 'AC') ')'
-    rule_attrs  :=  '[' rule_attr (',' rule_attr)* [','] ']'
-    rule_keys   := '(' [ident (',' ident)*] ')'
-    rule_attr   :=  ('color=' | 'colour=') hexcolor
-    let_block   :=  'let' (msg_var '=' msetterm)+ 'in'
-    msg_var     :=  ident ['.' natural] [':' 'msg']
-    hexcolor    :=  "'" ["#"] hexdigit{6} "'" | ["#"] hexdigit{6}
-\end{lstlisting}
+% \begin{lstlisting}
+%     rule        :=  simple_rule [variants]
+%     diff_rule   :=  simple_rule ['left' rule 'right' rule]
+%     simple_rule :=  'rule' [modulo] ident [rule_attrs] [key_block]':'
+%                     [let_block]
+%                     '[' [facts] ']' ( '-->' | '--[' facts ']->') '[' [facts] ']'
+%     variants    :=  'variants' simple_rule (',' simple_rule)*
+%     modulo      :=  '(' 'modulo' ('E' | 'AC') ')'
+%     rule_attrs  :=  '[' rule_attr (',' rule_attr)* [','] ']'
+%     rule_attr   :=  ('color=' | 'colour=') hexcolor
+%     let_block   :=  'let' (msg_var '=' msetterm)+ 'in'
+%     msg_var     :=  ident ['.' natural] [':' 'msg']
+%     hexcolor    :=  "'" ["#"] hexdigit{6} "'" | ["#"] hexdigit{6}
+%     ident       :=  alphaNum (alphaNum | '_')*
+
+%     key_block   :=  '('  ')'
+%     key_type    :=  'low' | 'medium' | 'high' | 'chaotic'
+
+%     facts := fact (',' fact)*
+%     fact  := ['!'] ident '(' [msetterm (',' msetterm)*] ')' [fact_annotes]
+%     fact_annotes := '[' fact_annote (',' fact_annote)* ']'
+%     fact_annote  := '+' | '-' | 'no_precomp'
+
+%     literal     := "'"  ~('\'' | '\n')+ "'" // a fixed, public name
+%              | "~'" ~('\'' | '\n')+ "'" // a fixed, fresh name
+%              | nonnode_var    // a non-temporal variable
+%     nonnode_var := ['$'] ident ['.' natural]         // 'pub' sort prefix
+%                 | ident ['.' natural] ':' 'pub'     // 'pub' sort suffix
+%                 | ['~'] ident ['.' natural]         // 'fresh' sort prefix
+%                 | ident ['.' natural] ':' 'fresh'   // 'fresh' sort suffix
+%                 | msg_var                                // 'msg' sort
+% \end{lstlisting}
 
 % \begin{flalign*}
 %     ident\; :=\; &alphaNum\; (alphaNum\; |\; '\_')^*\\
@@ -130,11 +141,15 @@
 Example
 
 \begin{lstlisting}
-
-    rule Register_pk(~lkt := ):
+    rule Register_pk(~lkt := chaos 'ltk'):
     [ Fr(~ltk) ]
   -->
     [ !Ltk($A, ~ltk), !Pk($A, pk(~ltk)) ] 
+
+    rule Reveal_ltk(ltk = 'ltk'):
+    [ !Ltk(A, ltk) ]
+  --[ LtkReveal(A) ]->
+    [ Out(ltk) ]
 
 \end{lstlisting}
 
@@ -148,6 +163,7 @@ Example
         \begin{itemize}
             \item BC: 密钥降级
             \item BLE：密钥降级、长度混淆
+            \item WPA 口令离线字典攻击
         \end{itemize}
     \item 效率：对比原模型文件修改前后的验证时间
 \end{itemize}
