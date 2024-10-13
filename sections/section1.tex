@@ -1,0 +1,41 @@
+\documentclass[../main.tex]{subfiles}  % 使用主文件的文档类
+
+\begin{document}
+
+\section{Introduction}
+
+% 近年来，确保身份验证协议的安全对于保护敏感信息和维护在线和离线系统的完整性至关重要。尽管安全措施取得了进步，但是或者是设计的缺陷，或者是出于功耗或其他因素的考量，协议有时会使用一些弱密钥或者说弱口令，这在物联网协议中尤为常见。这些较弱的密码机制会对协议整体的安全性存在一些潜在的威胁，更糟糕的在 GPU 和 FPGA 的帮助下，攻击者不断开发更有效的算法来破解弱密码或弱密钥，这些潜在威胁日益增长。
+
+In recent years, securing authentication protocols is paramount for protecting sensitive information and maintaining the integrity of online and offline systems. Despite advancements in security measures, offline dictionary attacks remain a ignificant threat. These attacks exploit weak authentication mechanisms by systematically guessing passwords or keys without interacting with the target system. With the help of GPU and FPGA, attackers are continuously developing more efficient algorithms to crack weak passwords or keys.
+
+% 一些低信息熵密钥的漏洞已经被攻击者发现病利用，例如 针对 Bluetooth Classic 和 Bluetooth low energy的密钥降级攻击、针对xxx的弱密钥攻击等。针对蓝牙的攻击，攻击者设法让蓝牙设备在配对时协商一个弱密钥，那么这样的密钥很容易被攻击者猜到，或者使用穷尽搜索的方式找到，如果被用于后续的加密链路保护，将会严重破坏加密链路的安全性。而xxx类似，攻击者能轻易地得到xxxx密钥，大大降低了协议所保证的安全性。这些攻击通常都是研究人员手动发现的，发现过程不仅高度依赖研究人员的经验，还费时费力。
+
+Some vulnerabilities associated with low-entropy keys have been exploited by attackers, including key downgrade attacks against Bluetooth Basic Rate/Enhanced Data Rate (BR/EDR) and Bluetooth Low Energy (BLE), as well as weak key attacks against XXX. In the Bluetooth attacks, adversaries attempt to induce Bluetooth devices to negotiate a weak key during the pairing process. If such a weak key is utilized to secure subsequent encrypted links, attackers can obtain it through brute-force methods, thereby greatly undermining the security of the encrypted connection. Similarly, in the case of XXXX, attackers can easily acquire the weak pre-shared key configured in WiFi routers. These vulnerabilities are typically identified through manual investigation by researchers. The discovery process heavily depends on the expertise of the researchers and is time-consuming and labor-intensive. 
+
+% 使用形式化方法来分析并验证协议的安全性已经是一种主流的研究方法，众多的工作都对他们研究的协议进行了形式化建模，以验证这些协议是否满足某些安全属性。。其中，很多工作为了彰显其模型的正确性，都试图说明使用其模型可以验证上述攻击的可行性。然而，这些工作都是在已知该攻击的前提下，主动地去根据协议中的薄弱密钥机制，进行针对性的建模。例如，\cite{shi2023formal, claverie2023tamarin} 均在其形式化模型中添加一种explicit的“ Oracle ”规则，以赋予攻击者得知某些密钥的能力，然而，这并不是一种通用的、自动的方法。这样的方法直接告知了攻击者可以被破解的密钥值，而省略的分析哪些密钥是可以被破解的工作，这些检查工作还是需要人工完成的。这告诉我们一个现实，现在没有一个形式化研究工作充分考虑了攻击者对弱密钥的破解能力，无法全面的分析薄弱的密码机制对协议整体的影响。
+Using formal methods to analyze protocols has become one of mainstream research approaches and numerous works have formally modeled the protocols they studied to verify whether these protocols satisfy certain security properties. Among them, many works attempt to demonstrate the correctness of their formal models by showing that their models can detect the existence of the aforementioned attacks. However, these works are based on the  premise of the known attacks, and actively model vulnerabilities in the protocol's weak key mechanisms. For instance, \cite{shi2023formal, claverie2023tamarin} incorporate an explicit ``oracle'' rule in their formal models to grant attackers the ability to know certain keys. However, this is not a universal or automated method. Such approaches directly inform attackers of the keys' value that can be compromised, while the analysis of which keys are vulnerable and able to be cracked still needs to be performed manually. This tells us a truth: there is currently no formal research work that fully considers the attacker's ability to crack weak keys, and it is impossible to comprehensively analyze the impact of weak cryptographic mechanisms on the overall protocol.
+
+% 在本文中，我们提出以一种通用的方法，来自动化分析安全协议中是否存在利用薄弱密钥的攻击。为了使用我们的methodology，我们在tamarin-prover\cite{meier2013tamarin}的语法之上进行了拓展，并开发了一套编译工具来将使用拓展的语法的模型转译为tamarin-prover支持的形式化模型。tamarin prover 是state-of-the-art 的形式化协议验证工具，很多协议都使用tamarin进行了形式化分析，包括Bluetooth、TLS、5G等  我们设计的语法高度兼容tamarin原有的语法，对现有的tamarin 模型，只需要进行很少了的修改，即赋予对密钥的熵的分析能力。
+In this paper, we provide a universal methodology for automated analysis of security protocols that can find vulnerable low-entropy keys and uncover attacks leveraging these keys. To apply our methodology, we extend the syntax of TAMARIN prover\cite{meier2013tamarin} and develop a compilation tool to convert models in our extended syntax into Tamarin supported models. Tamarin Prover is a state-of-the-art formal protocol verification tool widely used for formal analysis of many protocols, including Bluetooth, TLS, 5G-AKA, etc. Our designed syntax is highly compatible with the original one of Tamarin, requiring minimal modifications to existing Tamarin models to incorporate the capability for analyzing key entropy.
+
+
+% 在构建我们的形式化模型时，我们面对的其中一个困难是，在当前的符号模型体系采用完美加密假设，在没有密钥的情况下，攻击者无法从密文中获取任何信息。而密钥空间很小即信息熵很低的密钥加密的消息时，攻击者可以很容易的使用穷尽搜索的方式，从密文中还原出密钥。为了通用化和自动化，就不能像现有方法一样，手动制定一个特殊的Oracle规则，直接向攻击者透露某个密钥的内容，我们需要一个统一的方法，自动分析出协议中所有可被破解的低熵密钥。此外，我们还需要尽可能的考虑易用性，用最小的代价为现有的形式化模型提供低熵密钥的分析能力，以减少不必要的重复建模工作。
+
+\noindent\textbf{Challenges}  One of the challenges we face in constructing our formal models is that existing symbolic models usually employ the perfect cryptography assumption, where an attacker cannot obtain any information from ciphertext without the key. However, when messages are encrypted with keys in a small key space, attackers can easily recover the key according to the ciphertext. For universality and automation, we cannot manually define oracle rules as in existing methods, which directly reveal the content of a specific key to attackers. Instead, we require a general approach to automatically analyze all low-entropy keys that can be compromised within the protocol. Moreover, we need to consider usability as much as possible, providing low-entropy key analysis capabilities to existing formal models with minimal cost, thereby reducing unnecessary repetitive modeling efforts.
+
+\noindent\textbf{Contributions} Our contributions can be summarized as follows:
+\begin{itemize}
+    \item We are the first to develop a universal methodology for automated analysis of security protocols that can find vulnerable low-entropy keys. 
+    \item We find a brand new attack against Bluetooth Classic and Bluetooth low energy.
+\end{itemize}
+
+\noindent\textbf{Overview} 
+\begin{itemize}
+    \item We are the first to develop a universal methodology for automated analysis of security protocols that can find vulnerable low-entropy keys. 
+    \item We find a brand new attack against Bluetooth Classic and Bluetooth low energy.
+    \item We find a brand new attack against Bluetooth Classic and Bluetooth low energy.
+    \item We find a brand new attack against Bluetooth Classic and Bluetooth low energy.
+\end{itemize}
+
+
+\end{document}

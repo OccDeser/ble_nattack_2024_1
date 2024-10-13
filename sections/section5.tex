@@ -1,0 +1,66 @@
+\documentclass[../main.tex]{subfiles}  % 使用主文件的文档类
+
+\begin{document}
+
+\section{ Case studies }
+
+
+% 在本节中，我们将会详细介绍单侧密钥降级攻击，这是对蓝牙加密链路安全的重大威胁。UKDA攻击的目标是两个配对的BC设备，目的是获取中间人位置。配对之后，两个设备会在使用长期密钥KL协商一个会话密钥KS，该会话密钥的熵由Alice与Bob协商决定。在通常情况下，只要一方设备禁止了低熵密钥的使用，那么会话就只能被高熵密钥保护，攻击者直接通过暴力破解的方式破解会话密钥是不可能的。然而，我们发现的单侧密钥降级攻击可以绕过这种限制，逐级地将低熵密钥提升至高熵密钥，最终分段还原出完整的会话密钥。
+
+In this section, we will provide a detailed introduction to the Unilateral Key Downgrade Attack (UKDA), which poses a significant threat to the security of Bluetooth sessions. The UKDA specifically targets two paired BC devices with the objective of acquiring the Man-in-the-Middle position. Once the devices are paired, they engage in the negotiation of a session key $K_S$ using the long-term key $K_L$, and the entropy of the session key is determined by Alice and Bob. Normally, if either device prohibits the use of low-entropy keys, the session can only be protected by high-entropy session keys, making it practically impossible for an attacker to directly crack the session key through brute force. However, the UKDA we have discovered circumvents this limitation by gradually downgrading the high-entropy key to a lower-entropy key, ultimately restoring the complete session key in segments.
+
+\subsection{System and Attack Model}
+
+% 系统模型 我们认为系统模型有两个已经配对的经典蓝牙设备组成，一个中心设备Alice和一个外围设备Bob。假设这两个设备已经完成了配对流程，并共享了一个长期密钥KL。每次需要建立连接时，他们都会执行蓝牙会话建立流程，使用KL协商一个会话密钥KS。会话密钥KS用于保护两个设备之间的加密链路。
+
+\noindent\textbf{System Model}  We consider a system model comprising two paired classic Bluetooth devices: a central device, $Alice$, and a peripheral device, $Bob$. These devices have already completed the pairing process and share a long-term key,$K_L$. Each time a connection is established, they perform the Bluetooth session establishment process, utilizing $K_L$ to negotiate a session key, $K_S$. The session key $K_S$ is then used to secure the encrypted link between the two devices.
+
+% 两个配对的设备并非都未对KONB攻击进行了修补，中心设备Alice已经修补了KNOB攻击，完全禁止使用密钥长度低于16字节的所有会话密钥，而边缘设备则会遵循协议接受合法的密钥长度。
+The two paired devices are not both immune to the KNOB attack. While the central device, Alice, has been fortified against the KNOB attack by prohibiting the utilization of any session key with a length below 16 bytes, the peripheral device adheres to the protocol and accepts all legitimate key lengths.
+
+
+\noindent\textbf{Attacker Model} 
+% 我们假设攻击者Charile希望妥协Alice与Bob之间的加密链路，解密、篡改、伪造双方通信的加密数据。在第x章我们将详细描述攻击的执行过程。
+We assume that the attacker, Charlie, aims to compromise the encrypted link between Alice and Bob, decrypt, manipulate, and forge the encrypted data exchanged between them. In XXXXX, we will provide a detailed description of the attack execution process. 
+
+% 攻击者对Alice与Bob的配对过程并不关心，也无从得知他们之间共享的长期密钥$K_L$。我们假设攻击者知道Alice与Bob所有的公开信息，如蓝牙地址、设备名称等信息，能够窃听、操纵所有未加密的数据包。此外，攻击者还拥有穷尽搜索低熵密钥的能力，他可以从密文中恢复出低熵的加密密钥。
+The attacker is not concerned with the pairing process between Alice and Bob and has no knowledge of the long-term key $K_L$ shared between them. We assume that the attacker has access to all public information about Alice and Bob, such as their Bluetooth addresses, device names, and can eavesdrop and manipulate all unencrypted packets. Additionally, the attacker has the ability to conduct an exhaustive search for low-entropy keys, which allows them to retrieve the low-entropy encryption key from the ciphertext.
+
+
+\subsection{BC \& BLE Session establishment}
+
+\subsection{WPA2 PMKID}
+
+\subsection{Unilateral Key Downgrade Attack}
+
+
+
+
+% \section{Case Studies}
+
+% This section presents an in-depth examination of various case studies relevant to the security vulnerabilities in wireless communication protocols. We provide a detailed analysis of the system and attacker models, followed by specific studies on BC and BLE session establishment, WPA2 PMKID vulnerabilities, and the Unilateral Key Downgrade Attack. Each subsection explores the methodology, implications, and potential mitigations for these security threats.
+
+\subsection{System and Attack Model}
+
+\textbf{Attacker Model:}
+In this study, we consider a sophisticated attacker model where the adversary has the capability to intercept, modify, and inject packets within the wireless communication channel. The attacker is assumed to possess partial knowledge of the session establishment protocols, including potential cryptographic weaknesses. Additionally, the attacker may have access to prior communication sessions, enabling them to perform replay attacks or exploit key reuse vulnerabilities. The primary objectives of the attacker include unauthorized access to encrypted data, session hijacking, and inducing a state of reduced security by manipulating the cryptographic parameters exchanged during protocol negotiations.
+
+\textbf{System Model:}
+The system under consideration comprises multiple wireless communication protocols, including Bluetooth Classic (BC), Bluetooth Low Energy (BLE), and Wi-Fi protected access protocols such as WPA2. The typical environment involves a mix of devices with varying levels of security compliance, from modern smartphones and IoT devices to legacy systems with outdated firmware. The system's security relies on robust key exchange mechanisms, mutual authentication processes, and the integrity of cryptographic algorithms. In this context, we analyze the interplay between protocol specifications and real-world implementations, highlighting potential gaps that can be exploited by adversaries.
+
+\subsection{BC \& BLE Session Establishment}
+
+The Bluetooth Classic (BC) and Bluetooth Low Energy (BLE) protocols serve as foundational technologies for short-range wireless communication. Session establishment in these protocols involves multiple steps, including device discovery, pairing, and key negotiation. Despite the advances in security mechanisms such as Secure Simple Pairing (SSP) in BC and LE Secure Connections in BLE, vulnerabilities persist due to weaknesses in the pairing process and inadequate protection against passive eavesdropping. In particular, the legacy pairing methods in BC and the Just Works association model in BLE are susceptible to man-in-the-middle (MITM) attacks, where an attacker can intercept and alter the key exchange process without being detected by the communicating devices. This subsection provides an analysis of session establishment protocols, identifies critical vulnerabilities, and discusses potential enhancements to the pairing methods that could mitigate these risks.
+
+\subsection{WPA2 PMKID}
+
+The WPA2 (Wi-Fi Protected Access II) protocol is widely deployed for securing wireless networks, and its robustness is largely dependent on the cryptographic strength of the Pre-Shared Key (PSK) and the robustness of the 4-way handshake process. A notable vulnerability in WPA2 is the exposure of the Pairwise Master Key Identifier (PMKID) during the initial stages of the handshake, which can be exploited to perform offline dictionary or brute-force attacks against the PSK. This vulnerability is particularly concerning in environments where the PSK is weak or predictable, such as common words or simple passphrases. The section elaborates on the mechanics of the PMKID extraction attack, its implications for network security, and the effectiveness of countermeasures such as the use of strong, complex PSKs and the adoption of WPA3, which introduces more secure handshake methods like Simultaneous Authentication of Equals (SAE).
+
+\subsection{Unilateral Key Downgrade Attack}
+
+The Unilateral Key Downgrade Attack represents a class of cryptographic attacks where an adversary forces the communication parties to agree on a less secure cryptographic algorithm or key length, thus compromising the overall security of the session. This attack leverages flaws in the protocol negotiation phase, where devices may accept weaker parameters under certain conditions, typically to maintain backward compatibility with legacy systems. For instance, in a scenario where one device supports both strong and weak encryption standards, an attacker could manipulate the negotiation messages to ensure that the weak standard is selected, thereby exposing the session to easier cryptographic attacks. This subsection explores specific instances of Unilateral Key Downgrade Attacks within wireless communication protocols, outlines the technical details of how these attacks are carried out, and recommends best practices for protocol design that include strict enforcement of security policies and mandatory use of strong cryptographic standards.
+
+
+
+
+\end{document}

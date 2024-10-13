@@ -1,0 +1,93 @@
+\documentclass[../main.tex]{subfiles}  % 使用主文件的文档类
+
+\begin{document}
+
+\section{Universal and Automated}
+
+% 为了更加容易的应用我们提出的建模方法到现有的Tamarin模型
+% 在上一小节中我们介绍了如何通过一组通用的rule建模攻击者的暴力破解能力，在这一小节中，我们将介绍如何将我们的方法应用于协议建模。为了尽可能方便建模地建模协议，我们拓展了Tamarin的语法，引入了新的关键词，以标明协议中需要重点关注的低熵密钥。同时，实现了一套编译工具 Tamarin-Compilation-Tool，将拓展的Tamarin语法编译为Tamarin prover可识别的形式化模型。此外，为了配合oracle的建模，我们的工具支持分析rule中的消息生成关系，自动化地为模型添加消息派生fact。然后，为了模型的自动化验证，我们的编译工具支持为oracle rule根据不同的协议情况，来定义搜索边界，以避免分析不终止。
+In the preceding section, we detailed the methodology for modeling the attacker's brute-force capabilities using a set of general rules. This section elucidates the application of our approach to protocol modeling. To streamline the modeling of protocols, we extended Tamarin Prover's syntax by introducing new keywords that explicitly identify low-entropy keys requiring special attention within the protocol.
+
+We also developed a compilation tool named Tamarin-Compilation-Tool which translates the extended Tamarin syntax into a formal model recognizable by the Tamarin Prover. In support of the key cracking oracle model, our tool analyzes derivation relationships between variables and automatically incorporates message derivation facts into the model.
+
+To facilitate automated model verification, our Tamarin-Compilation-Tool supports the definition of search boundaries for oracle rules tailored to different protocol scenarios. This feature is crucial for preventing non-terminating analysis, ensuring that the verification process completes efficiently and reliably.
+
+\begin{figure*}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{img/tamarin_syntax} % 这里换成你图片的路径
+    \caption{tamarin syntax}
+    \label{fig:tamarin-syntax}
+\end{figure*}
+
+\subsection{ Extended Tamarin Prover Model Language}
+%以太坊智能合约最流行的编程语言是 Solidity [24]。本文以 Solidity 编写的智能合约为研究对象。为简便起见，我们专注于 Solidity 的一个核心子集，如图 1 所示。以图 2 中的合约 Ex1 为例，合约由全局变量的声明（第 2 行）和函数（第 3 至 12 行）组成。其中，构造函数是用于初始化全局变量的特殊函数。函数体
+% The protocol’s Tamarin model and its security properties are given in the file FirstExample.spthy (.spthy stands for security protocol theory), which can be found in the folder code within the github repository of this tutorial (https://github.com/tamarin-prover/manual). The Tamarin file starts with theory followed by the theory’s name, here FirstExample.
+% Here, we explain the formal syntax of the security protocol theory format that is processed by Tamarin.
+
+
+% Tamarin 模型通常被定义在spthy文件中（.spthy 代表 security protocol theory）。我们简单概括tamarin接受的安全协议theory的语法，图一展示了security protocol theory的语法的核心子集。我们的工具聚焦于rules的解析，图二展示了tamarin的rule的一个例子。
+% Taking the contract Ex1 in Fig. 2 for example, a contract consists of declarations of global variables (Line 2) and functions (Line 3 to 12). Here, constructor is a special function used to initialize global variables.
+% 一个tamarin模型的rule，
+The Tamarin model is typically defined in spthy files, where "spthy" denotes "security protocol theory." This section provides a concise overview of the syntax employed in the security protocol theory as recognized by Tamarin. Figure 1 illustrates the fundamental subset of this syntax. Our analytical tool is specifically designed to parse and analyze rules, with Figure 2 depicting a representative example of a rule in Tamarin. 
+
+
+
+
+
+
+
+
+\subsection{ Design of Tamarin-Compilation-Tool }
+
+
+
+\subsection{ Restrictions of  Oracle Rules}
+
+
+
+
+
+
+
+
+
+\subsection{The Symbolic Model of Cryptography}
+The symbolic model of cryptography, also known as the Dolev-Yao model, is a foundational framework that abstracts cryptographic operations into high-level symbolic terms. In this model, cryptographic primitives such as encryption, decryption, hashing, and signature generation are represented as atomic, idealized operations that are assumed to be perfect and unbreakable unless explicitly compromised by the attacker model.
+
+Abstraction and Simplification: The symbolic model abstracts away the algebraic and probabilistic complexities of cryptographic algorithms, focusing instead on the interactions between honest parties and adversaries. Messages are treated as symbolic expressions, and operations on these messages are governed by a set of rewrite rules that define how they can be manipulated or understood.
+
+Idealized Security Assumptions: In the symbolic model, cryptographic primitives are assumed to be flawless; that is, encryption schemes cannot be broken, and cryptographic keys cannot be guessed unless explicitly revealed. This idealization simplifies the analysis but also limits the scope of the model, as it may not capture subtle vulnerabilities that arise in real-world implementations.
+
+Protocol Analysis: The symbolic model allows for the systematic analysis of cryptographic protocols by modeling the capabilities of adversaries. Adversaries are typically assumed to have complete control over the communication channel, allowing them to intercept, modify, and fabricate messages. Verification tools then explore all possible interactions within this adversarial model to identify potential security breaches.
+
+By utilizing the symbolic model, researchers can efficiently verify key properties such as confidentiality, integrity, and authentication across a wide range of cryptographic protocols, thereby establishing a foundational level of trust in their security guarantees.
+
+\subsection{Symbolic Information Entropy Models}
+Symbolic information entropy models extend the symbolic approach by incorporating concepts from information theory, particularly entropy, into the symbolic framework. These models aim to provide a more nuanced representation of security that accounts for the unpredictability and randomness inherent in cryptographic operations.
+
+Integration of Entropy: In symbolic information entropy models, entropy is treated as a symbolic value associated with cryptographic keys or random values. This integration allows the model to assess not just whether a protocol maintains security, but also how robust that security is in terms of entropy levels. For instance, it can evaluate whether a cryptographic key space is sufficiently large to withstand brute-force attacks.
+
+Symbolic Entropy Metrics: These models define symbolic metrics for entropy, which can be used to compare the effectiveness of different cryptographic schemes or configurations. Unlike traditional models that purely focus on functional correctness, symbolic entropy models can quantify how much entropy is lost or preserved throughout protocol execution, providing deeper insights into the protocol's resilience against information leakage.
+
+Applications and Limitations: Symbolic entropy models are particularly useful in analyzing protocols where entropy plays a critical role, such as key exchange mechanisms, random number generation, and protocols dependent on probabilistic behaviors. However, the abstraction inherent in symbolic models means that these entropy estimates are often idealized and may not fully capture real-world entropy degradation due to implementation flaws or side-channel attacks.
+
+By incorporating entropy considerations, symbolic information entropy models offer a more comprehensive framework for evaluating cryptographic security, bridging the gap between symbolic abstraction and real-world entropy concerns.
+
+\subsection{Automated Analysis Methodology}
+Automated analysis methodologies leverage symbolic models to systematically verify the security properties of cryptographic protocols. These methodologies employ formal verification tools that use symbolic representations and reasoning techniques to explore the vast space of potential protocol executions and adversarial behaviors.
+
+Formal Verification Tools: Tools such as ProVerif, Tamarin, and Maude are commonly used in the automated analysis of cryptographic protocols. These tools automate the reasoning process by translating protocol descriptions into symbolic representations and then applying formal logic to verify security properties. The tools can check for a wide range of properties, including secrecy, authentication, and resistance to various attack vectors.
+
+Model Checking and Theorem Proving: Automated analysis methodologies often employ model checking, where the symbolic model is exhaustively explored to identify possible security breaches. Theorem proving, on the other hand, involves deriving logical proofs that establish the security of the protocol under all possible adversarial strategies. These techniques provide a high level of assurance, although they may be computationally intensive.
+
+Automated Entropy Analysis: When applied to symbolic information entropy models, automated analysis can include entropy-related checks, such as verifying that the protocol maintains sufficient entropy throughout its execution or that it correctly uses randomness in critical operations. These checks help ensure that the protocol not only functions correctly but also adheres to best practices in entropy management.
+
+Scalability and Limitations: While automated analysis offers significant advantages in terms of thoroughness and speed, it is not without limitations. The symbolic models often simplify real-world behaviors, and the computational complexity of exhaustive searches can become prohibitive for large or highly intricate protocols. Additionally, the idealized nature of the symbolic model may overlook certain types of attacks that exploit specific implementation weaknesses.
+
+Overall, automated analysis methodologies enable rigorous and efficient verification of cryptographic protocols, enhancing the confidence in their security properties. By integrating symbolic models and advanced verification tools, these methodologies offer a powerful approach to identifying and mitigating vulnerabilities in cryptographic systems.
+
+In summary, the use of symbolic models for automated verification provides a robust framework for analyzing cryptographic protocols, encompassing both traditional symbolic representations and advanced entropy considerations. This approach allows for a systematic, scalable, and thorough evaluation of security properties, ensuring that cryptographic systems can withstand a broad spectrum of potential attacks.
+
+
+
+\end{document}

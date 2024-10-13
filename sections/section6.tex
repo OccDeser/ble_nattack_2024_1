@@ -1,0 +1,18 @@
+\documentclass[../main.tex]{subfiles}  % 使用主文件的文档类
+
+\begin{document}
+
+\section{Discussion}
+
+% 不考虑攻击者未知明文，在暴力破解时通过密钥解密后的结果的编码规律是否合法来判断密钥是否正确。
+
+In this section, we discuss the broader implications of the identified vulnerabilities in wireless communication protocols, including the systemic challenges they present and potential avenues for future research and improvement. The findings from the case studies highlight a persistent gap between protocol specifications and their real-world implementations, which adversaries can exploit. A key observation is that many attacks, such as the Unilateral Key Downgrade Attack and WPA2 PMKID exploitation, arise from legacy support and backward compatibility requirements that compromise security in modern devices.
+
+One critical aspect is the trade-off between security and usability, as seen in the Just Works pairing method in BLE, which prioritizes ease of use over robust security measures, thus leaving devices vulnerable to MITM attacks. This reflects a broader trend where security considerations are often deprioritized in favor of consumer convenience, especially in IoT and wearable devices where minimal user interaction is a design goal. Addressing these vulnerabilities requires a paradigm shift towards more stringent security-first designs, even if it imposes a marginal increase in complexity or user intervention.
+
+Furthermore, the examination of WPA2 vulnerabilities underscores the need for widespread adoption of newer standards, such as WPA3, which provide enhanced protections like forward secrecy and more resilient key exchange mechanisms. However, this transition faces obstacles due to the vast number of legacy devices and the costs associated with upgrading infrastructure. The discussion emphasizes the importance of designing protocols that are not only secure against known attack vectors but also resilient to future threats through adaptive security mechanisms.
+
+Future work should focus on developing automated tools for vulnerability detection in wireless protocols and enhancing the robustness of security implementations against adversarial attacks. Moreover, there is a critical need for more comprehensive testing frameworks that can simulate real-world attack scenarios, providing insights into the effectiveness of proposed mitigations under diverse conditions.
+
+
+\end{document}

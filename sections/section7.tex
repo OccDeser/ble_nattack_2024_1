@@ -1,0 +1,16 @@
+\documentclass[../main.tex]{subfiles}  % 使用主文件的文档类
+
+\begin{document}
+
+\section{Related Work}
+
+The study of vulnerabilities in wireless communication protocols has been an active area of research, with numerous studies highlighting the potential risks associated with insecure session establishment and key negotiation processes. Existing literature has extensively documented attacks on Bluetooth protocols, with recent works focusing on the weaknesses in BLE pairing methods. Notably, Ryan et al. (2013) identified that the Just Works model, despite its popularity, offers little to no protection against MITM attacks due to its lack of authentication, prompting further investigations into alternative pairing schemes that could offer enhanced security without compromising user experience.
+
+In the context of Wi-Fi security, prior research has primarily concentrated on the WPA2 4-way handshake vulnerabilities. Vanhoef and Piessens (2017) demonstrated the KRACK (Key Reinstallation Attacks) vulnerability, which exploits flaws in the WPA2 protocol’s key management, allowing attackers to decrypt traffic between access points and clients. Building on this, more recent studies have explored the susceptibility of the PMKID to offline attacks, proposing various mitigations including improved key derivation functions and the adoption of WPA3’s SAE handshake, which addresses many of the security gaps left by WPA2.
+
+The concept of key downgrade attacks has also been extensively analyzed in both wireless and wired communication contexts. For example, Dowling et al. (2019) explored the feasibility of downgrade attacks in the context of TLS, drawing parallels to similar vulnerabilities in wireless protocols. Their findings underscore the broader applicability of downgrade attacks across diverse communication protocols, reinforcing the need for robust negotiation mechanisms that strictly enforce high-security standards.
+
+Our work builds on these foundational studies by providing a unified analysis of multiple wireless protocol vulnerabilities, demonstrating their interconnectedness, and proposing comprehensive strategies to mitigate the risks associated with legacy support and insecure protocol implementations.
+
+
+\end{document}

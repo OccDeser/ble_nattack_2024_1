@@ -1,0 +1,500 @@
+theory BC_Session_Establishment begin
+
+// Function signature and definition of the equational theory E
+
+functions: E1/3, E3/3, N1/0, N2/0, combine/2, decombine/1, fst/1, left/1,
+           pair/2, resize/2, right/1, sdec/2, senc/2, snd/1
+equations:
+    decombine(combine(m1, m2)) = <m1, m2>,
+    fst(<x.1, x.2>) = x.1,
+    resize(m, N1) = left(m),
+    resize(m, N2) = combine(left(m), right(m)),
+    sdec(senc(x.1, x.2), x.2) = x.1,
+    snd(<x.1, x.2>) = x.2
+
+tactic: tacticSecrecySK
+presort: S
+prio: {id}
+  regex".*KU\(\s~.*"
+prio: {id}
+  regex".*KU\(\ssenc.*"
+prio: {id}
+  regex".*KU\(\sfst.*"
+prio: {id}
+  regex".*KU\(\ssnd.*"
+prio: {id}
+  regex".*KU\(\scombine.*"
+prio: {id}
+  regex".*KU\(.*"
+deprio: {id}
+  regex".*EntropyLow.*"
+deprio: {id}
+  regex".*MDerive0\(.*"
+deprio: {id}
+  regex".*MDerive1\(.*"
+deprio: {id}
+  regex".*splitEqs.*"
+
+
+
+
+
+
+
+rule (modulo E) InitDevices:
+   [ Fr( ~LK ) ]
+  --[ OnlyOnceV( <'InitDevices', $A, $B, ~LK> ) ]->
+   [ !PairedDevices( $A, $B, ~LK ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) CenSendAuRand[color=#e0c8d1]:
+   [ !PairedDevices( $A, $B, LK ), Fr( ~AuRand ) ]
+  -->
+   [
+   Out( <$A, $B, 'AU_RAND', ~AuRand> ),
+   State_CenSendAuRand( $A, $B, LK, fst(E1(LK, ~AuRand, $B)),
+                        snd(E1(LK, ~AuRand, $B))
+   ),
+   !MDerive0( combine(LK, ~AuRand), fst(E1(LK, ~AuRand, $B)) ),
+   !MDerive0( combine(LK, ~AuRand), snd(E1(LK, ~AuRand, $B)) )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) PerRecvAuRand[color=#57c3c2]:
+   [ In( <$A, $B, 'AU_RAND', AuRand> ), !PairedDevices( $A, $B, LK ) ]
+  -->
+   [
+   Out( <$B, $A, 'SRES', fst(E1(LK, AuRand, $B))> ),
+   State_PerRecvAuRand( $B, $A, LK, snd(E1(LK, AuRand, $B)) ),
+   !MDerive0( combine(LK, AuRand), fst(E1(LK, AuRand, $B)) ),
+   !MDerive0( combine(LK, AuRand), snd(E1(LK, AuRand, $B)) )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) CenNegotiateKeysize[color=#e0c8d1]:
+   [
+   In( <$B, $A, 'SRES', SRES> ),
+   State_CenSendAuRand( $A, $B, LK, SRES, ACO )
+   ]
+  --[ OnlyOnceV( <'CenNegotiateKeysize', $A, $B, ACO, N2> ) ]->
+   [
+   Out( <$A, $B, 'KEYSIZE', N2> ),
+   State_CenNegotiateKeysize( $A, $B, LK, ACO, N2 )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) PerNegotiateKeysize[color=#57c3c2]:
+   [
+   In( <$A, $B, 'KEYSIZE', keysize> ),
+   State_PerRecvAuRand( $B, $A, LK, ACO )
+   ]
+  --[ OnlyOnceV( <'PerNegotiateKeysize', $A, $B, ACO, keysize> ) ]->
+   [
+   Out( <$B, $A, 'ACCEPTED'> ),
+   State_PerNegotiateAccept( $B, $A, LK, ACO, keysize )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) CenStartEnc[color=#e0c8d1]:
+   [
+   Fr( ~EnRand ), In( <$B, $A, 'ACCEPTED'> ),
+   State_CenNegotiateKeysize( $A, $B, LK, ACO, keysize )
+   ]
+  --[
+  OnlyOnceV( <'CenStartEnc', $A, $B, resize(E3(LK, ~EnRand, ACO), keysize)>
+  )
+  ]->
+   [
+   Out( <$A, $B, 'ENC_REQ', ~EnRand> ),
+   State_CenStartEnc( $A, $B, LK, ACO, keysize,
+                      resize(E3(LK, ~EnRand, ACO), keysize)
+   ),
+   !MDerive0( combine(keysize, E3(LK, ~EnRand, ACO)),
+              resize(E3(LK, ~EnRand, ACO), keysize)
+   ),
+   !MDerive0( combine(~EnRand, combine(ACO, LK)), E3(LK, ~EnRand, ACO) ),
+   !EntropyLow( left(E3(LK, ~EnRand, ACO)) ),
+   !EntropyLow( right(E3(LK, ~EnRand, ACO)) )
+   ]
+
+  /*
+  rule (modulo AC) CenStartEnc[color=#e0c8d1]:
+     [
+     Fr( ~EnRand ), In( <$B, $A, 'ACCEPTED'> ),
+     State_CenNegotiateKeysize( $A, $B, LK, ACO, keysize )
+     ]
+    --[ OnlyOnceV( <'CenStartEnc', $A, $B, z> ) ]->
+     [
+     Out( <$A, $B, 'ENC_REQ', ~EnRand> ),
+     State_CenStartEnc( $A, $B, LK, ACO, keysize, z ),
+     !MDerive0( combine(keysize, E3(LK, ~EnRand, ACO)), z ),
+     !MDerive0( combine(~EnRand, combine(ACO, LK)), E3(LK, ~EnRand, ACO) ),
+     !EntropyLow( left(E3(LK, ~EnRand, ACO)) ),
+     !EntropyLow( right(E3(LK, ~EnRand, ACO)) )
+     ]
+    variants (modulo AC)
+    1. ~EnRand
+             = ~EnRand.13
+       ACO   = ACO.14
+       LK    = LK.15
+       keysize
+             = N1
+       z     = left(E3(LK.15, ~EnRand.13, ACO.14))
+    
+    2. ~EnRand
+             = ~EnRand.13
+       ACO   = ACO.14
+       LK    = LK.15
+       keysize
+             = N2
+       z     = combine(left(E3(LK.15, ~EnRand.13, ACO.14)),
+                       right(E3(LK.15, ~EnRand.13, ACO.14)))
+    
+    3. ~EnRand
+             = ~EnRand.14
+       ACO   = ACO.15
+       LK    = LK.16
+       keysize
+             = keysize.17
+       z     = resize(E3(LK.16, ~EnRand.14, ACO.15), keysize.17)
+  */
+
+rule (modulo E) PerStartEnc[color=#57c3c2]:
+   [
+   In( <$A, $B, 'ENC_REQ', EnRand> ),
+   State_PerNegotiateAccept( $B, $A, LK, ACO, keysize )
+   ]
+  --[
+  Secret( 'peripheral', resize(E3(LK, EnRand, ACO), keysize) ),
+  OnlyOnceV( <'PerStartEnc', $A, $B, resize(E3(LK, EnRand, ACO), keysize)>
+  )
+  ]->
+   [
+   Out( <$B, $A, 'ENC_ACCEPTED', 
+         senc('ACCEPTED', resize(E3(LK, EnRand, ACO), keysize))>
+   ),
+   !MDerive0( resize(E3(LK, EnRand, ACO), keysize),
+              senc('ACCEPTED', resize(E3(LK, EnRand, ACO), keysize))
+   ),
+   !MDerive0( combine(ACO, combine(EnRand, combine(LK, keysize))),
+              resize(E3(LK, EnRand, ACO), keysize)
+   )
+   ]
+
+  /*
+  rule (modulo AC) PerStartEnc[color=#57c3c2]:
+     [
+     In( <$A, $B, 'ENC_REQ', EnRand> ),
+     State_PerNegotiateAccept( $B, $A, LK, ACO, keysize )
+     ]
+    --[ Secret( 'peripheral', z ), OnlyOnceV( <'PerStartEnc', $A, $B, z> )
+    ]->
+     [
+     Out( <$B, $A, 'ENC_ACCEPTED', senc('ACCEPTED', z)> ),
+     !MDerive0( z, senc('ACCEPTED', z) ),
+     !MDerive0( combine(ACO, combine(EnRand, combine(LK, keysize))), z )
+     ]
+    variants (modulo AC)
+    1. ACO   = ACO.14
+       EnRand
+             = EnRand.15
+       LK    = LK.16
+       keysize
+             = N1
+       z     = left(E3(LK.16, EnRand.15, ACO.14))
+    
+    2. ACO   = ACO.14
+       EnRand
+             = EnRand.15
+       LK    = LK.16
+       keysize
+             = N2
+       z     = combine(left(E3(LK.16, EnRand.15, ACO.14)),
+                       right(E3(LK.16, EnRand.15, ACO.14)))
+    
+    3. ACO   = ACO.15
+       EnRand
+             = EnRand.16
+       LK    = LK.17
+       keysize
+             = keysize.18
+       z     = resize(E3(LK.17, EnRand.16, ACO.15), keysize.18)
+  */
+
+rule (modulo E) CentSessionEstablished[color=#e0c8d1]:
+   [
+   In( <$B, $A, 'ENC_ACCEPTED', senc('ACCEPTED', SK)> ),
+   State_CenStartEnc( $A, $B, LK, ACO, keysize, SK )
+   ]
+  --[
+  Secret( 'central', SK ),
+  OnlyOnceV( <'CentSessionEstablished', $A, $B, SK> )
+  ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+restriction OnlyOnceV:
+  "∀ #i #j x. ((OnlyOnceV( x ) @ #i) ∧ (OnlyOnceV( x ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+lemma executable:
+  exists-trace
+  "∃ SK #i #j.
+    (Secret( 'peripheral', SK ) @ #i) ∧ (Secret( 'central', SK ) @ #j)"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ SK #i #j.
+  (Secret( 'peripheral', SK ) @ #i) ∧ (Secret( 'central', SK ) @ #j)"
+*/
+simplify
+solve( Secret( 'peripheral', SK ) @ #i )
+  case PerStartEnc
+  solve( State_PerNegotiateAccept( $B, $A, LK, ACO, keysize ) ▶₁ #i )
+    case PerNegotiateKeysize
+    solve( Secret( 'central', SK ) @ #j )
+      case CentSessionEstablished
+      solve( State_CenStartEnc( $A.1, $B.1, LK.1, ACO, keysize.1, SK ) ▶₁ #j )
+        case CenStartEnc
+        solve( !KU( ~EnRand ) @ #vk.16 )
+          case CenStartEnc
+          solve( !KU( ~AuRand ) @ #vk.22 )
+            case CenSendAuRand
+            solve( !KU( senc('ACCEPTED',
+                             combine(left(E3(~LK, ~EnRand, snd(E1(~LK, ~AuRand, $B)))),
+                                     right(E3(~LK, ~EnRand, snd(E1(~LK, ~AuRand, $B))))))
+                   ) @ #vk.25 )
+              case PerStartEnc
+              solve( !KU( fst(E1(~LK, ~AuRand, $B)) ) @ #vk.29 )
+                case PerRecvAuRand
+                SOLVED // trace found
+              qed
+            qed
+          qed
+        qed
+      qed
+    qed
+  qed
+qed
+
+lemma secrecyCentralSK [heuristic={tacticSecrecySK}]:
+  all-traces
+  "∀ SK #i. (Secret( 'central', SK ) @ #i) ⇒ (¬(∃ #j. K( SK ) @ #j))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ SK #i. (Secret( 'central', SK ) @ #i) ∧ ∃ #j. (K( SK ) @ #j)"
+*/
+simplify
+solve( Secret( 'central', SK ) @ #i )
+  case CentSessionEstablished
+  solve( !KU( senc('ACCEPTED', SK) ) @ #vk.7 )
+    case PerStartEnc
+    solve( State_CenStartEnc( $A, $B, LK, ACO, keysize, SK ) ▶₁ #i )
+      case CenStartEnc
+      solve( !KU( ~EnRand ) @ #vk.20 )
+        case CenStartEnc
+        solve( !KU( ~AuRand ) @ #vk.26 )
+          case CenSendAuRand
+          solve( !KU( fst(E1(~LK, ~AuRand, $B)) ) @ #vk.30 )
+            case PerRecvAuRand
+            solve( !KU( combine(left(E3(~LK, ~EnRand, snd(E1(~LK, ~AuRand, $B)))),
+                                right(E3(~LK, ~EnRand, snd(E1(~LK, ~AuRand, $B)))))
+                   ) @ #vk.12 )
+              case c_combine
+              solve( !KU( left(E3(~LK, ~EnRand, snd(E1(~LK, ~AuRand, $B))))
+                     ) @ #vk.31 )
+                case crack_low_entropy_message_case_1
+                solve( !KU( senc('ACCEPTED',
+                                 left(E3(~LK, ~EnRand, snd(E1(~LK, ~AuRand, $B)))))
+                       ) @ #vk.36 )
+                  case PerStartEnc
+                  solve( !KU( right(E3(~LK, ~EnRand, snd(E1(~LK, ~AuRand, $B))))
+                         ) @ #vk.36 )
+                    case crack_low_entropy_message_case_2
+                    solve( !MDerive0( combine(m1,
+                                              right(E3(~LK, ~EnRand, snd(E1(~LK, ~AuRand, $B))))),
+                                      fm
+                           ) ▶₀ #vr.30 )
+                      case PerStartEnc
+                      SOLVED // trace found
+                    qed
+                  qed
+                qed
+              qed
+            qed
+          qed
+        qed
+      qed
+    qed
+  qed
+qed
+
+lemma secrecyPeriheralSK [heuristic={tacticSecrecySK}]:
+  all-traces
+  "∀ SK #i. (Secret( 'peripheral', SK ) @ #i) ⇒ (¬(∃ #j. K( SK ) @ #j))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ SK #i. (Secret( 'peripheral', SK ) @ #i) ∧ ∃ #j. (K( SK ) @ #j)"
+*/
+simplify
+solve( Secret( 'peripheral', SK ) @ #i )
+  case PerStartEnc
+  solve( State_PerNegotiateAccept( $B, $A, LK, ACO, keysize ) ▶₁ #i )
+    case PerNegotiateKeysize
+    solve( splitEqs(0) )
+      case split_case_1
+      solve( !KU( combine(left(E3(~LK, EnRand, snd(E1(~LK, AuRand, $B)))),
+                          right(E3(~LK, EnRand, snd(E1(~LK, AuRand, $B)))))
+             ) @ #vk )
+        case c_combine
+        solve( !KU( left(E3(~LK, EnRand, snd(E1(~LK, AuRand, $B)))) ) @ #vk.18 )
+          case crack_low_entropy_message_case_1
+          solve( !KU( ~EnRand ) @ #vk.18 )
+            case CenStartEnc
+            solve( !KU( ~AuRand ) @ #vk.25 )
+              case CenSendAuRand
+              solve( !KU( senc('ACCEPTED',
+                               left(E3(~LK, ~EnRand, snd(E1(~LK, ~AuRand, $B)))))
+                     ) @ #vk.27 )
+                case PerStartEnc
+                solve( !KU( fst(E1(~LK, ~AuRand, $B)) ) @ #vk.31 )
+                  case PerRecvAuRand
+                  solve( !KU( right(E3(~LK, ~EnRand, snd(E1(~LK, ~AuRand, $B))))
+                         ) @ #vk.28 )
+                    case crack_low_entropy_message_case_2
+                    solve( !MDerive0( combine(m1,
+                                              right(E3(~LK, ~EnRand, snd(E1(~LK, ~AuRand, $B))))),
+                                      fm
+                           ) ▶₀ #vr.26 )
+                      case PerStartEnc
+                      solve( !KU( senc('ACCEPTED',
+                                       combine(left(E3(~LK, ~EnRand, snd(E1(~LK, ~AuRand, $B)))),
+                                               right(E3(~LK, ~EnRand, snd(E1(~LK, ~AuRand, $B))))))
+                             ) @ #vk.33 )
+                        case PerStartEnc
+                        SOLVED // trace found
+                      qed
+                    qed
+                  qed
+                qed
+              qed
+            qed
+          qed
+        qed
+      qed
+    qed
+  qed
+qed
+
+rule (modulo E) orcale_message_derive1:
+   [ !MDerive0( combine(m1, m2), fm ), In( m2 ) ]
+  --[ CrackDeriveV( fm ) ]->
+   [ !MDerive0( m1, fm ) ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) orcale_message_derive2:
+   [ !MDerive0( combine(m1, m2), fm ), In( m1 ) ]
+  --[ CrackDeriveV( fm ) ]->
+   [ !MDerive0( m2, fm ) ]
+
+  // loop breaker: [0]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) orcale_message_valve:
+   [ !MDerive0( m, fm ) ] --> [ !MDerive1( m, fm ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) orcale_message_propagate:
+   [ !MDerive1( m1, m2 ), !MDerive1( m2, m3 ) ]
+  --[ CrackPropagateV( m3 ) ]->
+   [ !MDerive1( m1, m3 ) ]
+
+  // loop breakers: [0,1]
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) crack_low_entropy_message:
+   [ !EntropyLow( m ), !MDerive1( m, fm ), In( fm ) ] --> [ Out( m ) ]
+
+  /* has exactly the trivial AC variant */
+
+restriction CrackDerive3Times:
+  "∀ x #i0 #i1 #i2 #i3.
+    ((((CrackDeriveV( x ) @ #i0) ∧ (CrackDeriveV( x ) @ #i1)) ∧
+      (CrackDeriveV( x ) @ #i2)) ∧
+     (CrackDeriveV( x ) @ #i3)) ⇒
+    ((((((#i0 = #i1) ∨ (#i0 = #i2)) ∨ (#i0 = #i3)) ∨ (#i1 = #i2)) ∨
+      (#i1 = #i3)) ∨
+     (#i2 = #i3))"
+  // safety formula
+
+restriction CrackPropagate2Times:
+  "∀ x #i0 #i1 #i2.
+    (((CrackPropagateV( x ) @ #i0) ∧ (CrackPropagateV( x ) @ #i1)) ∧
+     (CrackPropagateV( x ) @ #i2)) ⇒
+    (((#i0 = #i1) ∨ (#i0 = #i2)) ∨ (#i1 = #i2))"
+  // safety formula
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.8.0
+Maude version 2.7.1
+Git revision: UNKNOWN, branch: UNKNOWN
+Compiled at: 2023-08-30 13:15:41.590881948 UTC
+*/
+
+end
+maude tool: 'maude'
+ checking version: 2.7.1. OK.
+ checking installation: OK.
+
+==============================================================================
+summary of summaries:
+
+analyzed: ./experiment/levels_test/models/BC_session_establishment2_d3_p2.spthy
+
+  output:          ./experiment/levels_test/proofs/BC_session_establishment2_d3_p2.spthy
+  processing time: 0.87s
+  
+  executable (exists-trace): verified (10 steps)
+  secrecyCentralSK (all-traces): falsified - found trace (13 steps)
+  secrecyPeriheralSK (all-traces): falsified - found trace (14 steps)
+
+==============================================================================

@@ -1,0 +1,287 @@
+theory BC_Session_Establishment
+begin
+    builtins: symmetric-encryption
+
+    functions: E1/3, E3/3, resize/2, left/1, right/1, N1/0, N2/0, N3/0, N4/0, combine/2, decombine/1, left/1, right/1
+
+    equations:
+        resize(m, N1) = left(left(m)),
+        resize(m, N2) = combine(left(left(m)), right(left(m))),
+        resize(m, N3) = combine(combine(left(left(m)), right(left(m))), left(right(m))),
+        resize(m, N4) = combine(combine(combine(left(left(m)), right(left(m))), left(right(m))), right(right(m))),
+        decombine(combine(m1, m2)) = <m1, m2>
+
+    rule InitDevices:
+        [
+            Fr(~LK)
+        ]
+        --[
+            OnlyOnceV(<'InitDevices', $A, $B, ~LK>)
+        ]->
+        [
+            !PairedDevices($A, $B, ~LK)
+        ]
+
+    rule CenSendAuRand [color=#E0C8D1]:
+        let
+            SRES = fst(E1(LK, ~AuRand, $B))
+            ACO = snd(E1(LK, ~AuRand, $B))
+        in
+        [
+            !PairedDevices($A, $B, LK),
+            Fr(~AuRand)
+        ]
+        -->
+        [
+            Out(<$A, $B, 'AU_RAND', ~AuRand>),
+            State_CenSendAuRand($A, $B, LK, SRES, ACO),
+            !MDerive0(combine(~AuRand, LK), SRES),
+            !MDerive0(combine(~AuRand, LK), ACO)
+        ]
+
+    rule PerRecvAuRand [color=#57C3C2]:
+        let
+            SRES = fst(E1(LK, AuRand, $B))
+            ACO = snd(E1(LK, AuRand, $B))
+        in
+        [
+            In(<$A, $B, 'AU_RAND', AuRand>),
+            !PairedDevices($A, $B, LK)
+        ]
+        -->
+        [
+            Out(<$B, $A, 'SRES', SRES>),
+            State_PerRecvAuRand($B, $A, LK, ACO),
+            !MDerive0(combine(AuRand, LK), SRES),
+            !MDerive0(combine(AuRand, LK), ACO)
+        ]
+
+    rule CenNegotiateKeysize [color=#E0C8D1]:
+        let
+            keysize = N4
+        in
+        [
+            In(<$B, $A, 'SRES', SRES>),
+            State_CenSendAuRand($A, $B, LK, SRES, ACO)
+        ]
+        --[
+            OnlyOnceV(<'CenNegotiateKeysize', $A, $B, ACO, keysize>)
+        ]->
+        [
+            Out(<$A, $B, 'KEYSIZE', keysize>),
+            State_CenNegotiateKeysize($A, $B, LK, ACO, keysize)
+        ]
+
+    rule PerNegotiateKeysize [color=#57C3C2]:
+        [
+            In(<$A, $B, 'KEYSIZE', keysize>),
+            State_PerRecvAuRand($B, $A, LK, ACO)
+        ]
+        --[
+            OnlyOnceV(<'PerNegotiateKeysize', $A, $B, ACO, keysize>)
+        ]->
+        [
+            Out(<$B, $A, 'ACCEPTED'>),
+            State_PerNegotiateAccept($B, $A, LK, ACO, keysize)
+        ]
+
+    rule CenStartEnc [color=#E0C8D1]:
+        let
+            temp_key = E3(LK, ~EnRand, ACO)
+            SK = resize(temp_key, keysize)
+            low_key1 = left(left(temp_key))
+            low_key2 = right(left(temp_key))
+            low_key3 = left(right(temp_key))
+            low_key4 = right(right(temp_key))
+        in
+        [
+            Fr(~EnRand),
+            In(<$B, $A, 'ACCEPTED'>),
+            State_CenNegotiateKeysize($A, $B, LK, ACO, keysize)
+        ]
+        --[
+            OnlyOnceV(<'CenStartEnc', $A, $B, SK>)
+        ]->
+        [
+            Out(<$A, $B, 'ENC_REQ', ~EnRand>),
+            State_CenStartEnc($A, $B, LK, ACO, keysize, SK),
+            !MDerive0(combine(temp_key, keysize), SK),
+            !MDerive0(combine(LK, combine(~EnRand, ACO)), temp_key),
+            !EntropyLow(low_key1),
+            !EntropyLow(low_key2),
+            !EntropyLow(low_key3),
+            !EntropyLow(low_key4)
+        ]
+
+    rule PerStartEnc [color=#57C3C2]:
+        let
+            SK = resize(E3(LK, EnRand, ACO), keysize)
+        in
+        [
+            In(<$A, $B, 'ENC_REQ', EnRand>),
+            State_PerNegotiateAccept($B, $A, LK, ACO, keysize)
+        ]
+        --[
+            Secret('peripheral', SK),
+            OnlyOnceV(<'PerStartEnc', $A, $B, SK>)
+        ]->
+        [
+            Out(<$B, $A, 'ENC_ACCEPTED', senc('ACCEPTED', SK)>),
+            !MDerive0(SK, senc('ACCEPTED', SK)),
+            !MDerive0(combine(LK, combine(EnRand, combine(ACO, keysize))), SK)
+        ]
+
+    rule CentSessionEstablished [color=#E0C8D1]:
+        [
+            In(<$B, $A, 'ENC_ACCEPTED', senc('ACCEPTED', SK)>),
+            State_CenStartEnc($A, $B, LK, ACO, keysize, SK)
+        ]
+        --[
+            Secret('central', SK),
+            OnlyOnceV(<'CentSessionEstablished', $A, $B, SK>)
+        ]->
+        []
+
+
+
+restriction OnlyOnceV:
+    "All #i #j x. OnlyOnceV(x)@#i & OnlyOnceV(x)@#j ==> #i = #j"
+
+// tactic: tacticSecrecySK
+// presort: S
+// prio:
+//     regex ".*KU\(\s~.*"
+// prio:
+//     regex ".*KU\(\ssenc.*"
+// prio:
+//     regex ".*KU\(\sfst.*"
+// prio:
+//     regex ".*KU\(\ssnd.*"
+// prio:
+//     regex ".*KU\(\scombine.*"
+// prio:
+//     regex ".*KU\(\sleft\(left.*"
+// prio: 
+//     regex ".*MDerive0\(\sleft\(left.*"
+// prio:
+//     regex ".*KU\(\sleft\(right.*"
+// prio: 
+//     regex ".*MDerive0\(\sleft\(right.*"
+// prio:
+//     regex ".*KU\(\sright\(left.*"
+// prio: 
+//     regex ".*MDerive0\(\sright\(left.*"
+// prio:
+//     regex ".*KU\(\sright\(right.*"
+// prio: 
+//     regex ".*MDerive0\(\sright\(right.*"
+// deprio:
+//     regex ".*MDerive0\(\s(?!combine|m2(\.\d)?,\sfm(\.\d)?|m1(\.\d)?,\sfm(\.\d)?).*"
+// deprio:
+//     regex ".*MDerive0\(\scombine.*"
+// deprio:
+//     regex ".*MDerive0\(\sm2(\.\d)?,\sfm(\.\d)?.*"
+// deprio:
+//     regex ".*MDerive0\(\sm1(\.\d)?,\sfm(\.\d)?.*"
+// deprio:
+//     regex ".*EntropyLow.*"
+// deprio:
+//     regex ".*splitEqs.*"
+tactic: tacticSecrecySK
+    presort: S
+    prio:
+        regex ".*KU\(\s~.*"
+    prio:
+        regex ".*KU\(\ssenc.*"
+    prio:
+        regex ".*KU\(\sfst.*"
+    prio:
+        regex ".*KU\(\ssnd.*"
+    prio:
+        regex ".*KU\(\scombine.*"
+    prio:
+        regex ".*KU\(.*"
+    deprio:
+        regex ".*EntropyLow.*"
+    deprio:
+        regex ".*MDerive0\(.*"
+    deprio:
+        regex ".*MDerive1\(.*"
+    deprio:
+        regex ".*splitEqs.*"
+
+lemma executable:
+    exists-trace
+    "Ex SK #i #j. Secret('peripheral', SK)@i & Secret('central', SK) @j"
+
+lemma secrecyCentralSK [heuristic={tacticSecrecySK}]:
+    "All  SK #i. Secret('central', SK)@i ==> not (Ex #j. K(SK)@j)"
+
+lemma secrecyPeriheralSK [heuristic={tacticSecrecySK}]:
+    "All  SK #i. Secret('peripheral', SK)@i ==> not (Ex #j. K(SK)@j)"
+
+    rule orcale_message_derive1:
+        [
+            !MDerive0(combine(m1, m2), fm),
+            In(m2)
+        ]
+        --[
+            CrackDeriveV(fm)
+        ]->
+        [
+            !MDerive0(m1, fm)
+        ]
+
+    rule orcale_message_derive2:
+        [
+            !MDerive0(combine(m1, m2), fm),
+            In(m1)
+        ]
+        --[
+            CrackDeriveV(fm)
+        ]->
+        [
+            !MDerive0(m2, fm)
+        ]
+
+    rule orcale_message_valve:
+        [
+            !MDerive0(m, fm)
+        ]
+        -->
+        [
+            !MDerive1(m, fm)
+        ]
+
+    rule orcale_message_propagate:
+        [
+            !MDerive1(m1, m2),
+            !MDerive1(m2, m3)
+        ]
+        --[
+            CrackPropagateV(m3)
+        ]->
+        [
+            !MDerive1(m1, m3)
+        ]
+
+    rule crack_low_entropy_message:
+        [
+            !EntropyLow(m),
+            !MDerive1(m, fm),
+            In(fm)
+        ]
+        -->
+        [
+            Out(m)
+        ]
+
+restriction CrackDerive1Times:
+    "All x #i0 #i1. CrackDeriveV(x)@#i0 & CrackDeriveV(x)@#i1 
+        ==> #i0 = #i1"
+
+restriction CrackPropagate2Times:
+    "All x #i0 #i1 #i2. CrackPropagateV(x)@#i0 & CrackPropagateV(x)@#i1 & CrackPropagateV(x)@#i2 
+        ==> #i0 = #i1 | #i0 = #i2 | #i1 = #i2"
+
+end
