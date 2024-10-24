@@ -91,7 +91,7 @@ The value-breaking oracle grants attackers the limited capability to break low-e
 % 图4展示了算法破解oracle的执行流程，攻击者可以通过提供一个有密钥参与的函数，如果能提供除密钥外的其他参数，算法破解Oracle可以找到另一个函数，满足Eq. \ref{eq:entropy_definition}.
 \autoref{fig:algorithm-oracle} delineates the execution process of the algorithm-breaking oracle. An attacker is capable of presenting a function $f$ that incorporates a key $k$. Given that the attacker can provide all parameters $x_1, x_2, ... , x_n$ except for  $k$,  the oracle can identify another function $f'$ that satisfies  \autoref{eq:function_cracking}.
 \begin{equation} 
-    f'(k) = f(<k, x_1, x_2, ... , x_n>) \label{eq:function_cracking}
+    f'(k) = f(\langle k, x_1, x_2, ... , x_n \rangle) \label{eq:function_cracking}
 \end{equation}
 % 当攻击者使用这个oracle，确定了使用低熵密钥作为唯一变量的函数，并获取了对应的计算结果，那么攻击者就可以使用值破解Oracle来获取低熵密钥的数值。同样为了通用性，输入函数是不确定的，我们无法直接建模这个Oracle，我们将在下一小节介绍如何通过一系列规则来建模algorithm-breaking oracle。
 When an attacker utilizes this oracle to identify a function that employs a low-entropy key as the sole variable and acquires the corresponding computation result, the attacker can subsequently utilize the value-breaking oracle to obtain the value of the low-entropy key. Similarly, due to the uncertainty of the input function, it is infeasible to directly model this oracle. In the subsequent subsection, we will elucidate the method to model the algorithm-breaking oracle through a set of message derivation rules.
@@ -105,11 +105,13 @@ When an attacker utilizes this oracle to identify a function that employs a low-
 \end{figure}
 
 
-\subsection{Oracle Modeling} 
+\subsection{Oracle Modeling} \label{sec:oracle-modeling}
 
-% 我们通过一系列规则来建模算法破解Oracle。为抽象化oracle内部消息的派生过程，我们提出了消息派生事实的概念，以代替具体的函数符号。此外，为了建模algorithm-breaking oracle，我们还需要引入消息派生规则，帮助oracle推导出攻击者视角下所有可见的消息派生事实。最后，我们将介绍value-breaking oracle的建模方法。
-We model the previous oracles through a series of rules. To abstract the internal message derivation process within the two oracles, we introduce the concept of the message derivation fact, which serve as substitutes for specific function symbols. Furthermore, to effectively model the algorithm-breaking oracle, it is essential to incorporate message derivation rules that enable the oracle to infer all visible message derivation facts from the attacker's perspective. Finally, we will discuss the modeling approach for the value-breaking oracle.
+% 我们通过一系列规则来建模算法破解Oracle。为抽象化oracle内部消息的派生过程，我们提出了消息派生事实的概念，以代替具体的函数符号。此外，为了建模algorithm-breaking oracle，我们还需要引入消息派生规则，帮助oracle推导出攻击者视角下所有可见的消息派生事实。在此基础之上，我们将介绍如何建模value-breaking oracle。 最后，我们将讨论消息派生规则执行的一些限制。
 
+
+We model the previous oracles through a series of rules. To abstract the process of message derivation within the Oracle, we introduce the concept of message derivation facts, replacing specific function symbols. Furthermore, to effectively model the algorithm-breaking Oracle, it is necessary to incorporate message derivation rules that enable the Oracle to deduce all message derivation facts visible from the attacker's perspective. Building on this foundation, we will present our approach to modeling the value-breaking Oracle. 
+% Finally, we will discuss certain restrictions associated with the execution of message derivation rules.
 
 % 消息派生事实 在algorithm-breaking oracle的形式化中，我们将密钥的计算抽象为派生关系，使用消息派生fact来表示，每个派生Fact都是一个消息到一个消息的映射。具体来说，对于一个单参数函数$f$ 以及变量 $x$，我们可以将$f$抽象为如下的Fact：
 % \[
@@ -199,7 +201,7 @@ Upon the initiation of the attacker's access to the oracle, the oracle acquires 
 \end{flalign*}
 In these rules, the attacker is required to continuously supply all known terms to assist the oracle in inferring all visible derivation facts.
 
-\subsubsection{Low-entropy Cracking rule}
+\subsubsection{Value Breaking Oracle} 
 % oracle 破解密钥的最后一步，检查目标的key是否是低熵，且攻击者掌握其作为唯一变量的函数输出，如果是，oracle会返回该密钥的数值。这个规则如下：
 % 其中，k是攻击者的目标密钥，m是密钥的计算结果，$\text{\TFact{LowEntropy}}(k)$表示k是低熵密钥，在建模具体协议时被手动指定。
 In the concluding step of the oracle's key-breaking process, the oracle verifies whether the target key exhibits low entropy and whether the attacker has knowledge of a function output in which the key is the sole variable. If these conditions are satisfied, the oracle will return the value of the key. This rule can be stated as follows:
@@ -208,7 +210,8 @@ In the concluding step of the oracle's key-breaking process, the oracle verifies
     \TFacts{ &\text{\TFact{MDerive}}(k, m), \text{\TFact{LowEntropy}}(k), \text{\TFact{In}}(m) } \TEmpActFact{ }  \\
     \TFacts{ &\text{\TFact{Out}}(k) }        
 \end{flalign*}
-where $k$ denotes the attacker's target key, $m$ represents the computation result from the key, and $\text{\TFact{LowEntropy}}(k)$ indicates that $k$ is a low-entropy key, which is manually specified during modeling a certain protocol.
+where $k$ denotes the attacker's target key, $m$ represents the computation result from the key, and $\text{\TFact{LowEntropy}}(k)$ labels that $k$ is a low-entropy key, which is manually specified during modeling a certain protocol. Such a fact is essential for the oracle to determine whether the key's entropy is low.
+
 
 
 \end{document}

@@ -51,6 +51,8 @@
 
 
 \documentclass[conference,compsoc]{IEEEtran}
+% \documentclass[conference,compsoc,draft]{IEEEtran}
+
 % Some/most Computer Society conferences require the compsoc mode option,
 % but others may want the standard conference format.
 %
@@ -329,7 +331,7 @@
 \usepackage{proof}
 \usepackage{xcolor}
 \usepackage{subfiles}
-
+\usepackage{stmaryrd}
 \usepackage{hyperref}
 \renewcommand{\subsectionautorefname}{Section} 
 
@@ -345,13 +347,18 @@
 \newcommand{\TEmpActFactSL}[1]{- \hspace{-2.3pt} \TEmpFact{#1} \hspace{-4.8pt} \rightarrow} % single line
 \newcommand{\TActFacts}[1]{- \hspace{-4.5pt} \TFacts{#1} \hspace{-4.8pt} \rightarrow}
 \newcommand{\TActFactsSL}[1]{- \hspace{-2.3pt} \TFacts{#1} \hspace{-4.8pt} \rightarrow}
-\newcommand{\TFreTerm}[1]{\sim \hspace{-3pt} #1}
 \newcommand{\TPair}[1]{\langle #1 \rangle}
+\newcommand{\TPairN}[1]{$\langle$\text{\ttfamily #1}$\rangle$}
+
 
 \newcommand{\Tterm}[1]{{\ttfamily #1}}
 \newcommand{\Tequation}[1]{{\ttfamily #1}}
 \newcommand{\Tfunction}[1]{{\ttfamily #1}}
 % \newcommand{\Tamarin}[0]{Tamarin Prover }
+
+\newcommand{\TFrTerm}[1]{{\Tterm{$\sim$#1}}}
+\newcommand{\TFactTerm}[2]{{\ttfamily #1}$(\,$\Tterm{#2}$\,)$}
+\newcommand{\TFrFactTerm}[1]{{\ttfamily Fr}$(\,$\TFrTerm{#1}$\,)$}
 
 \newcommand{\fieldtext}[1]{\texttt{#1}}
 \newcommand{\csttext}[1]{\textbf{#1}}
@@ -374,23 +381,26 @@
 % author names and affiliations
 % use a multiple column layout for up to three different
 % affiliations
+% \author{
+%     \IEEEauthorblockN{Michael Shell}
+%     \IEEEauthorblockA{School of Electrical and\\Computer Engineering\\
+%     Georgia Institute of Technology\\
+%     Atlanta, Georgia 30332--0250\\
+%     Email: http://www.michaelshell.org/contact.html}
+% \and
+%     \IEEEauthorblockN{Homer Simpson}
+%     \IEEEauthorblockA{Twentieth Century Fox\\
+%     Springfield, USA\\
+%     Email: homer@thesimpsons.com}
+% \and
+%     \IEEEauthorblockN{James Kirk\\ and Montgomery Scott}
+%     \IEEEauthorblockA{Starfleet Academy\\
+%     San Francisco, California 96678-2391\\
+%     Telephone: (800) 555--1212\\
+%     Fax: (888) 555--1212}
+% }
 \author{
-    \IEEEauthorblockN{Michael Shell}
-    \IEEEauthorblockA{School of Electrical and\\Computer Engineering\\
-    Georgia Institute of Technology\\
-    Atlanta, Georgia 30332--0250\\
-    Email: http://www.michaelshell.org/contact.html}
-\and
-    \IEEEauthorblockN{Homer Simpson}
-    \IEEEauthorblockA{Twentieth Century Fox\\
-    Springfield, USA\\
-    Email: homer@thesimpsons.com}
-\and
-    \IEEEauthorblockN{James Kirk\\ and Montgomery Scott}
-    \IEEEauthorblockA{Starfleet Academy\\
-    San Francisco, California 96678-2391\\
-    Telephone: (800) 555--1212\\
-    Fax: (888) 555--1212}
+    \author{\IEEEauthorblockN{Anonymous}}
 }
 
 % conference papers do not typically use \thanks and this command

@@ -4,63 +4,299 @@
 
 \section{ Case studies }
 
+% 在之前的章节中，我们详细介绍了我们的建模方法以及翻译方案。To explain the overall methodology we use to 分析低熵密钥对协议安全性的影响，在本节中，我们将会对几个存在低熵密钥存在的真实协议进行全面分析，我们实现的源代码可以在我们的仓库{cite}中找到。
+In the previous sections, we discuss our modeling approach and translation solution. To explain the overall methodology we use to analyze the impact of low-entropy keys on protocol security, in this section, we will conduct a comprehensive analysis of several real-world protocols with low-entropy keys. The source code of our implementation can be found in our repository {cite}.
 
-% 在本节中，我们将会详细介绍单侧密钥降级攻击，这是对蓝牙加密链路安全的重大威胁。UKDA攻击的目标是两个配对的BC设备，目的是获取中间人位置。配对之后，两个设备会在使用长期密钥KL协商一个会话密钥KS，该会话密钥的熵由Alice与Bob协商决定。在通常情况下，只要一方设备禁止了低熵密钥的使用，那么会话就只能被高熵密钥保护，攻击者直接通过暴力破解的方式破解会话密钥是不可能的。然而，我们发现的单侧密钥降级攻击可以绕过这种限制，逐级地将低熵密钥提升至高熵密钥，最终分段还原出完整的会话密钥。
+\subsection{The 4-way Handshake of WPA2-PSK}
+% WPA与WPA2源于IEEE 802.11i标准，其中WPA作为过渡性解决方案，旨在修复WEP（Wired Equivalent Privacy）的安全漏洞，而WPA2则完整实现了IEEE 802.11i标准，提供更为完善的安全机制。WPA2-PSK（预共享密钥）是WPA2的一种简化模式，利用预共享密钥代替复杂的企业级认证过程，适用于不需要RADIUS服务器的小型网络。WPA2-PSK广泛应用于家庭、咖啡馆和中小型办公场所，因其配置简便且能够提供较高的安全性。
+Wi-Fi Protected Access (WPA) and WPA2 are both derived from the IEEE 802.11i standard {cite}, with WPA serving as an interim solution to address security vulnerabilities in Wired Equivalent Privacy (WEP), while WPA2 fully implements the 802.11i standard to provide more robust security mechanisms. WPA2-PSK (Pre-Shared Key) is a simplified version of WPA2, using a pre-shared key instead of a complex enterprise-level authentication process, making it suitable for small networks without a RADIUS server. WPA2-PSK is widely deployed in home environments, cafes, and small to medium-sized offices due to its ease of configuration and strong security.
 
-In this section, we will provide a detailed introduction to the Unilateral Key Downgrade Attack (UKDA), which poses a significant threat to the security of Bluetooth sessions. The UKDA specifically targets two paired BC devices with the objective of acquiring the Man-in-the-Middle position. Once the devices are paired, they engage in the negotiation of a session key $K_S$ using the long-term key $K_L$, and the entropy of the session key is determined by Alice and Bob. Normally, if either device prohibits the use of low-entropy keys, the session can only be protected by high-entropy session keys, making it practically impossible for an attacker to directly crack the session key through brute force. However, the UKDA we have discovered circumvents this limitation by gradually downgrading the high-entropy key to a lower-entropy key, ultimately restoring the complete session key in segments.
+% WPA2的4-way Handshake是一种用于在无线网络中安全地生成和交换加密密钥的协议过程，确保客户端与接入点之间的通信安全。与企业级WPA2认证机制依赖于802.1X和RADIUS服务器进行动态密钥分配的方式有所不同，在WPA2-PSK（Pre-Shared Key）模式下，4-way Handshake利用预共享密钥进行身份验证，
+The 4-way handshake of is protocol designed to securely generate and exchange encryption keys within wireless networks, thereby ensuring secure communication between clients and access points. In contrast to WPA2-Enterprise, which utilizes 802.1X and RADIUS servers for dynamic key distribution, the WPA2-PSK (Pre-Shared Key) employs a pre-shared key for the purpose of authentication.
 
-\subsection{System and Attack Model}
+\begin{figure}[hbtp]
+    \centering
+    \includegraphics[width=\columnwidth]{img/4-way-handshake} 
+    \caption{4-way-handshake}
+    \label{fig:4-way-handshake}
+\end{figure}
 
-% 系统模型 我们认为系统模型有两个已经配对的经典蓝牙设备组成，一个中心设备Alice和一个外围设备Bob。假设这两个设备已经完成了配对流程，并共享了一个长期密钥KL。每次需要建立连接时，他们都会执行蓝牙会话建立流程，使用KL协商一个会话密钥KS。会话密钥KS用于保护两个设备之间的加密链路。
+% \autoref{fig:4-way-handshake} 展示了用户设备（supplicant）与access point（authenticator）之间通过4-way handshake从PMK协商出PTK与GTK的全部过程。
+% WPA2-PSK 使用PBKDF2密钥派生函数，从Passphrase和Service Set Identification (SSID)生成PSK，PBKDF2的定义如下：
+% \[
+%    PSK = PBKDF2(Passphrase, SSID, 4096, 256)
+% \]
+% Passphrase 是由用户定义的秘密短语，由8到63个字符组成，SSID是网络的名称，通常是公开的，因此PSK的安全性将取决于Passphrase的强度。在WPA2-PSK中，Pairwise Master Key (PMK)与PSK是一致的。基于PMK，authenticator与supplicant直接执行4-way握手。首先，authenticator发送一个随机数ANonce给supplicant，supplicant收到后，生成自己的随机数SNonce，并计算出PTK。PTK的计算过程如下：
+% \[
+%     PTK = PRF(PMK, "Pairwise key expansion", ANonce || SNonce || MAC_authenticator || MAC_supplicant)
+% \]
+% 其中，PRF是伪随机函数，MAC_authenticator和MAC_supplicant分别是authenticator和supplicant的MAC地址，$\{\}_{min\_max}$ 代表了变量以由小到大的顺序拼接 。PTK被用于确保通信的隐私性和完整性。 接下来，authenticator发送GTK给supplicant，用于组播通信的加密密钥。最后，supplicant发送EAPOL消息4给authenticator，用于验证握手的完整性。当authenticator收到EAPOL消息4后，握手完成，supplicant与authenticator之间的通信将使用PTK和GTK进行加密。值得注意的是，根据802.1x 标准，4-way handshake由四条EAPOLkey类型的消息组成，其中，第一条EAPOLkey消息会包含一个额外的字段PMKID，它的计算方式如下：
+% \[
+%     PMKID = HMAC-SHA1-128(PSK, "PMK Name" || MAC_authenticator || MAC_supplicant)
+% \]
+% PMKID允许设备在重新连接时迅速完成身份验证。然而，由于PMK（PSK）的强度直接受用户选择的Passphrase决定，如果用户选择了弱Passphrase，攻击者可以通过暴力破解PMKID来获取PSK，从而破坏通信的安全性，这种攻击方式被称为PMKID攻击{cite}。
+\autoref{fig:4-way-handshake} illustrates the complete process of negotiating the Pairwise Transient Key (PTK) and Group Temporal Key (GTK) from the Pairwise Master Key (PMK) between the user device (supplicant) and access point (authenticator) via the 4-way handshake. 
+WPA2-PSK uses the key derivation function PBKDF2 to generate the Pre-Shared Key (PSK) from the Passphrase and Service Set Identification (SSID), defined as follows:
+\begin{equation}
+    \text{PSK} = PBKDF2(\text{Passphrase}, \text{SSID}, 4096, 256)
+\end{equation}
+Passphrase is a user-defined secret phrase consisting of 8 to 63 characters, while the SSID represents the network name, which is typically public.
+Therefore, the security of PSK depends on the strength of passphrase. In WPA2-PSK, the Pairwise Master Key (PMK) is equivalent to PSK. Based on the PMK, the authenticator and supplicant perform the 4-way handshake. First, the authenticator sends a random number ANonce to the supplicant. Upon receiving it, the supplicant generates its own random number SNonce and calculates the PTK. The calculation of PTK is as follows:
+\begin{equation}
+    \begin{split}
+        \text{PTK} = PRF(&\text{PMK},\text{``Pairwise key expansion''}, \\
+        &\left\{\text{MAC}_\text{AU}, \text{MAC}_\text{SUP}\right\}_{min,max} || \\
+        &\left\{\text{ANonce}, \text{SNonce}\right\}_{min,max} )
+    \end{split} 
+\end{equation}
+Here, $PRF$ represents a pseudo-random function, $\text{MAC}_\text{AU}$ and $\text{MAC}_\text{SUP}$ denote the MAC addresses of the authenticator and supplicant, respectively, and $\{\}_{min,max}$  denotes two variables that are concatenated in ascending order.
+The PTK is then used to ensure the secrecy and integrity of the communication between the supplicant and authenticator. 
+Subsequently, the authenticator transmits the GTK to the supplicant for use as an encryption key in multicast communications. Finally, the supplicant dispatches EAPOL message 4 to the authenticator to confirm the handshake's integrity. Upon receipt of EAPOL message 4 by the authenticator, the handshake is finalized, and communication between the supplicant and authenticator is encrypted using both the PTK and GTK. It is important to note that, according to the 802.1x standard, the 4-way handshake is composed of four EAPOL-key type messages, with the first EAPOL-key message incorporating an additional variable, PMKID, calculated as follows:
+\begin{equation}
+    \begin{split}
+        \text{PMKID} = \text{HM}&\text{AC-SHA1-128}(\text{PMK}, \\
+            &\text{``PMK Name''} || \text{MAC}_\text{AU} || \text{MAC}_\text{SUP})
+    \end{split} 
+\end{equation}
+Here, the PMKID assists devices in rapidly completing authentication upon reconnection.
 
-\noindent\textbf{System Model}  We consider a system model comprising two paired classic Bluetooth devices: a central device, $Alice$, and a peripheral device, $Bob$. These devices have already completed the pairing process and share a long-term key,$K_L$. Each time a connection is established, they perform the Bluetooth session establishment process, utilizing $K_L$ to negotiate a session key, $K_S$. The session key $K_S$ is then used to secure the encrypted link between the two devices.
+\textbf{PMKID attack:} 
+since the strength of the PMK (PSK) is directly influenced by the user's chosen passphrase, a weak passphrase can enable attackers to brute force the PMKID, thereby obtaining the PMK and compromising communication security, shown in \autoref{fig:pmkid-attack}. This attack is known as the ~PMKID attack {cite}.
 
-% 两个配对的设备并非都未对KONB攻击进行了修补，中心设备Alice已经修补了KNOB攻击，完全禁止使用密钥长度低于16字节的所有会话密钥，而边缘设备则会遵循协议接受合法的密钥长度。
-The two paired devices are not both immune to the KNOB attack. While the central device, Alice, has been fortified against the KNOB attack by prohibiting the utilization of any session key with a length below 16 bytes, the peripheral device adheres to the protocol and accepts all legitimate key lengths.
+\begin{figure}[hbtp]
+    \centering
+    \includegraphics[width=\columnwidth]{img/pmkid_attack} 
+    \caption{PMKID Attack}
+    \label{fig:pmkid-attack}
+\end{figure}
 
+% 此外在WPA2-PSK中，PMK(PSK)仅需要用户选择的passphrase便可以计算，因此PMK的熵取决于Passphrase的熵。我们假设存在一个缺乏安全意识的用户，总是选择短且简单的passphrase，这样就导致了PMK的熵较低，我们在模型中添加了这一假设，将PMK标记为低熵的密钥。
+\textbf{Security assumption:} 
+in WPA2-PSK, the PMK (PSK) can be calculated solely from the user-selected passphrase, resulting in the PMK's entropy being contingent on the passphrase's entropy. We assume the existence of a security-unaware user who consistently selects short and simple passphrases, thereby leading to low entropy in the PMK. 
 
-\noindent\textbf{Attacker Model} 
-% 我们假设攻击者Charile希望妥协Alice与Bob之间的加密链路，解密、篡改、伪造双方通信的加密数据。在第x章我们将详细描述攻击的执行过程。
-We assume that the attacker, Charlie, aims to compromise the encrypted link between Alice and Bob, decrypt, manipulate, and forge the encrypted data exchanged between them. In XXXXX, we will provide a detailed description of the attack execution process. 
+% cremers_wpa2 提出了WPA2的 4-way handshake协议的形式化模型，该模型包括从PMK派生PTK和GTK的过程。由于该模型主要为了验证密钥重装攻击，因此在第一条握手消息中省略了PMKID，我们补全了这一部分：
+\textbf{Protocol modeling:}  
+\cite{cremers2020formal} proposed a formal model of the WPA2 4-way handshake protocol, encompassing the process of deriving the PTK and GTK from the PMK. As the model primarily focuses on verifying key reinstallation attacks, the PMKID is omitted in the first handshake message. We added PMKID to the first message of the handshake as follows:
+\begin{flalign*}
+    \text{\ruleNameText{Au}}    & \text{\ruleNameText{thSndM1}} :                                                   & \\
+                                & \text{\Tterm{let}}                                                                \\  
+                                & \hspace{2em} \text{\Tterm{PMK := `L`}}                                            \\  
+                                & \hspace{2em} \text{\Tterm{PMKID = HMAC("PMK Name", PMK)}}                         \\  
+                                & \text{\Tterm{in}}                                                                 \\  
+    \TFacts{                    & \text{\TFactTerm{AuthState}{"INIT", PMK}}, \; \text{\TFrFactTerm{ANonce}}  }      \\
+                                & \TEmpActFact{ }                                                                   \\
+    \TFacts{                    & \text{\TFactTerm{AuthState}{"PTK START", \TPairN{PMK, \TFrTerm{ANonce}}}},        \\
+                                & \text{\TFactTerm{AuthOut}{\TPairN{\TFrTerm{ANonce}, PMKID}}}}
+\end{flalign*}
+Here, we incorporate our security assumption into the model, marking the PMK as a low-entropy key. 
 
-% 攻击者对Alice与Bob的配对过程并不关心，也无从得知他们之间共享的长期密钥$K_L$。我们假设攻击者知道Alice与Bob所有的公开信息，如蓝牙地址、设备名称等信息，能够窃听、操纵所有未加密的数据包。此外，攻击者还拥有穷尽搜索低熵密钥的能力，他可以从密文中恢复出低熵的加密密钥。
-The attacker is not concerned with the pairing process between Alice and Bob and has no knowledge of the long-term key $K_L$ shared between them. We assume that the attacker has access to all public information about Alice and Bob, such as their Bluetooth addresses, device names, and can eavesdrop and manipulate all unencrypted packets. Additionally, the attacker has the ability to conduct an exhaustive search for low-entropy keys, which allows them to retrieve the low-entropy encryption key from the ciphertext.
+% 我们将验证PTK的保密性来探究低熵的PMK是否会被攻击者利用来妥协4-way handshake的安全性。我们引入一个事实 SupplicantInstalledPTK，表示supplicant已经安装了PTK。PTK的保密性形式化定义如下：
+% 这个公式表示supplicant安装某个PTK且攻击者得知此PTK是不可能的。
+\textbf{Property specification:} We will verify the secrecy of PTK to analysis whether attackers can exploit a low-entropy PMK to compromise the security of the 4-way handshake. We introduce a fact, \TFact{SuppInsPTK}, indicating that the supplicant has installed a PTK. The formal definition of the secrecy of the PTK is as follows:
+\begin{flalign*}
+    & \hspace{0em} \text{\TLemma{not}} \;\, \text{\TLemma{Ex}} \;\, \text{\Tterm{suppID  PTK \#i \#j.}} \;\, &\\
+    & \hspace{1em} \text{\TFact{K(PTK)@i}} \; \land \; \text{\TFact{SuppInsPTK(suppID, PTK)@j}}
+\end{flalign*}
+This formula indicates that it is impossible for the attacker to know a PTK while the supplicant has installed it.
 
+\subsection{The Paring Process of BLE}
+% 蓝牙技术广泛应用于短距离无线通信，主要用于实现设备间的便捷数据交换与连接。蓝牙包含两种主要技术：Bluetooth Classic 适用于高带宽的应用场景，如音频流传输；而Bluetooth Low Energy（BLE）则专为低功耗应用设计，适合传感器、物联网设备等场景。蓝牙通过配对机制为设备间建立安全的通信机制，确保数据传输的保密性和完整性。
+Bluetooth technology is extensively utilized for short-range wireless communication, primarily enabling efficient data exchange and connectivity between devices. It comprises two principal technologies: Bluetooth Classic(BC), which is appropriate for high-bandwidth applications, such as audio streaming, and Bluetooth Low Energy (BLE), which is specifically engineered for low-power applications, making it particularly suitable for sensors and Internet of Things (IoT) devices. Bluetooth utilizes a pairing mechanism to establish a secure communication framework between devices, thereby ensuring the confidentiality and integrity of data transmission.
 
-\subsection{BC \& BLE Session establishment}
+\begin{figure}[hbtp]
+    \centering
+    \includegraphics[width=\columnwidth]{img/BLE_pairing} 
+    \caption{BLE pairing}
+    \label{fig:ble-pairing}
+\end{figure}
 
-\subsection{WPA2 PMKID}
+% 进行配对的两个低功耗蓝牙设备分别称为Initiator和Responder，\autoref{ble-pairing}展示了BLE secure connection配对过程的三个阶段。在第一阶段，Initiator和Responder相互交换配对feature，包括BLE设备的IO能力和LTK密钥的长度等信息。BLE设备的IO能力包括NoInputNoOutput、DisplayOnly、DisplayYesNo、KeyboardOnly、KeyboardDisplay
+% 在第二阶段，Initiator和Responder根据第一阶段交换的feature选择合适的配对方案，包括Just Works、Passkey Entry、Out of Band等。在这一阶段结束，Initiator和Responder协商出长期密钥LTK。
+% 在第三阶段，Initiator和Responder使用LTK生成会话密钥SK，然后双方在受SK保护的信道熵分发transport specific keys, for example the Identity Resolving Key (IRK) value and Identity Address information.
+The pairing process between two Bluetooth Low Energy (BLE) devices, designated as the Initiator and the Responder, involves three distinct phases, as depicted in \autoref{fig:ble-pairing}. Initially, the devices exchange pairing features, which include the IO capabilities and the length of the Long Term Key (LTK). These IO capabilities determine the pairing scheme to be implemented in the subsequent phase. The IO capabilities include NoInputNoOutput, DisplayOnly, DisplayYesNo, KeyboardOnly, and KeyboardDisplay.
 
-\subsection{Unilateral Key Downgrade Attack}
+During the second phase, an appropriate pairing scheme is selected based on the exchanged features. Options include Just Works, Passkey Entry, and Out of Band. By the conclusion of this phase, both devices successfully negotiate the Long Term Key (LTK).
 
+In the final phase, the Initiator and Responder utilize the LTK to derive a Session Key (SK). This SK is then employed to secure the channel over which transport-specific keys are distributed, such as the Identity Resolving Key (IRK) and Identity Address information.
 
+% Key Negotiation Of Bluetooth(KNOB)攻击在针对低功耗蓝牙时，攻击者可以通过降低LTK的长度来降低密钥被破解的难度，进而破坏通信的安全性。\autoref{fig:ble-knob}展示了KNOB攻击的过程，攻击者通过篡改双方配对feature中的LTK长度字段，使得Initiator和Responder协商出的LTK长度较短，从而降低了攻击者通过暴力破解LTK的难度。
+\textbf{KNOB attack:}  
+The Key Negotiation of Bluetooth (KNOB) attack poses a significant threat to low-power Bluetooth communications by allowing an attacker to decrease the difficulty of compromising the Long-Term Key (LTK) through the intentional reduction of its length. This reduction undermines the security of the communication channel. As illustrated in \autoref{fig:ble-knob}, the attacker manipulates the LTK length field within the pairing features exchanged between the Initiator and Responder, leading to the negotiation of a shorter LTK. This alteration substantially reduces the complexity of a brute-force attack on the LTK.
+\begin{figure}[hbtp]
+    \centering
+    \includegraphics[width=\columnwidth]{img/BLE_KNOB} 
+    \caption{BLE KNOB}
+    \label{fig:ble-knob}
+\end{figure}
 
+% 在我们的模型中，我们假设参与配对的BLE设备的IO能力为KeyboardDisplay，且支持的最大密钥长度为协议规定的16字节。在这种场景下，如果没有攻击者的参与，配对的蓝牙设备将会采用Numeric Comparison配对方案，成功协商出完整长度的LTK。
+% 为了充分研究攻击者的计算能力对协议安全性的影响，我们会逐步放松BLE设备对于最低密钥长度的限制，以及提高攻击者的计算能力。我们以下两类设备：
+% \begin{itemize}
+%     \item \textbf{极端安全的设备(ES-D)}：及其注重安全，仅接受使用完整长度的LTK。
+%     \item \textbf{普通安全的设备(NS-D)}：遵守规范的建议，接受7字节到16字节的LTK，但是倾向于使用完整长度的LTK。 
+% \end{itemize}
+% 对于攻击者的计算能力，我们假设攻击者可以在短时间内遍历长度为LTK最大长度一半的密钥的密钥空间，也就是说，攻击者拥有暴力破解出8字节及以下的LTK的能力。
+\textbf{Security assumption:} 
+In the proposed model, it is assumed that the participating BLE devices possess an IO capability of KeyboardDisplay, with a maximum expected key length of 16 bytes as stipulated by the protocol. In the absence of an adversary, these devices will employ the Numeric Comparison pairing method, achieving a full-length LTK.
+To comprehensively analyze the influence of an attacker's computational capabilities on the security of the protocol, we will incrementally loosen the constraint on the minimum key length for BLE devices, while enhancing the attacker's computational capabilities.
 
-% \section{Case Studies}
+We consider two categories of devices:
+\begin{itemize}
+\item \textbf{Extremely Secure Device(ES-D)}: These devices place a high emphasis on security and only accept full-length LTKs.
+\item \textbf{Normally Secure Device(NS-D)}: These devices conform to the recommended guidelines, accepting LTKs ranging from 7 to 16 bytes, although they prefer full-length LTKs.
+\end{itemize}
 
-% This section presents an in-depth examination of various case studies relevant to the security vulnerabilities in wireless communication protocols. We provide a detailed analysis of the system and attacker models, followed by specific studies on BC and BLE session establishment, WPA2 PMKID vulnerabilities, and the Unilateral Key Downgrade Attack. Each subsection explores the methodology, implications, and potential mitigations for these security threats.
+With respect to the attacker's computational capabilities, we assume that there are two types of attackers:
+\begin{itemize}
+    \item \textbf{Semi-cracking Attacker(SA)}: This attacker can traverse the key space of a key with a length of half the maximum LTK length in a short period, i.e., the attacker has the ability to brute force key of 8 bytes or less.
+    \item \textbf{Quart-cracking Attacker(QA)}: Similar to the SA, this attacker can crack keys of 4 bytes or less.
+\end{itemize}
+The minimum length of LTK is 7 bytes makes it impossible for QA to compromise any LTKs. So we only take SA into consideration in the case of BLE.
 
-\subsection{System and Attack Model}
+% \cite{shi2023formal} 开发了BLE-SC配对协议的的全面的形式化模型，涵盖了规范中所有的关联模型。根据蓝牙标准，计算LTK的最后一步是根据协商的密钥长度对LTK进行截取，例如，协商的密钥长度为7字节，那么LTK只会保留7字节的有效数据。考虑到攻击者的计算能力，长度较短的LTK是可以被攻击者获取的，而完整长度的LTK无法被攻击者直接破解。现有的工作直接定义了如下的rule，给攻击者得到低熵密钥的能力：
+\textbf{Protocol modeling:}
+\cite{shi2023formal} has developed a comprehensive formal model for the BLE-SC pairing protocol, which includes all related models specified in the standards. According to the Bluetooth Specification, the final process in LTK derivation involves truncating the LTK to the negotiated key length. For instance, if the negotiated key length is 7 bytes, only 7 bytes of the LTK will remain as valid data. Given the computational capabilities of an adversary, shorter LTKs are susceptible to being compromised, whereas a full-length LTK remains secure against brute-force attacks. Existing research defines a rule that provides the attacker with the ability to access low-entropy keys:
+\begin{flalign*}
+    \text{\ruleNameText{Re}}    & \text{\ruleNameText{vealLTK}} :                                   & \\
+                                & \text{\Tterm{let}}                                                \\
+                                & \hspace{1em} \text{\Tterm{LTK = resize(\_, "Low Entropy")}}       \\
+                                & \text{\Tterm{in}}                                                 \\
+    \TFacts{                    & \text{\TFactTerm{In}{senc(m, LTK)}}} \TEmpActFactSL{} \TFacts{ \text{\TFactTerm{Out}{LTK}}}             
+\end{flalign*}
+% 其中，resize函数代表了LTK的截断操作，第一个参数是待截断的密钥，第二个参数是截断后的密钥长度。虽然这条规则虽然赋予了攻击者获取低熵的LTK的能力，但是这条规则并没有还原真实的攻击行为。事实上，配对的蓝牙设备在使用LTK保护通信时，会首先使用LTK派生出SK，然后使用SK加密发往公开信道的数据。delov-yao模型中的攻击者无法获取到使用LTK加密的密文，也就无法使用这条规则来妥协低熵的LTK。这样的模型可以发现KNOB攻击，是因为这个模型简化了SK的参与，直接使用了LTK来保护通信数据。我们希望更加还原协议的行为，因此补充了LTK参与派生SK，以及SK用于保护通信。
+The \funcText{resize} function is designed to model the truncation operation of LTK, with the first parameter being the key to be truncated and the second parameter specifying the desired length of the truncated key. While this rule provides the attacker with the theoretical ability to obtain a low-entropy LTK, it does not accurately replicate the actual attack scenario. In fact, paired Bluetooth devices utilize the LTK to secure communications by first deriving a Session Key (SK) from the LTK, and subsequently employing the SK to encrypt data transmitted over the public channel. In the Dolev-Yao model, the attacker is unable to intercept the ciphertext encrypted with the LTK, thus making it impossible to exploit this rule to compromise a low-entropy LTK. The model's ability to discover the KNOB attack arises from its simplification of SK involvement, where the LTK is directly used to secure communication data. In our efforts to more faithfully model the protocol's execution, we have incorporated the derivation of the SK from the LTK and the use of the SK in securing communications.
 
-\textbf{Attacker Model:}
-In this study, we consider a sophisticated attacker model where the adversary has the capability to intercept, modify, and inject packets within the wireless communication channel. The attacker is assumed to possess partial knowledge of the session establishment protocols, including potential cryptographic weaknesses. Additionally, the attacker may have access to prior communication sessions, enabling them to perform replay attacks or exploit key reuse vulnerabilities. The primary objectives of the attacker include unauthorized access to encrypted data, session hijacking, and inducing a state of reduced security by manipulating the cryptographic parameters exchanged during protocol negotiations.
+% 此外，我们还以更细的粒度建模了reszie函数。定义两种种密钥长度$N_1$与$N_2$，其中$N_1$表示攻击者可以破解的密钥长度，$N_2$表示攻击者无法破解的密钥长度。为了详细地建模出LTK的截取操作，我们定义两个函数 left/1 与 right/1，分别代表了截取密钥的左侧一半与右侧一半。在此基础上，resize函数满足以下等式：
+Furthermore, we have refined the modeling of the \funcText{resize} function for increased granularity. From the attacker's perspective, we define two critical key lengths, $N_1$ and $N_2$, where $N_1$ denotes the key lengths susceptible to attack, and $N_2$ denotes those remaining secure. To provide a detailed model of the LTK truncation process, we introduce two functions, \funcText{left} and \funcText{right}, which respectively denote the left and right halves of the key. The \funcText{resize} function adheres to the following equation:
+\begin{flalign*}
+    \text{\Tterm{resize(k, $N_1$)}} & \text{ = \Tterm{left(k)}}    & \\
+    \text{\Tterm{resize(k, $N_2$)}} & \text{ = \TPairN{left(k), right(k)}}    \\
+\end{flalign*}
 
-\textbf{System Model:}
-The system under consideration comprises multiple wireless communication protocols, including Bluetooth Classic (BC), Bluetooth Low Energy (BLE), and Wi-Fi protected access protocols such as WPA2. The typical environment involves a mix of devices with varying levels of security compliance, from modern smartphones and IoT devices to legacy systems with outdated firmware. The system's security relies on robust key exchange mechanisms, mutual authentication processes, and the integrity of cryptographic algorithms. In this context, we analyze the interplay between protocol specifications and real-world implementations, highlighting potential gaps that can be exploited by adversaries.
+% LTK派生的过程建模如下：
+Taking into account the computational capabilities of an adversary, both \Tterm{left(FullLTK)} and \Tterm{right( FullLTK)} are considered vulnerable from the attacker's viewpoint, where \Tterm{FullLTK} is a LTK with the full length. Therefore, in our model, both of these LTK parts are marked as low-entropy keys. The LTK truncation process is modeled as follows:
+\begin{flalign*}
+    \text{\ruleNameText{Re}}    & \text{\ruleNameText{sizeLTK}} :                                   & \\
+                                & \text{\Tterm{let}}                                                \\
+                                & \hspace{1em} \text{\Tterm{LSEG, RSEG := `L`}}                     \\
+                                & \hspace{1em} \text{\Tterm{LTK = resize(FullLTK, KS)}}             \\
+                                & \hspace{1em} \text{\Tterm{LSEG = left(FullLTK)}}                  \\
+                                & \hspace{1em} \text{\Tterm{RSEG = right(FullLTK)}}                 \\
+                                & \text{\Tterm{in}}                                                 \\
+    \TFacts{                    & \text{\TFactTerm{InitState}{"LTK CALC", \TPairN{FullLTK, KS}}}}   \\
+                                & \TEmpActFact{ }                                                   \\
+    \TFacts{                    & \text{\TFactTerm{InitState}{"LTK CALCED", LTK}}}                  \\
+\end{flalign*}
+% 为了简洁，我们这里省略了具体计算FullLTK的过程，只展示了LTK的截断操作。在这个规则中，KS是协商的密钥长度，LLTK与RLTK分别代表了LTK的左边部分与右边部分，这两个部分都被标记为低熵密钥。
+For brevity, the detailed computation process for the \Tterm{left(FullLTK)} is not included here; instead, we only focus on the truncation operation of the LTK. In this rule, \Tterm{KS} denotes the negotiated key length, while \Tterm{LSEG} and \Tterm{RSEG} represent the left and right segments of \Tterm{FullLTK} respectively. Both segments are annotated as low-entropy keys.
 
-\subsection{BC \& BLE Session Establishment}
+% 我们聚焦于分析攻击者能否利用计算能力破解密钥，因此我们着重研究协议中密钥的保密性。我们定义了两个事实，\TFact{LTKNegotiated} 与 \TFact{SKDistributed}，分别代表了LTK成功被协商出来，SK被成功分发。LTK与SK的保密性分别定义如下：
+\textbf{Property specification:}
+Our focus is on analyzing whether an attacker can leverage computational capabilities to compromise keys, thus we emphasize the study of key confidentiality within the protocol. We define two facts, \TFact{LtkNegotiated} and \TFact{SkDistributed}, representing the successful negotiation of the LTK and the successful distribution of the SK, respectively. The secrecy of LTK and SK for the Initiator and Responder is defined as follows:
+\begin{flalign*}
+    & \hspace{0em} \text{\TLemma{All}} \;\, \text{\Tterm{Addr LTK \#i.}} \;\, &\\
+    & \hspace{1em} \text{\TFact{LtkNegotiated(Role, Addr, LTK)@i}} \\
+    & \hspace{0em} \implies \neg (\text{\TLemma{Ex \#j.}} \;\, \text{\TFact{K(LTK)@j}} ) \\
+    & \hspace{0em} \text{\TLemma{All}} \;\, \text{\Tterm{Addr SK \#i.}} \;\, &\\
+    & \hspace{1em} \text{\TFact{SkDistributed(Role, Addr, SK)@i}} \\
+    & \hspace{0em} \implies \neg (\text{\TLemma{Ex \#j.}} \;\, \text{\TFact{K(SK)@j}} ) \\
+\end{flalign*}
+where \TFact{Role} could be either "Initiator" or "Responder". This formula indicates that it is impossible for the attacker to know the LTK while the Initiator or Responder has successfully negotiated it. Similarly, the attacker cannot know the SK while the Initiator or Responder has successfully distributed it. 
 
-The Bluetooth Classic (BC) and Bluetooth Low Energy (BLE) protocols serve as foundational technologies for short-range wireless communication. Session establishment in these protocols involves multiple steps, including device discovery, pairing, and key negotiation. Despite the advances in security mechanisms such as Secure Simple Pairing (SSP) in BC and LE Secure Connections in BLE, vulnerabilities persist due to weaknesses in the pairing process and inadequate protection against passive eavesdropping. In particular, the legacy pairing methods in BC and the Just Works association model in BLE are susceptible to man-in-the-middle (MITM) attacks, where an attacker can intercept and alter the key exchange process without being detected by the communicating devices. This subsection provides an analysis of session establishment protocols, identifies critical vulnerabilities, and discusses potential enhancements to the pairing methods that could mitigate these risks.
+\subsection{The Session Establishment of Bluetooth Classic}
+% BC 在配对的过程中，同样会协商出一个长期密钥，称之为Link Key。BC 的会话建立协议发生在配对之后，会话建立协议会使用Link Key生成会话密钥，用于保护数据传输的安全性，图1展示展示了这个过程。
+During the pairing process, BC also negotiates a long-term key known as the Link Key. The session establishment protocol for BC occurs after pairing and utilizes the Link Key to generate a session key, which secures data transmission. \autoref{fig:bc-session} illustrates this process.
+\begin{figure}[hbtp]
+    \centering
+    \includegraphics[width=\columnwidth]{img/bc_session} 
+    \caption{BC Session Legacy}
+    \label{fig:bc-session}
+\end{figure}
+\begin{figure}[hbtp]
+    \centering
+    \includegraphics[width=\columnwidth]{img/bc_session} 
+    \caption{BC Session SC}
+    \label{fig:bc-session-sc}
+\end{figure}
+% 参与会话建立的两个设备我们分别称之为中心设备和边缘设备。在会话建立之前，双方共享Link Key $K_L$。整个会话建立流程分为三个步骤，第一步，中心设备发起一个挑战响应过程，向边缘设备发送一个随机数$AuRand$。边缘设备收到后，使用Link Key根据$AuRand$计算出响应$SERS$和 Authenticated Channel Offset (ACO)，并并将$SERS$返回给中心设备，中心设备验证$SERS$无误后进入下一步。第二步，中心设备与边缘设备会协商会话密钥的长度。第三步，中心设备发送加密随机数$EnRand$给边缘设备，双方使用$EnRand$与ACO生成会话密钥$SK。然后边缘设备使用$SK$加密固定格式的LMP_ACCEPT消息，发送给中心设备，中心设备成功解密消息后，加密会话至此建立。
+In BC session establishment protocol , the devices involved are designated as the central device and the peripheral device. Prior to the initiation of the session, both entities share a Link Key, denoted as $K_L$. The session establishment process is delineated into three distinct phases.
 
-\subsection{WPA2 PMKID}
+Initially, the central device initiates a challenge-response mechanism by transmitting a random number, $AuRand$, to the peripheral device. Upon receipt, the peripheral device utilizes the Link Key to compute the response $SERS$ and the Authenticated Channel Offset ($ACO$) based on $AuRand$, subsequently returning $SERS$ to the central device. The central device, upon verifying the correctness of $SERS$, progresses to the subsequent phase.
 
-The WPA2 (Wi-Fi Protected Access II) protocol is widely deployed for securing wireless networks, and its robustness is largely dependent on the cryptographic strength of the Pre-Shared Key (PSK) and the robustness of the 4-way handshake process. A notable vulnerability in WPA2 is the exposure of the Pairwise Master Key Identifier (PMKID) during the initial stages of the handshake, which can be exploited to perform offline dictionary or brute-force attacks against the PSK. This vulnerability is particularly concerning in environments where the PSK is weak or predictable, such as common words or simple passphrases. The section elaborates on the mechanics of the PMKID extraction attack, its implications for network security, and the effectiveness of countermeasures such as the use of strong, complex PSKs and the adoption of WPA3, which introduces more secure handshake methods like Simultaneous Authentication of Equals (SAE).
+In the following phase, the central and peripheral devices engage in negotiation regarding the length of the session key.
 
-\subsection{Unilateral Key Downgrade Attack}
+In the final phase, the central device dispatches an encrypted random number, $EnRand$, to the peripheral device. Utilizing $EnRand$ in conjunction with ACO, both devices generate the session key $SK$. The peripheral device then encrypts a predetermined format \Tfunction{LMP\_ACCEPT} message using $SK$ and transmits it to the central device. The successful decryption of this message by the central device signifies the establishment of the encrypted session.
 
-The Unilateral Key Downgrade Attack represents a class of cryptographic attacks where an adversary forces the communication parties to agree on a less secure cryptographic algorithm or key length, thus compromising the overall security of the session. This attack leverages flaws in the protocol negotiation phase, where devices may accept weaker parameters under certain conditions, typically to maintain backward compatibility with legacy systems. For instance, in a scenario where one device supports both strong and weak encryption standards, an attacker could manipulate the negotiation messages to ensure that the weak standard is selected, thereby exposing the session to easier cryptographic attacks. This subsection explores specific instances of Unilateral Key Downgrade Attacks within wireless communication protocols, outlines the technical details of how these attacks are carried out, and recommends best practices for protocol design that include strict enforcement of security policies and mandatory use of strong cryptographic standards.
+\begin{figure}[hbtp]
+    \centering
+    \includegraphics[width=\columnwidth]{img/bc_knob} 
+    \caption{BC KNOB}
+    \label{fig:bc-knob}
+\end{figure}
 
+% BC设备同样会受到KNOB攻击，因为在建立加密会话时，BC会协商会话密钥的长度。 在\autoref{fig:bc-knob}中展示了KNOB攻击的过程，攻击者通过篡改中心设备与边缘设备协商的会话密钥长度，使得会话密钥长度较短，从而降低了攻击者通过暴力破解会话密钥的难度。在蓝牙规范中，BC设备支持的会话密钥长度可以是1-16字节，在一些情况下，攻击者事实KNOB攻击，可以最短将会话密钥长度降级到1字节。
+\textbf{KNOB attack:}  
+BC devices are  also vulnerable to KNOB attacks due to their negotiation of session key lengths during the establishment of sessions. The mechanism of the KNOB attack is depicted in \autoref{fig:bc-knob}. An adversary can alter the negotiated session key length between the central and peripheral devices, which results in a shortened session key. This significantly reduces the difficulty of brute-forcing the session key for the attacker. As per the Bluetooth specification, BC devices support session key lengths in the range of 1 to 16 bytes. Under certain circumstances, an attacker can effectively implement a KNOB attack, reducing the session key length to 1 byte.
 
+% 在蓝牙specification中，BC设备支持的会话密钥长度从1字节到16字节。在BLE的case中我们提到的两个攻击者SA与QA都可能对BC设备的会话密钥产生威胁，因此我们将在BC的case中考虑这两种攻击者。
+\textbf{Security assumption:} 
+According to the Bluetooth specification, BC devices support session key lengths ranging from 1 byte to 16 bytes. In the context of BLE, both potential attackers, SA and QA, could pose a threat to the session key of BC devices. Therefore, we will consider both types of attackers in the BC case. 
+% 对于BC设备，我们同样放松我们的安全假设。我们根据是否只接受完整长度的密钥和是否只接受SC的设备这两个维度，将BC设备分为4类：
+% \begin{itemize}
+%     \item \textbf{ESO-D}：只接受完整长度的会话密钥，且只接受SC建立会话的设备。
+%     \item \textbf{NSO-D}：遵守规范的建议，接受1字节到16字节的会话密钥，但只接受SC的设备。
+%     \item \textbf{ESL-D}：只接受完整长度的会话密钥，但是同时接受SC与Legacy建立会话的设备。
+%     \item \textbf{NSL-D}：遵守规范的建议，接受1字节到16字节的会话密钥，同时也接受SC与Legacy建立会话的设备。
+By loosening our security assumptions for BC devices, we classify them into four distinct categories based on two criteria: whether they accept only full-length keys and whether they exclusively permit Secure Connections (SC):
+\begin{itemize}
+\item \textbf{ESO-D}: These devices accept only full-length session keys and permit sessions exclusively established through SC.
+\item \textbf{NSO-D}: These devices adhere to the specification's recommendations, accepting session keys ranging from 1 to 16 bytes, while exclusively permitting SC.
+\item \textbf{ESL-D}: These devices accept only full-length session keys but allow sessions established via both SC and Legacy methods.
+\item \textbf{NSL-D}: These devices comply with the specification's recommendations, accepting session keys ranging from 1 to 16 bytes, and allow sessions established through both SC and Legacy methods.
+\end{itemize}
+
+% 我们建模了BC-SC与BC-Legacy进行了全面的形式化建模，以支持我们安全假设中不同的设备类型的验证。我们通过如下的equations来建模协议中设备交换双方的认证需求，来选择会话建立方法的过程：
+\textbf{Protocol modeling:}
+We have developed a comprehensive formal model for BC SC and  Legacy session establishment  protocols to facilitate the verification of various device types under our specified security assumptions. The authentication requirements for device exchanges and the procedure for selecting a session establishment method within the protocol are represented by the following equations:
+\begin{flalign*}
+    \text{\Tterm{Select(SCY, SCY)}} & \text{\Tterm{ = ScMethod}}    & \\
+    \text{\Tterm{Select(SCN, SCY)}} & \text{\Tterm{ = LyMethod}}    \\
+    \text{\Tterm{Select(SCY, SCN)}} & \text{\Tterm{ = LyMethod}}    \\
+    \text{\Tterm{Select(SCN, SCN)}} & \text{\Tterm{ = LyMethod}}    
+\end{flalign*}
+% 其中SCY 、 SCN、ScMethod 和 LyMethod 是0 arity function，代表了设备是否支持SC，ScMethod 与 LyMethod 代表了设备选择SC与Legacy建立会话的方法。
+In this context, \Tterm{SCY}, \Tterm{SCN}, \Tterm{ScMethod}, and \Tterm{LyMethod} are 0-arity functions. The functions \Tterm{SCY} and \Tterm{SCN} denote a device's capability to support SC. Meanwhile, \Tterm{ScMethod} and \Tterm{LyMethod} specify the methods selected by the device for session establishment via SC and Legacy approaches, respectively.
+% 在建模攻击者时,我们还需要建模出QA. 与在BLE模型中类似，我们使用l与r函数分别表示密钥的两半,不过此时需要引入更多的密钥长度$N_1$, $N_2$, $N_3$, $N_4$,并且resize函数满足以下等式：
+In modeling the attacker, it is essential to incorporate the \text{QA} model. Analogous to the BLE model, the functions \Tterm{l} and \Tterm{r} are employed to represent the two halves of the key. In this scenario, additional key lengths $N_1$, $N_2$, $N_3$, and $N_4$ are introduced. The resize function is defined to satisfy the following equations:
+\begin{flalign*}
+    \text{\Tterm{resize(k, $N_1$)}} & \text{ = \Tterm{l(l(k))}}                           & \\
+    \text{\Tterm{resize(k, $N_2$)}} & \text{ = \TPairN{l(l(k)),r(l(k))}}          \\
+    \text{\Tterm{resize(k, $N_3$)}} & \text{ = \TPairN{l(l(k)),r(l(k)),l(r(k))}}          \\
+    \text{\Tterm{resize(k, $N_4$)}} & \text{ = \TPairN{l(l(k)),r(l(k)),l(r(k)),r(r(k))}}         
+\end{flalign*}
+% 这种建模方法，将密钥等分为$2^n$个部分，直至最短的密钥部分可以被攻击者破解。在QA攻击者模型中,我们将密钥分为四个部分,每个部分都是QA攻击者可以破解的. 在模型的规则中将其标注为低熵密钥。
+This modeling strategy involves partitioning the key into $2^n$ segments, continuing until the shortest segment is susceptible to compromise by an attacker. Within the QA attacker model, the key is divided into four segments, with each segment being vulnerable to be compromised by the QA attacker. In the rules of the model, these segments are categorized as low-entropy keys. 
+\begin{flalign*}
+    \text{\ruleNameText{Re}}    & \text{\ruleNameText{sizeSKQA}} :                                   & \\
+                                & \text{\Tterm{let}}                                                \\
+                                & \hspace{1em} \text{\Tterm{l(l(k)),r(l(k)),l(r(k)),r(r(k)) := `L`}}                     \\
+                                & \hspace{1em} \text{\Tterm{SK = resize(FullSK, KS)}}             \\
+                                & \text{\Tterm{in}}                                                 \\
+    \TFacts{                    & \text{\TFactTerm{State}{"SK CALC", \TPairN{FullSK, KS}}}}   \\
+                                & \TEmpActFact{ }                                                   \\
+    \TFacts{                    & \text{\TFactTerm{State}{"SK CALCED", SK}}}                 
+\end{flalign*}
+
+% 在BC模型中我们同样考虑了会话密钥的保密性，我们定义了 \TFact{SKDistributed} 事实，分别代表了会话密钥成功被分发。我们定义了如下的规则来验证会话密钥的保密性：
+\textbf{Property specification:}
+In the BC model, the secrecy of the session key is also a critical consideration. We define the \TFact{SKDistributed} fact to represent the successful distribution of the session key. The property is specified as follows:
+\begin{flalign*}
+    & \hspace{0em} \text{\TLemma{All}} \;\, \text{\Tterm{Addr SK \#i.}} \;\, &\\
+    & \hspace{1em} \text{\TFact{SkDistributed(Role, Addr, SK)@i}} \\
+    & \hspace{0em} \implies \neg (\text{\TLemma{Ex \#j.}} \;\, \text{\TFact{K(SK)@j}} ) \\
+\end{flalign*}
+where \TFact{Role} could be either "Central" or "Peripheral". This formula indicates that it is impossible for the attacker to know the session key while the central or peripheral device has successfully distributed it.
+% 此外我们还考虑了SK密钥的认证性
 
 
 \end{document}
