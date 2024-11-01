@@ -333,6 +333,33 @@
 \usepackage{subfiles}
 \usepackage{stmaryrd}
 \usepackage{hyperref}
+\usepackage{tcolorbox}
+\usepackage{tabularx}
+\usepackage{pifont}
+
+\tcbuselibrary{skins}
+
+\definecolor{xhs_blue}{HTML}{364FC7}
+\definecolor{xhs_blue_dark}{HTML}{081C59}
+\definecolor{xhs_blue_light}{HTML}{EDF2FF}
+
+\definecolor{xhs_red}{HTML}{c13c33}
+\definecolor{xhs_green}{HTML}{3c5840}
+
+
+\NewTotalTColorBox{\BlueQuote}{ +m +m }{ 
+    notitle,
+    colback=xhs_blue_light,
+    colbacklower=white,
+    frame hidden,
+    boxrule=0pt,
+    bicolor,
+    sharp corners,
+    borderline west={2.5pt}{0pt}{xhs_blue}
+}{
+    \textcolor{xhs_blue}{ \textbf{#1} }
+    #2 
+}
 \renewcommand{\subsectionautorefname}{Section} 
 
 \newcommand{\funcText}[1]{{\ttfamily #1}}
@@ -366,6 +393,7 @@
 
 \hbadness=10000
 
+\newcolumntype{S}{>{\centering\arraybackslash}m{3cm}@{*}}
 
 \begin{document}
 %
@@ -375,7 +403,7 @@
 % not capitalized unless they are the first or last word of the title.
 % Linebreaks \\ can be used within to get better formatting as desired.
 % Do not put math or special symbols in the title.
-\title{Universal Formal Method for Automated Analysis of Low-Entropy Keys}
+\title{Automated Analysis of Protocols with Low-Entropy Keys}
 
 
 % author names and affiliations
@@ -520,10 +548,8 @@ The authors would like to thank...
 %   0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
 
 % \end{thebibliography}
-
-{\footnotesize \bibliographystyle{acm}
-\bibliography{library}}
-
+\bibliographystyle{IEEEtran}
+\bibliography{library}
 
 % that's all folks
 \end{document}

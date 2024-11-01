@@ -29,21 +29,21 @@ where $H(K)$ denotes the entropy of the key $K$. This equation illustrates that 
 
 The method of exhaustively searching the key space by continually attempting different keys until the correct one is identified is termed a brute-force attack. Brute-force attacks can be classified into online and offline categories based on the necessity for real-time interaction with the target system. In an online attack, the adversary must persistently transmit the attempted keys to the target system to verify their correctness. Conversely, in an offline attack, the adversary typically acquires the ciphertext from the target system and can attempt all possible keys by decrypting the ciphertext, thereby obviating the need for interaction with the target system.
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\columnwidth]{img/online-brute-force} 
-    \caption{online-brute-force}
-    \label{fig:online-brute-force}
-\end{figure}
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=\columnwidth]{img/online-brute-force} 
+%     \caption{online-brute-force}
+%     \label{fig:online-brute-force}
+% \end{figure}
 
 Typically, the efficacy of online brute-force attacks is constrained by network latency and the response time of the target system. In contrast, offline attacks are predominantly limited by the computational power available to the attacker. The operational efficiency of offline brute-force attacks is entirely governed by the attacker's capabilities; therefore, the cryptographic key must possess adequate entropy to resist such attacks effectively Consequently, this paper primarily focuses on the investigation of offline brute-force attacks. Throughout the subsequent sections, any reference to brute-force attacks, unless explicitly stated otherwise, pertains to offline brute-force attacks.
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\columnwidth]{img/offline-brute-force} 
-    \caption{offline-brute-force}
-    \label{fig:offline-brute-force}
-\end{figure}
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=\columnwidth]{img/offline-brute-force} 
+%     \caption{offline-brute-force}
+%     \label{fig:offline-brute-force}
+% \end{figure}
 
 
 \subsection{Key Breaking Oracles}
@@ -61,18 +61,14 @@ Employing these rules can enable attackers to compromise specific keys. Nonethel
 
 % 为了通用化和自动化，我们需要一个统一的方法，自动分析出协议中所有可被破解的低熵密钥。类似的，我们假设攻击者可以访问一个密钥破解的oracle，来建模攻击者的穷尽搜索能力，这个oracle如下：
 
-To achieve generalization and automation, it is essential to develop a unified method capable of automatically analyzing all low-entropy keys within the protocol that are susceptible to compromise. In a similar vein, we assume the attacker has access to a key-breaking oracle, which serves to model the attacker's exhaustive search capabilities. The oracle is defined as \autoref{fig:general-oracle}.
-
-\begin{figure}[htbp]
+To achieve generalization and automation, it is essential to develop a unified method capable of automatically analyzing all low-entropy keys within the protocol that are susceptible to compromise. In a similar vein, we assume the attacker has access to a key-breaking oracle, which serves to model the attacker's exhaustive search capabilities. The oracle is shown as follows:
+\begin{figure}[!h]
     \centering
-    \includegraphics[width=\columnwidth]{img/general-oracle} 
-    \caption{General Oracle}
-    \label{fig:general-oracle}
+    \includegraphics[width=0.7755\columnwidth]{img/general-oracle} 
 \end{figure}
 
 % 在这个oracle中，攻击者可以提供一个有低熵密钥参与的函数，如果能提供除密钥外的其他参数，则攻击者就可以获得该秘密的低熵密钥。直接建模这样的Oracle是困难的，一方面，Tamarin 的 pattern matching 是精确的，我们无法使用一个 function symbol 匹配所有密钥参与的算法，另一方面，攻击者需要输入除密钥外所有参与运算的参数，Oracle动态地根据具体算法来决定需要的参数。我们的方法设计了两个更加基础的Oracle，共同完成密钥破解的过程，一个是算法破解Oracle，另一个是值破解Oracle。
-
-In this oracle, an attacker can provide a function that incorporates a low-entropy key. If all parameters involved in the computation except for the key are supplied, the attacker can retrieve the secret low-entropy key. Directly modeling such an oracle presents significant challenges. Firstly, Tamarin's pattern matching is exact, which precludes the use of a single function symbol to match all algorithms involving keys. Secondly, the attacker must input all parameters involved in the computation aside from the key, and the oracle dynamically determines the necessary parameters based on the specific algorithm in question. Our methodology introduces two more fundamental oracles to collaboratively facilitate the key-breaking process.
+\noindent In this oracle, an attacker can provide a function that incorporates a low-entropy key. If all parameters involved in the computation except for the key are supplied, the attacker can retrieve the secret low-entropy key. Directly modeling such an oracle presents significant challenges. Firstly, Tamarin's pattern matching is exact, which precludes the use of a single function symbol to match all algorithms involving keys. Secondly, the attacker must input all parameters involved in the computation aside from the key, and the oracle dynamically determines the necessary parameters based on the specific algorithm in question. Our methodology introduces two more fundamental oracles to collaboratively facilitate the key-breaking process.
 
 
 % a value-breaking oracle and an algorithm-breaking oracle.
@@ -80,11 +76,9 @@ In this oracle, an attacker can provide a function that incorporates a low-entro
 % 数值破解Oracle可以有限地赋予攻击者破解低熵密钥的能力，前提是攻击者可以找到低熵密钥作为唯一变量的计算结果。该Oracle的流程如图\autoref{label}所示。攻击者可以向Oracle提供密钥作为唯一变量的计算结果，如果该密钥的熵低，那么Oracle会向攻击者提供该低熵密钥的数值。
 The value-breaking oracle grants attackers the limited capability to break low-entropy keys, assuming the attacker can identify a computation result in which the low-entropy key is the only variable. The procedure for this oracle is illustrated in Figure \autoref{fig:value-oracle}. Attackers can submit the computation result, where the key is the sole variable, to the oracle. If the key exhibits low entropy, the oracle will provide the attacker with the value of this low-entropy key.
 
- \begin{figure}[t]
+ \begin{figure}[h]
     \centering
-    \includegraphics[width=\columnwidth]{img/oracle2} 
-    \caption{Value breaking oracle}
-    \label{fig:value-oracle}
+    \includegraphics[width=0.4653\columnwidth]{img/oracle1} 
 \end{figure}
 
 \subsubsection{Algorithm-breaking Oracle}
@@ -95,13 +89,9 @@ The value-breaking oracle grants attackers the limited capability to break low-e
 \end{equation}
 % 当攻击者使用这个oracle，确定了使用低熵密钥作为唯一变量的函数，并获取了对应的计算结果，那么攻击者就可以使用值破解Oracle来获取低熵密钥的数值。同样为了通用性，输入函数是不确定的，我们无法直接建模这个Oracle，我们将在下一小节介绍如何通过一系列规则来建模algorithm-breaking oracle。
 When an attacker utilizes this oracle to identify a function that employs a low-entropy key as the sole variable and acquires the corresponding computation result, the attacker can subsequently utilize the value-breaking oracle to obtain the value of the low-entropy key. Similarly, due to the uncertainty of the input function, it is infeasible to directly model this oracle. In the subsequent subsection, we will elucidate the method to model the algorithm-breaking oracle through a set of message derivation rules.
-
-
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{img/oracle1} 
-    \caption{Algorithm breaking oracle}
-    \label{fig:algorithm-oracle}
+    \includegraphics[width=0.99\columnwidth]{img/oracle2} 
 \end{figure}
 
 

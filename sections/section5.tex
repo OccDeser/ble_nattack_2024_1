@@ -7,7 +7,7 @@
 % 在之前的章节中，我们详细介绍了我们的建模方法以及翻译方案。To explain the overall methodology we use to 分析低熵密钥对协议安全性的影响，在本节中，我们将会对几个存在低熵密钥存在的真实协议进行全面分析，我们实现的源代码可以在我们的仓库{cite}中找到。
 In the previous sections, we discuss our modeling approach and translation solution. To explain the overall methodology we use to analyze the impact of low-entropy keys on protocol security, in this section, we will conduct a comprehensive analysis of several real-world protocols with low-entropy keys. The source code of our implementation can be found in our repository {cite}.
 
-\subsection{The 4-way Handshake of WPA2-PSK}
+\subsection{Case 1: The 4-way Handshake of WPA2-PSK}
 % WPA与WPA2源于IEEE 802.11i标准，其中WPA作为过渡性解决方案，旨在修复WEP（Wired Equivalent Privacy）的安全漏洞，而WPA2则完整实现了IEEE 802.11i标准，提供更为完善的安全机制。WPA2-PSK（预共享密钥）是WPA2的一种简化模式，利用预共享密钥代替复杂的企业级认证过程，适用于不需要RADIUS服务器的小型网络。WPA2-PSK广泛应用于家庭、咖啡馆和中小型办公场所，因其配置简便且能够提供较高的安全性。
 Wi-Fi Protected Access (WPA) and WPA2 are both derived from the IEEE 802.11i standard {cite}, with WPA serving as an interim solution to address security vulnerabilities in Wired Equivalent Privacy (WEP), while WPA2 fully implements the 802.11i standard to provide more robust security mechanisms. WPA2-PSK (Pre-Shared Key) is a simplified version of WPA2, using a pre-shared key instead of a complex enterprise-level authentication process, making it suitable for small networks without a RADIUS server. WPA2-PSK is widely deployed in home environments, cafes, and small to medium-sized offices due to its ease of configuration and strong security.
 
@@ -16,7 +16,7 @@ The 4-way handshake of is protocol designed to securely generate and exchange en
 
 \begin{figure}[hbtp]
     \centering
-    \includegraphics[width=\columnwidth]{img/4-way-handshake} 
+    \includegraphics[width=0.85\columnwidth]{img/4-way-handshake} 
     \caption{4-way-handshake}
     \label{fig:4-way-handshake}
 \end{figure}
@@ -44,7 +44,7 @@ Passphrase is a user-defined secret phrase consisting of 8 to 63 characters, whi
 Therefore, the security of PSK depends on the strength of passphrase. In WPA2-PSK, the Pairwise Master Key (PMK) is equivalent to PSK. Based on the PMK, the authenticator and supplicant perform the 4-way handshake. First, the authenticator sends a random number ANonce to the supplicant. Upon receiving it, the supplicant generates its own random number SNonce and calculates the PTK. The calculation of PTK is as follows:
 \begin{equation}
     \begin{split}
-        \text{PTK} = PRF(&\text{PMK},\text{``Pairwise key expansion''}, \\
+        \text{PTK} = PRF(\text{PMK}&,\text{``Pairwise key expansion''}, \\
         &\left\{\text{MAC}_\text{AU}, \text{MAC}_\text{SUP}\right\}_{min,max} || \\
         &\left\{\text{ANonce}, \text{SNonce}\right\}_{min,max} )
     \end{split} 
@@ -76,7 +76,7 @@ in WPA2-PSK, the PMK (PSK) can be calculated solely from the user-selected passp
 
 % cremers_wpa2 提出了WPA2的 4-way handshake协议的形式化模型，该模型包括从PMK派生PTK和GTK的过程。由于该模型主要为了验证密钥重装攻击，因此在第一条握手消息中省略了PMKID，我们补全了这一部分：
 \textbf{Protocol modeling:}  
-\cite{cremers2020formal} proposed a formal model of the WPA2 4-way handshake protocol, encompassing the process of deriving the PTK and GTK from the PMK. As the model primarily focuses on verifying key reinstallation attacks, the PMKID is omitted in the first handshake message. We added PMKID to the first message of the handshake as follows:
+\cite{cremers2020wpa2} proposed a formal model of the WPA2 4-way handshake protocol, encompassing the process of deriving the PTK and GTK from the PMK. As the model primarily focuses on verifying key reinstallation attacks, the PMKID is omitted in the first handshake message. We added PMKID to the first message of the handshake as follows:
 \begin{flalign*}
     \text{\ruleNameText{Au}}    & \text{\ruleNameText{thSndM1}} :                                                   & \\
                                 & \text{\Tterm{let}}                                                                \\  
@@ -99,13 +99,13 @@ Here, we incorporate our security assumption into the model, marking the PMK as 
 \end{flalign*}
 This formula indicates that it is impossible for the attacker to know a PTK while the supplicant has installed it.
 
-\subsection{The Paring Process of BLE}
+\subsection{Case 2: The Paring Protocol of BLE}
 % 蓝牙技术广泛应用于短距离无线通信，主要用于实现设备间的便捷数据交换与连接。蓝牙包含两种主要技术：Bluetooth Classic 适用于高带宽的应用场景，如音频流传输；而Bluetooth Low Energy（BLE）则专为低功耗应用设计，适合传感器、物联网设备等场景。蓝牙通过配对机制为设备间建立安全的通信机制，确保数据传输的保密性和完整性。
 Bluetooth technology is extensively utilized for short-range wireless communication, primarily enabling efficient data exchange and connectivity between devices. It comprises two principal technologies: Bluetooth Classic(BC), which is appropriate for high-bandwidth applications, such as audio streaming, and Bluetooth Low Energy (BLE), which is specifically engineered for low-power applications, making it particularly suitable for sensors and Internet of Things (IoT) devices. Bluetooth utilizes a pairing mechanism to establish a secure communication framework between devices, thereby ensuring the confidentiality and integrity of data transmission.
 
 \begin{figure}[hbtp]
     \centering
-    \includegraphics[width=\columnwidth]{img/BLE_pairing} 
+    \includegraphics[width=0.85\columnwidth]{img/BLE_pairing} 
     \caption{BLE pairing}
     \label{fig:ble-pairing}
 \end{figure}
@@ -155,7 +155,7 @@ The minimum length of LTK is 7 bytes makes it impossible for QA to compromise an
 
 % \cite{shi2023formal} 开发了BLE-SC配对协议的的全面的形式化模型，涵盖了规范中所有的关联模型。根据蓝牙标准，计算LTK的最后一步是根据协商的密钥长度对LTK进行截取，例如，协商的密钥长度为7字节，那么LTK只会保留7字节的有效数据。考虑到攻击者的计算能力，长度较短的LTK是可以被攻击者获取的，而完整长度的LTK无法被攻击者直接破解。现有的工作直接定义了如下的rule，给攻击者得到低熵密钥的能力：
 \textbf{Protocol modeling:}
-\cite{shi2023formal} has developed a comprehensive formal model for the BLE-SC pairing protocol, which includes all related models specified in the standards. According to the Bluetooth Specification, the final process in LTK derivation involves truncating the LTK to the negotiated key length. For instance, if the negotiated key length is 7 bytes, only 7 bytes of the LTK will remain as valid data. Given the computational capabilities of an adversary, shorter LTKs are susceptible to being compromised, whereas a full-length LTK remains secure against brute-force attacks. Existing research defines a rule that provides the attacker with the ability to access low-entropy keys:
+\cite{shi2023blesc} has developed a comprehensive formal model for the BLE-SC pairing protocol, which includes all related models specified in the standards. According to the Bluetooth Specification, the final process in LTK derivation involves truncating the LTK to the negotiated key length. For instance, if the negotiated key length is 7 bytes, only 7 bytes of the LTK will remain as valid data. Given the computational capabilities of an adversary, shorter LTKs are susceptible to being compromised, whereas a full-length LTK remains secure against brute-force attacks. Existing research defines a rule that provides the attacker with the ability to access low-entropy keys:
 \begin{flalign*}
     \text{\ruleNameText{Re}}    & \text{\ruleNameText{vealLTK}} :                                   & \\
                                 & \text{\Tterm{let}}                                                \\
@@ -203,9 +203,9 @@ Our focus is on analyzing whether an attacker can leverage computational capabil
 \end{flalign*}
 where \TFact{Role} could be either "Initiator" or "Responder". This formula indicates that it is impossible for the attacker to know the LTK while the Initiator or Responder has successfully negotiated it. Similarly, the attacker cannot know the SK while the Initiator or Responder has successfully distributed it. 
 
-\subsection{The Session Establishment of Bluetooth Classic}
+\subsection{Case 3: The Session Establishment of BC}
 % BC 在配对的过程中，同样会协商出一个长期密钥，称之为Link Key。BC 的会话建立协议发生在配对之后，会话建立协议会使用Link Key生成会话密钥，用于保护数据传输的安全性，图1展示展示了这个过程。
-During the pairing process, BC also negotiates a long-term key known as the Link Key. The session establishment protocol for BC occurs after pairing and utilizes the Link Key to generate a session key, which secures data transmission. \autoref{fig:bc-session} illustrates this process.
+During the pairing process, BC devices also negotiate a long-term key known as the Link Key. The session establishment protocol for BC occurs after pairing and utilizes the Link Key to generate a session key, which secures data transmission. \autoref{fig:bc-session} illustrates this process.
 \begin{figure}[hbtp]
     \centering
     \includegraphics[width=\columnwidth]{img/bc_session} 
@@ -240,40 +240,51 @@ BC devices are  also vulnerable to KNOB attacks due to their negotiation of sess
 
 % 在蓝牙specification中，BC设备支持的会话密钥长度从1字节到16字节。在BLE的case中我们提到的两个攻击者SA与QA都可能对BC设备的会话密钥产生威胁，因此我们将在BC的case中考虑这两种攻击者。
 \textbf{Security assumption:} 
-According to the Bluetooth specification, BC devices support session key lengths ranging from 1 byte to 16 bytes. In the context of BLE, both potential attackers, SA and QA, could pose a threat to the session key of BC devices. Therefore, we will consider both types of attackers in the BC case. 
-% 对于BC设备，我们同样放松我们的安全假设。我们根据是否只接受完整长度的密钥和是否只接受SC的设备这两个维度，将BC设备分为4类：
-% \begin{itemize}
-%     \item \textbf{ESO-D}：只接受完整长度的会话密钥，且只接受SC建立会话的设备。
-%     \item \textbf{NSO-D}：遵守规范的建议，接受1字节到16字节的会话密钥，但只接受SC的设备。
-%     \item \textbf{ESL-D}：只接受完整长度的会话密钥，但是同时接受SC与Legacy建立会话的设备。
-%     \item \textbf{NSL-D}：遵守规范的建议，接受1字节到16字节的会话密钥，同时也接受SC与Legacy建立会话的设备。
-By loosening our security assumptions for BC devices, we classify them into four distinct categories based on two criteria: whether they accept only full-length keys and whether they exclusively permit Secure Connections (SC):
+% 在蓝牙Core Specification v5.1以及之前的版本中，BC设备支持的最短密钥长度可以是1字节。在蓝牙v5.2及之后的规范中建议BC设备支持的最短密钥长度至少为7字节。以下是在最新的蓝牙v6.0标准文件中相关内容的表述：
+In the Bluetooth Core Specification version 5.1 and preceding versions, the minimum key size can be allowed by BC devices is 1 byte. However, starting from Bluetooth version 5.2, it is advised that BC devices support the minimum key size should not be less than 7 bytes. The subsequent text is extracted from the most recent Bluetooth Core Specification version 6.0, which elaborates on this recommendation.
+\BlueQuote{[Vol 2, Part C, 4.2.5.2]}{ 
+    L\_max\_c and L\_max\_p \textbf{shall} be set to at least 7 octets. L\_min\_c and L\_min\_p \textbf{should} be set to at least 7 octets. 
+}
+% 在蓝牙specification中，\textbf{shall} 代表了强制要求，\textbf{should} 代表了建议。因此，支持最大的密钥长度低于7字节的BC设备是不符合规范的。然而，我们在最新的规范中找到了有关BC设备允许的最大密钥长度的另一处表述，如下所示：
+In the Bluetooth specification, the term \textbf{shall} denotes a mandatory requirement, whereas \textbf{should} indicates a recommended practice. So BC devices that support a maximum key size of less than 7 bytes are deemed non-compliant with the specification. Nonetheless, in the same specification, we have identified an alternative statement pertaining to the permissible maximum key length for BC devices, which is detailed as follows:
+\BlueQuote{[Vol 2, Part H, 4.1]}{ \\
+Each device implementing the Baseband specification shall have a parameter defining the maximal allowed key length, L\_max, $1 \leq \text{L\_max} \leq 16$ (number of octets in the key).}
+% 这里表述BC设备支持的最大密钥长度可以是1字节到16字节，与之前的表述明显存在矛盾。
+It is indicated that the maximum key length accepted by BC devices ranges from 1 byte to 16 bytes, which clearly contradicts the previous statement.
+
+% 鉴于the specification 对最短的密钥长度并没有严格的要求，而且表述前后混乱，我们假定BC设备支持的密钥长度范围存在三种类型：
+Since there is no strict requirement regarding the minimum key length in the specification, and the statements are inconsistent, we assume that there are three types of key length ranges accepted by BC devices:
 \begin{itemize}
-\item \textbf{ESO-D}: These devices accept only full-length session keys and permit sessions exclusively established through SC.
-\item \textbf{NSO-D}: These devices adhere to the specification's recommendations, accepting session keys ranging from 1 to 16 bytes, while exclusively permitting SC.
-\item \textbf{ESL-D}: These devices accept only full-length session keys but allow sessions established via both SC and Legacy methods.
-\item \textbf{NSL-D}: These devices comply with the specification's recommendations, accepting session keys ranging from 1 to 16 bytes, and allow sessions established through both SC and Legacy methods.
+    \item \textbf{Secure Keysize:} The BC device only accepts keys of 16 bytes and rejects any keys shorter than 16 bytes.
+    \item \textbf{Enhancing Keysize:} The BC device accepts keys ranging from 7 to 16 bytes, but prefers 16-byte keys.
+    \item \textbf{Legacy Keysize:} The BC device accepts keys ranging from 1 to 16 bytes, but prefers 16-byte keys.
 \end{itemize}
+% 此外，按照是否支持SC特性，我们将设备分为SC-Only、SC-Legacy、Legacy-Only，分别代表只支持Secure Connections的设备，同时支持Legacy和Secure Connections的设备，以及只支持Legacy功能的设备。SC特性与密钥支持的特性进行组合，一共有六种设备类型。由于BC的会话加密密钥最低可能低至1字节，在QA模型下并不一定安全，因此我们将同时考虑攻击者二分与四分的攻击能力。
+Furthermore, devices are classified according to their support for the SC feature into three categories: SC-Only, SC-Legacy, and Legacy-Only. These categories correspond to devices that only support Secure Connections, those that support both Legacy and Secure Connections, and those limited to Legacy connections, respectively. By integrating the SC feature with key support characteristics, six distinct device types emerge. Considering that the session encryption key for BC can be as short as 1 byte, there are potential security concerns within the QA model. Therefore, both SA and QA model of the adversary will be taken into account.
 
 % 我们建模了BC-SC与BC-Legacy进行了全面的形式化建模，以支持我们安全假设中不同的设备类型的验证。我们通过如下的equations来建模协议中设备交换双方的认证需求，来选择会话建立方法的过程：
 \textbf{Protocol modeling:}
-We have developed a comprehensive formal model for BC SC and  Legacy session establishment  protocols to facilitate the verification of various device types under our specified security assumptions. The authentication requirements for device exchanges and the procedure for selecting a session establishment method within the protocol are represented by the following equations:
+We have developed a comprehensive formal model for BC's SC and Legacy session establishment protocols to facilitate the verification of various device types under our specified security assumptions.The procedure for selecting a session establishment method according to the two devices' SC feature are represented by the following equations:
 \begin{flalign*}
-    \text{\Tterm{Select(SCY, SCY)}} & \text{\Tterm{ = ScMethod}}    & \\
-    \text{\Tterm{Select(SCN, SCY)}} & \text{\Tterm{ = LyMethod}}    \\
-    \text{\Tterm{Select(SCY, SCN)}} & \text{\Tterm{ = LyMethod}}    \\
-    \text{\Tterm{Select(SCN, SCN)}} & \text{\Tterm{ = LyMethod}}    
+    \text{\Tterm{Select(FALSE, \_)}} &= \text{\Tterm{LegacyMethod}} & \\
+    \text{\Tterm{Select(\_, FALSE)}} &= \text{\Tterm{LegacyMethod}} \\
+    \text{\Tterm{Select(TRUE, TRUE)}} &= \text{\Tterm{SecureMethod}} 
 \end{flalign*}
 % 其中SCY 、 SCN、ScMethod 和 LyMethod 是0 arity function，代表了设备是否支持SC，ScMethod 与 LyMethod 代表了设备选择SC与Legacy建立会话的方法。
-In this context, \Tterm{SCY}, \Tterm{SCN}, \Tterm{ScMethod}, and \Tterm{LyMethod} are 0-arity functions. The functions \Tterm{SCY} and \Tterm{SCN} denote a device's capability to support SC. Meanwhile, \Tterm{ScMethod} and \Tterm{LyMethod} specify the methods selected by the device for session establishment via SC and Legacy approaches, respectively.
+In this context, \Tterm{TRUE}, \Tterm{FALSE}, \Tterm{SecureMethod}, and \Tterm{LegacyMethod} are 0-arity functions. The functions \Tterm{TRUE} and \Tterm{FALSE} denote whether a device supports SC. Meanwhile, \Tterm{ScMethod} and \Tterm{LyMethod} specify the methods selected by the device for session establishment, respectively. The \Tterm{ScMethod} will be chosen only if both devices support secure connections.
+
+
 % 在建模攻击者时,我们还需要建模出QA. 与在BLE模型中类似，我们使用l与r函数分别表示密钥的两半,不过此时需要引入更多的密钥长度$N_1$, $N_2$, $N_3$, $N_4$,并且resize函数满足以下等式：
 In modeling the attacker, it is essential to incorporate the \text{QA} model. Analogous to the BLE model, the functions \Tterm{l} and \Tterm{r} are employed to represent the two halves of the key. In this scenario, additional key lengths $N_1$, $N_2$, $N_3$, and $N_4$ are introduced. The resize function is defined to satisfy the following equations:
 \begin{flalign*}
-    \text{\Tterm{resize(k, $N_1$)}} & \text{ = \Tterm{l(l(k))}}                           & \\
-    \text{\Tterm{resize(k, $N_2$)}} & \text{ = \TPairN{l(l(k)),r(l(k))}}          \\
-    \text{\Tterm{resize(k, $N_3$)}} & \text{ = \TPairN{l(l(k)),r(l(k)),l(r(k))}}          \\
-    \text{\Tterm{resize(k, $N_4$)}} & \text{ = \TPairN{l(l(k)),r(l(k)),l(r(k)),r(r(k))}}         
+    \text{\Tterm{resize(k, $N_1$)}} &= \text{\Tterm{l(l(k))}}                           & \\
+    \text{\Tterm{resize(k, $N_2$)}} &= \text{\TPairN{l(l(k)),r(l(k))}}          \\
+    \text{\Tterm{resize(k, $N_3$)}} &= \text{\TPairN{l(l(k)),r(l(k)),l(r(k))}}          \\
+    \text{\Tterm{resize(k, $N_4$)}} &= \langle \text{\Tterm{l(l(k)),r(l(k)),} }    \\
+                                    &\hspace{6.5em} \text{\Tterm{l(r(k)),r(r(k))}}\rangle
+    % \text{\Tterm{resize(k, $N_4$)}} & \text{ = \TPairN{l(l(k)),r(l(k)),l(r(k)),r(r(k))}}         
 \end{flalign*}
+
 % 这种建模方法，将密钥等分为$2^n$个部分，直至最短的密钥部分可以被攻击者破解。在QA攻击者模型中,我们将密钥分为四个部分,每个部分都是QA攻击者可以破解的. 在模型的规则中将其标注为低熵密钥。
 This modeling strategy involves partitioning the key into $2^n$ segments, continuing until the shortest segment is susceptible to compromise by an attacker. Within the QA attacker model, the key is divided into four segments, with each segment being vulnerable to be compromised by the QA attacker. In the rules of the model, these segments are categorized as low-entropy keys. 
 \begin{flalign*}

@@ -2,12 +2,7 @@
 
 \begin{document}
 
-\begin{figure*}[htb]
-    \centering
-    \includegraphics[width=\textwidth]{img/tamarin_syntax} 
-    \caption{tamarin syntax}
-    \label{fig:tamarin-syntax}
-\end{figure*}
+
 
 \section{Automation and Universality}
 
@@ -20,25 +15,49 @@ To facilitate automated model verification, our Tamarin-Compilation-Tool support
 
 \subsection{ Extended Tamarin Prover Model Language}
 
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\columnwidth]{img/tamarin_syntax} 
+    \caption{Tamarin Rule Syntax}
+    \label{fig:tamarin-syntax}
+\end{figure}
+
 % Tamarin 模型通常被定义在spthy文件中（.spthy 代表 security protocol theory）。图一展示了security protocol theory的语法的核心子集，我们的工具专门设计用于解析和分析其中的rule部分。 Tamarin 使用多多重集重写规则来规定协议的执行和敌手的行为。
 The models Tamarin supported are typically defined within spthy files (spthy, representing security protocol theory). \autoref{fig:tamarin-syntax} presents the core subset of the security protocol theory syntax. Our tool is specifically designed to parse and analyze the rule section of these models. Tamarin utilizes multiset rewriting rules to define both protocol execution and adversarial behavior.
 
-\begin{figure}[hbtp]
-    \centering
-    \includegraphics[width=\columnwidth]{img/rule} 
-    \caption{Rule Demo}
-    \label{fig:rule-demo}
-\end{figure}
+% \begin{figure}[hbtp]
+%     \centering
+%     \includegraphics[width=\columnwidth]{img/rule} 
+%     \caption{Rule Demo}
+%     \label{fig:rule-demo}
+% \end{figure}
+
+\begin{flalign*}
+    \text{\Tterm{Se}}   & \text{\Tterm{ndHello}} :                                      & \\
+                        & \text{\Tterm{let}}                                            \\  
+                        & \hspace{2em} \text{\Tterm{ciphertext = senc("hello", key)}}   \\  
+                        & \text{\Tterm{in}}                                             \\  
+                        & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFactSL{} \TFacts{ \text{\TFactTerm{Out}{ciphertext}} }
+\end{flalign*}
 
 % 以图二中的rule demo为例，一条Tamarin的多重集重写规则，由declarations of Left-hand side(line 5)、action facts(line 6) 被用于标记这个规则背后代表的state transition，以及一个Right-hand side(line 7)。其中，Tamarin支持使用一个局部的宏定义区域，$let ... in$(line 2 - 4)，在这个区域内，每一行定义了一个substitution。Tamarin 会在运行时，使用等号右侧的arbitrary term，替换这条规则中，等号左侧的variable。
 For instance, consider the rule demo in \autoref{fig:rule-demo}. A Tamarin multiset rewriting rule comprises declarations of the rule's left-hand side (line 5), action facts (line 6) that label the state transition represented by the rule, and the right-hand side (line 7) of the rule. Tamarin also supports local macro definitions in a rule which are defined within the $let...in$ area(lines 2 - 4) called as the let-block, where each line specifies a substitution. During execution, Tamarin substitutes variables on the left side of the equation with arbitrary terms from the right side.
 
-\begin{figure}[hbtp]
-    \centering
-    \includegraphics[width=\columnwidth]{img/rule_plus} 
-    \caption{Rule Plus Demo}
-    \label{fig:rule-plus-demo}
-\end{figure}
+% \begin{figure}[hbtp]
+%     \centering
+%     \includegraphics[width=\columnwidth]{img/rule_plus} 
+%     \caption{Rule Plus Demo}
+%     \label{fig:rule-plus-demo}
+% \end{figure}
+
+\begin{flalign*}
+    \text{\Tterm{Se}}   & \text{\Tterm{ndHello}} :                                      & \\
+                        & \text{\Tterm{let}}                                            \\  
+                        & \hspace{2em} \text{\Tterm{key := `L`}}                        \\  
+                        & \hspace{2em} \text{\Tterm{ciphertext = senc("hello", key)}}   \\  
+                        & \text{\Tterm{in}}                                             \\  
+                        & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFactSL{} \TFacts{ \text{ \TFactTerm{Out}{ciphertext}} }
+\end{flalign*}
 
 % 为了支持我们的方法，我们引入了新操作符``:=''和新关键字``\verb|`L`|''，这些新的语法元素可以更简单地帮助我们标记低熵变量。新的语法下的rule如图三所示，密钥的低熵标记(Line 3)同样被定义在let block内，不同的是``=''被运算符``:=''代替了，``=''右侧的标识``\verb|`L`|''表明左侧的变量``foo''拥有低熵。这个标记会被编译工具转译为右侧的fact，如下所示：
 To facilitate our methodology, we introduced a new operator ``:='' and a keyword ``\verb|`L`|''. These syntax elements streamline the marking of low-entropy variables. In the revised syntax, as depicted in \autoref{fig:rule-plus-demo}, the low-entropy annotation for the variable (line 3) is defined within the let block. Here, the operator ``:='' replaces ``='', and the label ``\verb|`L`|'' on the right signifies that the variable ``foo'' on the left possesses a low entropy. This annotation is subsequently translated by the compilation tool into the fact $\text{\TFact{EntropyLow}}(foo)$ on the right-hand side of the rule.
