@@ -20,8 +20,8 @@
 \begin{document}
 \begin{tikzpicture}
 
-\node[AGENT] (n_initiator) {Initiator};
-\node[AGENT, right=0.25\textwidth of n_initiator] (n_responder) {Responder};
+\node[AGENT] (n_initiator) {Central};
+\node[AGENT, right=0.25\textwidth of n_initiator] (n_responder) {Peripheral};
 
 \coordinate (end_initiator) at ($(n_initiator.south)+(0,-83ex)$);
 \draw[semithick] (n_initiator.south) -- (end_initiator);
@@ -36,42 +36,42 @@
 
 \coordinate (c_init_pair_req) at ($(n_prep.south-|n_initiator)+(0,-3.2ex)$);
 \coordinate (c_res_pair_req) at ($(c_init_pair_req-|n_responder)$);
-\draw[ARROW] (c_init_pair_req) -- (c_res_pair_req) node[midway,above=-0.3ex]{$\text{FeatureSC}_\text{I}$};
+\draw[ARROW] (c_init_pair_req) -- (c_res_pair_req) node[midway,above=-0.3ex]{$\text{FeatureSC}_\text{C}$};
 
 \coordinate (c_res_pair_rsp) at ($(c_res_pair_req)+(0,-3.2ex)$);
 \coordinate (c_init_pair_rsp) at ($(c_res_pair_rsp-|n_initiator)$);
-\draw[ARROW] (c_res_pair_rsp) -- (c_init_pair_rsp) node[midway,above=-0.3ex]{$\text{FeatureSC}_\text{R}$};
+\draw[ARROW] (c_res_pair_rsp) -- (c_init_pair_rsp) node[midway,above=-0.3ex]{$\text{FeatureSC}_\text{P}$};
 \node[PREPARATION, minimum width=24em] (n_user) at ($(c_res_pair_rsp-|c_middle)+(0,-1ex)$) {
     Establish Link Connection
 };
 
 \coordinate (c_init_au1) at ($(n_user.south-|n_initiator)+(0,-5ex)$);
 \coordinate (c_res_au1) at ($(c_init_au1-|n_responder)$);
-\draw[ARROW] (c_init_au1) -- (c_res_au1) node[midway,above=-0.3ex]{$\text{AuRand}_\text{I}$};
+\draw[ARROW] (c_init_au1) -- (c_res_au1) node[midway,above=-0.3ex]{$\text{AuRand}_\text{C}$};
 
 \coordinate (c_res_au2) at ($(c_res_au1)+(0,-3.2ex)$);
 \coordinate (c_init_au2) at ($(c_res_au2-|n_initiator)$);
-\draw[ARROW] (c_res_au2) -- (c_init_au2) node[midway,above=-0.3ex]{$\text{AuRand}_\text{R}$};
+\draw[ARROW] (c_res_au2) -- (c_init_au2) node[midway,above=-0.3ex]{$\text{AuRand}_\text{P}$};
 
-\node[ACTION] (n_res_au) at ($(c_res_au2)+(0,-1ex)$) {Calculate\\ACO, $\text{SERS}_\text{R}$};
+\node[ACTION] (n_res_au) at ($(c_res_au2)+(0,-1ex)$) {Calculate\\ACO, $\text{SERS}_\text{P}$};
 
-\node[ACTION] (n_init_ver) at ($(c_init_au2)+(0,-1ex)$) {Calculate \\ACO, $\text{SERS}_\text{I}$};
-% Verify $\text{SERS}_\text{R}$\\
+\node[ACTION] (n_init_ver) at ($(c_init_au2)+(0,-1ex)$) {Calculate \\ACO, $\text{SERS}_\text{C}$};
+% Verify $\text{SERS}_\text{P}$\\
 \coordinate (c_res_ser) at ($(n_init_ver.south-|n_responder)+(0,-1ex)$);
 \coordinate (c_init_ser) at ($(c_res_ser-|n_initiator)$);
-\draw[ARROW] (c_res_ser) -- (c_init_ser) node[midway,above=-0.3ex]{$\text{SERS}_\text{R}$};
+\draw[ARROW] (c_res_ser) -- (c_init_ser) node[midway,above=-0.3ex]{$\text{SERS}_\text{P}$};
 
-\node[ACTION] (n_res_ver) at ($(c_init_ser)+(0,-1ex)$) {Verify $\text{SERS}_\text{R}$};
+\node[ACTION] (n_res_ver) at ($(c_init_ser)+(0,-1ex)$) {Verify $\text{SERS}_\text{P}$};
 
 \coordinate (c_init_sei) at ($(n_res_ver.south)+(0,-1ex)$);
 \coordinate (c_res_sei) at ($(c_init_sei-|n_responder)$);
-\draw[ARROW] (c_init_sei) -- (c_res_sei) node[midway,above=-0.3ex]{$\text{SERS}_\text{I}$};
+\draw[ARROW] (c_init_sei) -- (c_res_sei) node[midway,above=-0.3ex]{$\text{SERS}_\text{C}$};
 
 % \coordinate (c_init_se1) at ($(n_init_au.south)+(0,-1ex)$);
 % \coordinate (c_res_se1) at ($(c_init_se1-|n_responder)$);
-% \draw[ARROW] (c_init_se1) -- (c_res_se1) node[midway,above=-0.3ex]{$\text{SERS}_\text{I}$};
+% \draw[ARROW] (c_init_se1) -- (c_res_se1) node[midway,above=-0.3ex]{$\text{SERS}_\text{C}$};
 
-\node[ACTION] (n_res_se) at ($(c_res_sei)+(0,-1ex)$) {Verify $\text{SERS}_\text{I}$};
+\node[ACTION] (n_res_se) at ($(c_res_sei)+(0,-1ex)$) {Verify $\text{SERS}_\text{C}$};
 
 \coordinate (c_sc_south_east) at ($(n_res_se.south east)+(0.5em, -1ex)$);
 \coordinate (c_sc_north_west) at ($(c_init_au1)+(-4.4em, 3ex)$);

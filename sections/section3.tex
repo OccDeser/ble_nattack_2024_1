@@ -14,50 +14,8 @@
 In the previous section, we reviewed advanced verification tools and introduced the verification tool Tamarin prover used in this article in detail.
 In this section, we will use Tamarin prover to model low entropy keys in the protocol and generalized brute force cracking behavior.
 
-\subsection{Entropy and Brute Force Attack}
-
-% 熵是信息论中的一个重要概念，由香农在1948年提出，用于衡量系统的随机性和不确定性。在密码学中，密钥的熵是衡量密钥强度的重要指标，一个在密钥空间均匀分布的密钥的熵通常可以用以下的公式表示：
-% H = log_2(N)
-% 其中N是密钥空间的大小。该公式说明了，均匀分布的密钥的熵就是该密钥的比特数。那么对于想要通过穷尽搜索的方式找到密钥的攻击者来说，他需要尝试的密钥的数量就是2^H，其中H是密钥的熵。因此，密钥的熵越高，攻击者找到密钥的难度就越大。
 
 
-Entropy is a fundamental concept in information theory, introduced by Shannon in 1948 {cite}, to quantify the randomness and uncertainty within a system.
-In the domain of cryptography, the entropy of a key serves as a crucial metric for assessing its strength.
- Formally, consider a uniformly distributed key $K$ within a key space of size $N$.
-The entropy of such a key can be represented by \autoref{eq:entropy_definition}.
-\begin{equation} 
-    H(K) = \log_2(N) \label{eq:entropy_definition}
-\end{equation}
-where $H(K)$ denotes the entropy of the key $K$.
-This equation illustrates that the entropy of a uniformly distributed key is equivalent to its bit length.
-For an adversary employing exhaustive search techniques to locate the key, the number of keys that must be tested is $2^{H(K)}$.
-Therefore, an increase in the key's entropy directly correlates with a higher level of difficulty for an attacker attempting to restore the key.
-
-% 这种遍历密钥空间的方法，不断地尝试密钥，直到找到正确的密钥，就是暴力破解攻击。通过是否需要与目标系统进行实时交互可以分为在线攻击与离线攻击。在线的攻击，攻击者需要不断地将尝试的密钥发送给目标系统以判断密钥是否正确。离线攻击，通常是通过获取目标系统的密文，攻击者可以在不与目标系统交互的情况下，尝试所有的密钥通过解密密文的方式来鉴别密钥。通常来说在线的暴力破解攻击主要受限于网络速度和目标系统的响应时间，而离线的攻击主要受限于攻击者的计算速度。离线暴力破解攻击的运行效率完全掌握在攻击者手中，密钥因此需要具有足够的熵来抵御这种攻击。因此本文主要研究的就是离线的暴力破解攻击，后文提到的暴力破解攻击如果没有特别制定，均指离线的暴力破解攻击。
-
-The method of exhaustively searching the key space by continually attempting different keys until the correct one is identified is termed a brute-force attack.
-Brute-force attacks can be classified into online and offline categories based on the necessity for real-time interaction with the target system.
-In an online attack, the adversary must persistently transmit the attempted keys to the target system to verify their correctness.
-Conversely, in an offline attack, the adversary typically acquires the ciphertext from the target system and can attempt all possible keys by decrypting the ciphertext, thereby obviating the need for interaction with the target system.
-
-% \begin{figure}[htbp]
-%     \centering
-%     \includegraphics[width=\columnwidth]{img/online-brute-force} 
-%     \caption{online-brute-force}
-%     \label{fig:online-brute-force}
-% \end{figure}
-
-Typically, the efficacy of online brute-force attacks is constrained by network latency and the response time of the target system.
-In contrast, offline attacks are predominantly limited by the computational power available to the attacker.
-The operational efficiency of offline brute-force attacks is entirely governed by the attacker's capabilities; therefore, the cryptographic key must possess adequate entropy to resist such attacks effectively Consequently, this paper primarily focuses on the investigation of offline brute-force attacks.
-Throughout the subsequent sections, any reference to brute-force attacks, unless explicitly stated otherwise, pertains to offline brute-force attacks.
-
-% \begin{figure}[htbp]
-%     \centering
-%     \includegraphics[width=\columnwidth]{img/offline-brute-force} 
-%     \caption{offline-brute-force}
-%     \label{fig:offline-brute-force}
-% \end{figure}
 
 
 \subsection{Key Breaking Oracles}

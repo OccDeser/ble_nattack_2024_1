@@ -25,7 +25,7 @@ The discovery process heavily depends on the expertise of the researchers and is
 Using formal methods to analyze protocols has become one of mainstream research approaches and numerous works have formally modeled the protocols they studied to verify whether these protocols satisfy certain security properties.
 Among them, many works attempt to demonstrate the correctness of their formal models by showing that their models can detect the existence of the aforementioned attacks.
 However, these works are based on the  premise of the known attacks, and actively model vulnerabilities in the protocol's weak key mechanisms.
-For instance, \cite{shi2023formal, claverie2023tamarin} incorporate an explicit ``oracle'' rule in their formal models to grant attackers the ability to know certain keys.
+For instance, \cite{shi2023blesc, claverie2023tamarin} incorporate an explicit ``oracle'' rule in their formal models to grant attackers the ability to know certain keys.
 However, this is not a universal or automated method.
 Such approaches directly inform attackers of the keys' value that can be compromised, while the analysis of which keys are vulnerable and able to be cracked still needs to be performed manually.
 This tells us a truth: there is currently no formal research work that fully considers the attacker's ability to crack weak keys, and it is impossible to comprehensively analyze the impact of weak cryptographic mechanisms on the overall protocol.
@@ -61,5 +61,22 @@ Moreover, we need to consider usability as much as possible, providing low-entro
     \item We find a brand new attack against Bluetooth Classic and Bluetooth low energy.
 \end{itemize}
 
+
+% In the realm of cryptographic protocols, ensuring security against various attack vectors is paramount. Traditional symbolic analysis tools often assume ideal conditions where cryptographic primitives are unbreakable and keys are of high entropy. However, in real-world scenarios, low-entropy keys, such as user-chosen passwords, are common and pose significant security risks due to their susceptibility to brute-force attacks. The challenge lies in effectively modeling and analyzing these low-entropy keys within cryptographic protocols to uncover potential vulnerabilities.
+
+% Existing symbolic modeling approaches lack mechanisms to represent the entropy of keys and the adversary's ability to perform brute-force attacks. This gap leads to incomplete security analyses, overlooking vulnerabilities that arise from low-entropy keys. Addressing this problem is crucial for accurately assessing the security of protocols and for designing systems resilient to such attacks.
+
+% Several studies have attempted to incorporate low-entropy key analysis into symbolic models. However, these efforts are often protocol-specific and do not provide a generalized or automated solution. They typically require manual adjustments to identify which low-entropy keys can be compromised, limiting their applicability across different protocols.
+
+% This paper aims to bridge this gap by introducing a generalized and automated method for modeling low-entropy keys and the adversary's brute-force capabilities within symbolic analysis frameworks. We focus on enhancing the Tamarin Prover, a tool widely used for security protocol verification, to support the modeling of low-entropy keys and to simulate generalized brute-force attacks by adversaries.
+
+% Our methodology involves extending the Tamarin Prover's syntax with new keywords to explicitly mark low-entropy keys within protocols. We develop a compilation tool that translates the extended syntax into formal models recognizable by the Tamarin Prover. This tool automatically generates necessary facts and rules, including key-breaking oracles that simulate an adversary's ability to compromise low-entropy keys when certain conditions are met.
+
+% The contributions of our work are threefold:
+% 1. Generalized Modeling Approach: We propose a unified method to model low-entropy keys and brute-force attacks in symbolic analysis, enabling automated identification of vulnerable keys within protocols.
+% 2. Extension of Tamarin Prover: We enhance the Tamarin Prover's modeling language by introducing new syntax and develop a compilation tool to facilitate the translation of extended models, improving usability and automation.
+% 3. Practical Application and Discovery: Applying our method to real-world protocols such as WPA2-PSK and BLE pairing, we demonstrate its effectiveness by uncovering known and previously undetected vulnerabilities, including the PMKID attack in WPA2-PSK.
+
+% The remainder of this paper is structured as follows: Section 2 reviews related work and highlights existing gaps in symbolic modeling of low-entropy keys. Section 3 introduces our symbolic modeling approach for entropy-based security, detailing the key-breaking oracles. Section 4 discusses the automation and universality of our method, including the extended syntax and compilation tool. Section 5 presents case studies where we apply our method to analyze real-world protocols. Finally, Section 6 concludes the paper and suggests directions for future research.
 
 \end{document}

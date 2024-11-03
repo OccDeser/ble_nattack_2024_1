@@ -21,9 +21,9 @@
 \begin{document}
 \begin{tikzpicture}
 
-\node[AGENT] (n_initiator) {Initiator};
+\node[AGENT] (n_initiator) {Central};
 \node[AGENT, right=0.08\textwidth of n_initiator] (n_attacker) {\textcolor{xhs_red}{Attacker}};
-\node[AGENT, right=0.08\textwidth of n_attacker] (n_responder) {Responder};
+\node[AGENT, right=0.08\textwidth of n_attacker] (n_responder) {Peripheral};
 
 \coordinate (end_initiator) at ($(n_initiator.south)+(0,-78.5ex)$);
 \draw[semithick] (n_initiator.south) -- (end_initiator);
@@ -39,19 +39,19 @@
 
 \coordinate (c_init_sc) at ($(n_initiator.south)+(0,-3.2ex)$);
 \coordinate (c_atta_sc) at ($(c_init_sc-|n_attacker)$);
-\draw[ARROW] (c_init_sc) -- (c_atta_sc) node[midway,above=-0.3ex]{$\text{SC}_\text{I}$: True};
+\draw[ARROW] (c_init_sc) -- (c_atta_sc) node[midway,above=-0.3ex]{$\text{SC}_\text{C}$: True};
 
 \coordinate (c_atta_sc) at ($(c_atta_sc)+(0,-1ex)$);
 \coordinate (c_res_sc) at ($(c_atta_sc-|n_responder)$);
-\draw[ARROW] (c_atta_sc) -- (c_res_sc) node[midway,above=-0.3ex]{$\text{SC}_\text{I}$: \textcolor{xhs_red}{False}};
+\draw[ARROW] (c_atta_sc) -- (c_res_sc) node[midway,above=-0.3ex]{$\text{SC}_\text{C}$: \textcolor{xhs_red}{False}};
 
 \coordinate (c_res_sc) at ($(c_res_sc)+(0,-3.2ex)$);
 \coordinate (c_atta_sc) at ($(c_res_sc-|n_attacker)$);
-\draw[ARROW] (c_res_sc) -- (c_atta_sc) node[midway,above=-0.3ex]{$\text{SC}_\text{R}$: True};
+\draw[ARROW] (c_res_sc) -- (c_atta_sc) node[midway,above=-0.3ex]{$\text{SC}_\text{P}$: True};
 
 \coordinate (c_atta_sc) at ($(c_atta_sc)+(0,-1ex)$);
 \coordinate (c_init_sc) at ($(c_atta_sc-|n_initiator)$);
-\draw[ARROW] (c_atta_sc) -- (c_init_sc) node[midway,above=-0.3ex]{$\text{SC}_\text{R}$: \textcolor{xhs_red}{False}};
+\draw[ARROW] (c_atta_sc) -- (c_init_sc) node[midway,above=-0.3ex]{$\text{SC}_\text{P}$: \textcolor{xhs_red}{False}};
 
 \node[PREPARATION, minimum width=26em] (n_auth) at ($(c_atta_sc)+(0,-1ex)$) {
     Legacy Authentication

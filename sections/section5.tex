@@ -9,71 +9,34 @@ In the previous sections, we discuss our modeling approach and translation solut
 To explain the overall methodology we use to analyze the impact of low-entropy keys on protocol security, in this section, we will conduct a comprehensive analysis of several real-world protocols with low-entropy keys.
 The source code of our implementation can be found in our repository {cite}.
 
-\subsection{Case 1: The 4-way Handshake of WPA2-PSK}
-% WPA与WPA2源于IEEE 802.11i标准，其中WPA作为过渡性解决方案，旨在修复WEP（Wired Equivalent Privacy）的安全漏洞，而WPA2则完整实现了IEEE 802.11i标准，提供更为完善的安全机制。WPA2-PSK（预共享密钥）是WPA2的一种简化模式，利用预共享密钥代替复杂的企业级认证过程，适用于不需要RADIUS服务器的小型网络。WPA2-PSK广泛应用于家庭、咖啡馆和中小型办公场所，因其配置简便且能够提供较高的安全性。
-Wi-Fi Protected Access (WPA) and WPA2 are both derived from the IEEE 802.11i standard {cite}, with WPA serving as an interim solution to address security vulnerabilities in Wired Equivalent Privacy (WEP), while WPA2 fully implements the 802.11i standard to provide more robust security mechanisms.
-WPA2-PSK (Pre-Shared Key) is a simplified version of WPA2, using a pre-shared key instead of a complex enterprise-level authentication process, making it suitable for small networks without a RADIUS server.
-WPA2-PSK is widely deployed in home environments, cafes, and small to medium-sized offices due to its ease of configuration and strong security.
 
-% WPA2的4-way Handshake是一种用于在无线网络中安全地生成和交换加密密钥的协议过程，确保客户端与接入点之间的通信安全。与企业级WPA2认证机制依赖于802.1X和RADIUS服务器进行动态密钥分配的方式有所不同，在WPA2-PSK（Pre-Shared Key）模式下，4-way Handshake利用预共享密钥进行身份验证，
-The 4-way handshake of is protocol designed to securely generate and exchange encryption keys within wireless networks, thereby ensuring secure communication between clients and access points.
-In contrast to WPA2-Enterprise, which utilizes 802.1X and RADIUS servers for dynamic key distribution, the WPA2-PSK (Pre-Shared Key) employs a pre-shared key for the purpose of authentication.
+The Bluetooth Low Energy (BLE) Key Negotiation Downgrade Attack, also known as the BC (Bluetooth Classic) BLE Key Negotiation Downgrade Attack, exposes another facet of how modern attackers can manipulate cryptographic protocols.
+This attack exploits a vulnerability in the BLE pairing process where an attacker can force the devices to negotiate a lower level of security, specifically by downgrading the key strength used for encryption.
 
-\begin{figure}[hbtp]
-    \centering
-    \includegraphics[width=0.85\columnwidth]{img/4-way-handshake} 
-    \caption{4-way-handshake}
-    \label{fig:4-way-handshake}
-\end{figure}
+By intercepting and modifying the key negotiation process, attackers can downgrade the encryption from a stronger key to a weaker one, which is easier to brute-force.
+Once the weaker key is in place, the attacker can use brute-force methods to break the encryption, gaining access to the communication channel.
+This attack is particularly concerning for IoT devices, which often use BLE for communication and may not have the computational power to implement stronger cryptographic measures.
 
-% \autoref{fig:4-way-handshake} 展示了用户设备（supplicant）与access point（authenticator）之间通过4-way handshake从PMK协商出PTK与GTK的全部过程。
-% WPA2-PSK 使用PBKDF2密钥派生函数，从Passphrase和Service Set Identification (SSID)生成PSK，PBKDF2的定义如下：
-% \[
-%    PSK = PBKDF2(Passphrase, SSID, 4096, 256)
-% \]
-% Passphrase 是由用户定义的秘密短语，由8到63个字符组成，SSID是网络的名称，通常是公开的，因此PSK的安全性将取决于Passphrase的强度。在WPA2-PSK中，Pairwise Master Key (PMK)与PSK是一致的。基于PMK，authenticator与supplicant直接执行4-way握手。首先，authenticator发送一个随机数ANonce给supplicant，supplicant收到后，生成自己的随机数SNonce，并计算出PTK。PTK的计算过程如下：
-% \[
-%     PTK = PRF(PMK, "Pairwise key expansion", ANonce || SNonce || MAC_authenticator || MAC_supplicant)
-% \]
-% 其中，PRF是伪随机函数，MAC_authenticator和MAC_supplicant分别是authenticator和supplicant的MAC地址，$\{\}_{min\_max}$ 代表了变量以由小到大的顺序拼接 。PTK被用于确保通信的隐私性和完整性。 接下来，authenticator发送GTK给supplicant，用于组播通信的加密密钥。最后，supplicant发送EAPOL消息4给authenticator，用于验证握手的完整性。当authenticator收到EAPOL消息4后，握手完成，supplicant与authenticator之间的通信将使用PTK和GTK进行加密。值得注意的是，根据802.1x 标准，4-way handshake由四条EAPOLkey类型的消息组成，其中，第一条EAPOLkey消息会包含一个额外的字段PMKID，它的计算方式如下：
-% \[
-%     PMKID = HMAC-SHA1-128(PSK, "PMK Name" || MAC_authenticator || MAC_supplicant)
-% \]
-% PMKID允许设备在重新连接时迅速完成身份验证。然而，由于PMK（PSK）的强度直接受用户选择的Passphrase决定，如果用户选择了弱Passphrase，攻击者可以通过暴力破解PMKID来获取PSK，从而破坏通信的安全性，这种攻击方式被称为PMKID攻击{cite}。
-\autoref{fig:4-way-handshake} illustrates the complete process of negotiating the Pairwise Transient Key (PTK) and Group Temporal Key (GTK) from the Pairwise Master Key (PMK) between the user device (supplicant) and access point (authenticator) via the 4-way handshake.
+The BLE Key Negotiation Downgrade Attack highlights the broader issue of how at`tackers can exploit key management flaws to weaken the security of cryptographic protocols, making them vulnerable to brute-force attacks.
+It also underscores the importance of ensuring that protocols are resilient not just against brute-force attacks on high-entropy keys, but also against downgrade attacks that reduce key entropy.
 
-WPA2-PSK uses the key derivation function PBKDF2 to generate the Pre-Shared Key (PSK) from the Passphrase and Service Set Identification (SSID), defined as follows:
-\begin{equation}
-    \text{PSK} = PBKDF2(\text{Passphrase}, \text{SSID}, 4096, 256)
-\end{equation}
-Passphrase is a user-defined secret phrase consisting of 8 to 63 characters, while the SSID represents the network name, which is typically public.
-Therefore, the security of PSK depends on the strength of passphrase.
-In WPA2-PSK, the Pairwise Master Key (PMK) is equivalent to PSK.
-Based on the PMK, the authenticator and supplicant perform the 4-way handshake.
-First, the authenticator sends a random number ANonce to the supplicant.
-Upon receiving it, the supplicant generates its own random number SNonce and calculates the PTK.
-The calculation of PTK is as follows:
-\begin{equation}
-    \begin{split}
-        \text{PTK} = PRF(\text{PMK}&,\text{``Pairwise key expansion''}, \\
-        &\left\{\text{MAC}_\text{AU}, \text{MAC}_\text{SUP}\right\}_{min,max} || \\
-        &\left\{\text{ANonce}, \text{SNonce}\right\}_{min,max} )
-    \end{split} 
-\end{equation}
-Here, $PRF$ represents a pseudo-random function, $\text{MAC}_\text{AU}$ and $\text{MAC}_\text{SUP}$ denote the MAC addresses of the authenticator and supplicant, respectively, and $\{\}_{min,max}$  denotes two variables that are concatenated in ascending order.
-The PTK is then used to ensure the secrecy and integrity of the communication between the supplicant and authenticator.
+\subsection{Case 1: The 4-way Handshake of WPA2-PSK} \label{sec:wpa2-psk}
 
-Subsequently, the authenticator transmits the GTK to the supplicant for use as an encryption key in multicast communications.
-Finally, the supplicant dispatches EAPOL message 4 to the authenticator to confirm the handshake's integrity.
-Upon receipt of EAPOL message 4 by the authenticator, the handshake is finalized, and communication between the supplicant and authenticator is encrypted using both the PTK and GTK.
-It is important to note that, according to the 802.1x standard, the 4-way handshake is composed of four EAPOL-key type messages, with the first EAPOL-key message incorporating an additional variable, PMKID, calculated as follows:
-\begin{equation}
-    \begin{split}
-        \text{PMKID} = \text{HM}&\text{AC-SHA1-128}(\text{PMK}, \\
-            &\text{``PMK Name''} || \text{MAC}_\text{AU} || \text{MAC}_\text{SUP})
-    \end{split} 
-\end{equation}
-Here, the PMKID assists devices in rapidly completing authentication upon reconnection.
+
+\subsection{WPA2 PMKID Attack} 
+The WPA2 PMKID Attack, discovered in 2018, is a prime example of how attackers can exploit protocol vulnerabilities to facilitate brute-force attacks.
+The attack targets the WPA2 handshake process, specifically the PMKID (Pairwise Master Key Identifier) that is transmitted during the initial connection between a client and an access point.
+Traditionally, capturing a full four-way handshake was required to launch a brute-force attack on the WPA2 Pre-Shared Key (PSK).
+However, the PMKID Attack simplifies this process by allowing attackers to capture the PMKID and then brute-force the PSK offline without needing the full handshake.
+
+This attack is particularly dangerous because it exploits a design flaw in the WPA2 protocol, not just an implementation error.
+The availability of tools like Hashcat, which can efficiently perform such brute-force attacks using GPUs, has further lowered the barrier for attackers to successfully compromise Wi-Fi networks.
+The PMKID Attack demonstrates how even protocols considered secure can be vulnerable when attackers leverage their brute-force capabilities.
+This attack is particularly dangerous because it exploits a design flaw in the WPA2 protocol, not just an implementation error.
+The availability of tools like Hashcat, which can efficiently perform such brute-force attacks using GPUs, has further lowered the barrier for attackers to successfully compromise Wi-Fi networks.
+The PMKID Attack demonstrates how even protocols considered secure can be vulnerable when attackers leverage their brute-force capabilities.
+
+
 
 \textbf{PMKID attack:} 
 since the strength of the PMK (PSK) is directly influenced by the user's chosen passphrase, a weak passphrase can enable attackers to brute force the PMKID, thereby obtaining the PMK and compromising communication security, shown in \autoref{fig:pmkid-attack}.
@@ -81,7 +44,7 @@ This attack is known as the ~PMKID attack {cite}.
 
 \begin{figure}[hbtp]
     \centering
-    \includegraphics[width=\columnwidth]{img/pmkid_attack} 
+    \includegraphics[width=0.925495\columnwidth]{img/pmkid-attack} 
     \caption{PMKID Attack}
     \label{fig:pmkid-attack}
 \end{figure}
@@ -123,33 +86,6 @@ The formal definition of the secrecy of the PTK is as follows:
 This formula indicates that it is impossible for the attacker to know a PTK while the supplicant has installed it.
 
 \subsection{Case 2: The Paring Protocol of BLE}
-% 蓝牙技术广泛应用于短距离无线通信，主要用于实现设备间的便捷数据交换与连接。蓝牙包含两种主要技术：Bluetooth Classic 适用于高带宽的应用场景，如音频流传输；而Bluetooth Low Energy（BLE）则专为低功耗应用设计，适合传感器、物联网设备等场景。蓝牙通过配对机制为设备间建立安全的通信机制，确保数据传输的保密性和完整性。
-Bluetooth technology is extensively utilized for short-range wireless communication, primarily enabling efficient data exchange and connectivity between devices.
-It comprises two principal technologies: Bluetooth Classic(BC), which is appropriate for high-bandwidth applications, such as audio streaming, and Bluetooth Low Energy (BLE), which is specifically engineered for low-power applications, making it particularly suitable for sensors and Internet of Things (IoT) devices.
-Bluetooth utilizes a pairing mechanism to establish a secure communication framework between devices, thereby ensuring the confidentiality and integrity of data transmission.
-
-\begin{figure}[hbtp]
-    \centering
-    \includegraphics[width=0.85\columnwidth]{img/BLE_pairing} 
-    \caption{BLE pairing}
-    \label{fig:ble-pairing}
-\end{figure}
-
-% 进行配对的两个低功耗蓝牙设备分别称为Initiator和Responder，\autoref{ble-pairing}展示了BLE secure connection配对过程的三个阶段。在第一阶段，Initiator和Responder相互交换配对feature，包括BLE设备的IO能力和LTK密钥的长度等信息。BLE设备的IO能力包括NoInputNoOutput、DisplayOnly、DisplayYesNo、KeyboardOnly、KeyboardDisplay
-% 在第二阶段，Initiator和Responder根据第一阶段交换的feature选择合适的配对方案，包括Just Works、Passkey Entry、Out of Band等。在这一阶段结束，Initiator和Responder协商出长期密钥LTK。
-% 在第三阶段，Initiator和Responder使用LTK生成会话密钥SK，然后双方在受SK保护的信道熵分发transport specific keys, for example the Identity Resolving Key (IRK) value and Identity Address information.
-The pairing process between two Bluetooth Low Energy (BLE) devices, designated as the Initiator and the Responder, involves three distinct phases, as depicted in \autoref{fig:ble-pairing}.
-Initially, the devices exchange pairing features, which include the IO capabilities and the length of the Long Term Key (LTK).
-These IO capabilities determine the pairing scheme to be implemented in the subsequent phase.
-The IO capabilities include NoInputNoOutput, DisplayOnly, DisplayYesNo, KeyboardOnly, and KeyboardDisplay.
-
-During the second phase, an appropriate pairing scheme is selected based on the exchanged features.
-Options include Just Works, Passkey Entry, and Out of Band.
-By the conclusion of this phase, both devices successfully negotiate the Long Term Key (LTK).
-
-In the final phase, the Initiator and Responder utilize the LTK to derive a Session Key (SK).
-This SK is then employed to secure the channel over which transport-specific keys are distributed, such as the Identity Resolving Key (IRK) and Identity Address information.
-
 % Key Negotiation Of Bluetooth(KNOB)攻击在针对低功耗蓝牙时，攻击者可以通过降低LTK的长度来降低密钥被破解的难度，进而破坏通信的安全性。\autoref{fig:ble-knob}展示了KNOB攻击的过程，攻击者通过篡改双方配对feature中的LTK长度字段，使得Initiator和Responder协商出的LTK长度较短，从而降低了攻击者通过暴力破解LTK的难度。
 \textbf{KNOB attack:}  
 The Key Negotiation of Bluetooth (KNOB) attack poses a significant threat to low-power Bluetooth communications by allowing an attacker to decrease the difficulty of compromising the Long-Term Key (LTK) through the intentional reduction of its length.
@@ -158,7 +94,7 @@ As illustrated in \autoref{fig:ble-knob}, the attacker manipulates the LTK lengt
 This alteration substantially reduces the complexity of a brute-force attack on the LTK.
 \begin{figure}[hbtp]
     \centering
-    \includegraphics[width=\columnwidth]{img/BLE_KNOB} 
+    \includegraphics[width=\columnwidth]{img/ble-knob} 
     \caption{BLE KNOB}
     \label{fig:ble-knob}
 \end{figure}
@@ -261,35 +197,12 @@ Similarly, the attacker cannot know the SK while the Initiator or Responder has 
 
 
 \subsection{Case 3: The Session Establishment of BC}
-% BC 在配对的过程中，同样会协商出一个长期密钥，称之为Link Key。BC 的会话建立协议发生在配对之后，会话建立协议会使用Link Key生成会话密钥，用于保护数据传输的安全性，图1展示展示了这个过程。
-During the pairing process, BC devices also negotiate a long-term key known as the Link Key.
-The session establishment protocol for BC occurs after pairing and utilizes the Link Key to generate a session key, which secures data transmission.
-\autoref{fig:bc-session} illustrates this process.
-\begin{figure}[hbtp]
-    \centering
-    \includegraphics[width=\columnwidth]{img/bc-session} 
-    \caption{BC Session}
-    \label{fig:bc-session}
-\end{figure}
-% 参与会话建立的两个设备我们分别称之为中心设备和边缘设备。在会话建立之前，双方共享Link Key $K_L$。整个会话建立流程分为三个步骤，第一步，中心设备发起一个挑战响应过程，向边缘设备发送一个随机数$AuRand$。边缘设备收到后，使用Link Key根据$AuRand$计算出响应$SERS$和 Authenticated Channel Offset (ACO)，并并将$SERS$返回给中心设备，中心设备验证$SERS$无误后进入下一步。第二步，中心设备与边缘设备会协商会话密钥的长度。第三步，中心设备发送加密随机数$EnRand$给边缘设备，双方使用$EnRand$与ACO生成会话密钥$SK。然后边缘设备使用$SK$加密固定格式的LMP_ACCEPT消息，发送给中心设备，中心设备成功解密消息后，加密会话至此建立。
-In BC session establishment protocol , the devices involved are designated as the central device and the peripheral device.
-Prior to the initiation of the session, both entities share a Link Key, denoted as $K_L$.
-The session establishment process is delineated into three distinct phases.
 
-Initially, the central device initiates a challenge-response mechanism by transmitting a random number, $AuRand$, to the peripheral device.
-Upon receipt, the peripheral device utilizes the Link Key to compute the response $SERS$ and the Authenticated Channel Offset ($ACO$) based on $AuRand$, subsequently returning $SERS$ to the central device.
-The central device, upon verifying the correctness of $SERS$, progresses to the subsequent phase.
 
-In the following phase, the central and peripheral devices engage in negotiation regarding the length of the session key.
-
-In the final phase, the central device dispatches an encrypted random number, $EnRand$, to the peripheral device.
-Utilizing $EnRand$ in conjunction with ACO, both devices generate the session key $SK$.
-The peripheral device then encrypts a predetermined format \Tfunction{LMP\_ACCEPT} message using $SK$ and transmits it to the central device.
-The successful decryption of this message by the central device signifies the establishment of the encrypted session.
 
 \begin{figure}[hbtp]
     \centering
-    \includegraphics[width=\columnwidth]{img/bc_knob} 
+    \includegraphics[width=0.962747\columnwidth]{img/bc-knob} 
     \caption{BC KNOB}
     \label{fig:bc-knob}
 \end{figure}

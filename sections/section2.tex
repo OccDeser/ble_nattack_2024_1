@@ -2,141 +2,209 @@
 
 \begin{document}
 
-\section{Background on entropy and low-entropy attacks}
+\section{Background}
 
 % 在密码学中，熵是衡量系统随机性和不确定性的重要概念。特别是密钥的熵，指的是密钥空间的大小和复杂性，它直接关系到密码系统的安全性。高熵密钥意味着更大的密钥空间，从而增加了攻击者通过暴力破解找到密钥的难度。因此，确保密钥具有足够的熵是设计安全密码协议的关键因素之一。
 
 In cryptographic systems, entropy is a fundamental concept used to quantify the randomness and uncertainty inherent in the system.
 Specifically, entropy pertains to the size and complexity of the key space, which is directly correlated with the security of the cryptographic system.
-A key with high entropy
-demotes a larger key space, thereby augmenting the difficulty for an attacker to discover the key through brute-force methods.
-Consequently, ensuring that a key possesses sufficient entropy is a critical factor in the design of secure cryptographic protocols.
+A key with high entropy demotes a larger key space, thereby augmenting the difficulty for an attacker to recover the key through brute-force methods.
+Though ensuring that a key possesses sufficient entropy is a critical factor in the design of secure cryptographic protocols, low-entropy keys seam to be inevitable in practice. There are several reasons for this, such as performance, power consumption, compatibility, and user experience.
+
+% % 历史上，密钥熵在密码学研究中一直占据重要地位。早期的密码系统往往由于密钥熵不足而遭遇失败。例如，经典的维吉尼亚密码（Vigenère cipher）由于其密钥空间有限而易于被频率分析破解。随着密码学的发展，研究人员不断探索新的方法来增加密钥的熵和复杂性。例如，Shannon在其信息理论中提出了熵的概念，为现代密码学的发展奠定了理论基础。
+
+% Historically, entropy has consistently occupied a crucial role in cryptographic research.
+% Early cryptographic systems frequently succumbed to attacks due to insufficient entropy.
+% For instance, the classical Vigenère cipher was susceptible to frequency analysis because of its limited key space.
+% As the field of cryptography evolved, researchers have persistently sought new methods to enhance the entropy and complexity of keys.
+% Notably, Shannon's introduction of the entropy concept in his information theory provided the theoretical underpinning for the advancement of modern cryptography.
+
+% % 然而,密钥熵的事迹实现和维护并非易事。理想情况下，每个密钥应该是从一个足够大的密钥空间中均匀随机选择的，以最大化熵。然而在实践中，由于随机数生成器的质量不佳或者在密钥派生过程中的不当处理，可能导致实际密钥熵低于理论值。这种熵的不足可能会显著降低密码系统的安全性，使其更容易收到攻击。
+% However, achieving and maintaining entropy is a challenging endeavor.
+% Ideally, each key should be uniformly and m randomly selected from a sufficiently largely key space to maximize entropy.
+% Even so, when applied, the quality of random number generators or improper handling during the key derivation process can lead to actual entropy of keys falling short of the theoretical value.
+% Such deficiencies in entropy can substantially compromise the security  of the cryptographic system, rendering it more vulnerable to attacks.
+
+% % 在实际应用中，密码协议尽管会尽可能的使用高熵密钥，然而，由于一些特定的因素，如性能、功耗、用户体验等，低熵密钥的使用时不可避免的。例如，Bluetooth的配对和加密会话建立协议，为了兼容老设备和低功耗设备，通常会使用短密钥。另外，为了方便用户记忆，一些协议会由用户选择使用Passkey或者PIN Code，这类协议有代表性的是WPA / WPA2 。如果用户缺少足够的安全意识，很可能在较小的字符集上选择passkey，例如简单的数字组合，将严重影响协议的安全性
+% In practical applications, although cryptographic protocols strive to use high-entropy keys whenever possible, certain factors such as performance, power consumption and user experience make the use of low-entropy keys inevitable.
+% For instance, Bluetooth pairing and encryption session establishment protocols often employ short keys to ensure compatibility with older devices and low-power devices.
+% Furthermore, to facilitate user memorization, some protocols allow users to select passkeys or PIN codes.
+% A notable example of such protocols is WPA/WPA2.
+% If users lack adequate security awareness, they may opt for passkeys from a limited character set, such as simple numerical combinations, which can significantly undermine the security of the protocol.
+
+% % 在本章节中，我们将针对密码协议中常见的低熵密钥以及相应的攻击进行介绍。我们首先在2.1节介绍Diffie-Hellman密钥交换中的小子群约束攻击。然后在2.2节介绍WPA2 PMKID攻击。最后在2.3节介绍BC BLE密钥协商降级攻击。
+
+% In this section, we will provide an overview of common low-entropy keys in  protocols and the associated attacks.
+% We first review the small subgroup confinement attack in Diffie-Hellman key exchange in  \autoref{sec:2knob_bc}.
+% In \autoref{sec:2knob_ble}, we discuss the KNOB attack against Bluetooth Classic(BC) and Bluetooth Low Energy(BLE).
+% In \autoref{sec:2wpa}, we introduce the WPA/WPA2 PMKID attack.
+
+In this section, we provide an overview of the concepts of entropy and brute-force attacks.
+Then we discuss some wide-known protocols and the low-entropy keys involved in them.
+ we introduce the TAMARIN prover\cite{meier2013tamarin}, one of state-of-the-art symbolic tools for verifying cryptographic protocols.
 
 
-% 历史上，密钥熵在密码学研究中一直占据重要地位。早期的密码系统往往由于密钥熵不足而遭遇失败。例如，经典的维吉尼亚密码（Vigenère cipher）由于其密钥空间有限而易于被频率分析破解。随着密码学的发展，研究人员不断探索新的方法来增加密钥的熵和复杂性。例如，Shannon在其信息理论中提出了熵的概念，为现代密码学的发展奠定了理论基础。
+\subsection{Entropy and brute force attacks}
 
-Historically, entropy has consistently occupied a crucial role in cryptographic research.
-Early cryptographic systems frequently succumbed to attacks due to insufficient entropy.
-For instance, the classical Vigenère cipher was susceptible to frequency analysis because of its limited key space.
-As the field of cryptography evolved, researchers have persistently sought new methods to enhance the entropy and complexity of keys.
-Notably.
-Shannon's introduction of the entropy concept in his information theory provided the theoretical underpinning for the advancement of modern cryptography.
+% 熵是信息论中的一个重要概念，由香农在1948年提出，用于衡量系统的随机性和不确定性。在密码学中，密钥的熵是衡量密钥强度的重要指标，一个在密钥空间均匀分布的密钥的熵通常可以用以下的公式表示：
+% H = log_2(N)
+% 其中N是密钥空间的大小。该公式说明了，均匀分布的密钥的熵就是该密钥的比特数。那么对于想要通过穷尽搜索的方式找到密钥的攻击者来说，他需要尝试的密钥的数量就是2^H，其中H是密钥的熵。因此，密钥的熵越高，攻击者找到密钥的难度就越大。
+Entropy was introduced by Shannon in 1948 \cite{shannon1948communicationtheory}, to quantify the randomness and uncertainty within a system.
+In the domain of cryptography, the entropy of a key serves as a crucial metric for assessing its strength.
+Formally, consider a uniformly distributed key $K$ within a key space of size $N$.
+The entropy of such a key can be represented by \autoref{eq:entropy_definition}.
+\begin{equation} 
+    H(K) = \log_2(N) \label{eq:entropy_definition}
+\end{equation}
+where $H(K)$ denotes the entropy of the key $K$.
+This equation illustrates that the entropy of a uniformly distributed key is equivalent to its bit length.
+For an adversary employing exhaustive search techniques to locate the key, the number of keys that must be tested is $2^{H(K)}$.
+Therefore, an increase in the key's entropy directly correlates with a higher level of difficulty for an attacker attempting to restore the key.
 
-% 然而,密钥熵的事迹实现和维护并非易事。理想情况下，每个密钥应该是从一个足够大的密钥空间中均匀随机选择的，以最大化熵。然而在实践中，由于随机数生成器的质量不佳或者在密钥派生过程中的不当处理，可能导致实际密钥熵低于理论值。这种熵的不足可能会显著降低密码系统的安全性，使其更容易收到攻击。
-However, achieving and maintaining entropy is a challenging endeavor.
-Ideally, each key should be uniformly and m randomly selected from a sufficiently largely key space to maximize entropy.
-Even so, when applied, the quality of random number generators or improper handling during the key derivation process can lead to actual entropy of keys falling short of the theoretical value.
-Such deficiencies in entropy can substantially compromise the security  of the cryptographic system, rendering it more vulnerable to attacks.
+% 这种遍历密钥空间的方法，不断地尝试密钥，直到找到正确的密钥，就是暴力破解攻击。通过是否需要与目标系统进行实时交互可以分为在线攻击与离线攻击。在线的攻击，攻击者需要不断地将尝试的密钥发送给目标系统以判断密钥是否正确。离线攻击，通常是通过获取目标系统的密文，攻击者可以在不与目标系统交互的情况下，尝试所有的密钥通过解密密文的方式来鉴别密钥。通常来说在线的暴力破解攻击主要受限于网络速度和目标系统的响应时间，而离线的攻击主要受限于攻击者的计算速度。离线暴力破解攻击的运行效率完全掌握在攻击者手中，密钥因此需要具有足够的熵来抵御这种攻击。因此本文主要研究的就是离线的暴力破解攻击，后文提到的暴力破解攻击如果没有特别制定，均指离线的暴力破解攻击。
+The method of exhaustively searching the key space by continually attempting different keys until the correct one is identified is termed a brute-force attack.
+Brute-force attacks can be classified into online and offline categories based on the necessity for real-time interaction with the target system.
+In an online attack, the adversary must persistently transmit the attempted keys to the target system to verify their correctness.
+Conversely, in an offline attack, the adversary acquires the ciphertext or other calculation result from the target system and can attempt all possible keys by decrypting the ciphertext, thereby obviating the need for interaction with the target system.
 
-% 在实际应用中，密码协议尽管会尽可能的使用高熵密钥，然而，由于一些特定的因素，如性能、功耗、用户体验等，低熵密钥的使用时不可避免的。例如，Bluetooth的配对和加密会话建立协议，为了兼容老设备和低功耗设备，通常会使用短密钥。另外，为了方便用户记忆，一些协议会由用户选择使用Passkey或者PIN Code，这类协议有代表性的是WPA / WPA2 。如果用户缺少足够的安全意识，很可能在较小的字符集上选择passkey，例如简单的数字组合，将严重影响协议的安全性
-In practical applications, although cryptographic protocols strive to use high-entropy keys whenever possible, certain factors such as performance, power consumption and user experience make the use of low-entropy keys inevitable.
-For instance, Bluetooth pairing and encryption session establishment protocols often employ short keys to ensure compatibility with older devices and low-power devices.
-Furthermore, to facilitate user memorization, some protocols allow users to select passkeys or PIN codes.
-A notable example of such protocols is WPA/WPA2.
-If users lack adequate security awareness, they may opt for passkeys from a limited character set, such as simple numerical combinations, which can significantly undermine the security of the protocol.
+Typically, the efficacy of online brute-force attacks is constrained by network latency and the response time of the target system 
+and offline attacks are predominantly limited by the computational power available to the attacker.
+The operational efficiency of offline brute-force attacks is entirely governed by the attacker's capabilities; therefore, the cryptographic key must possess adequate entropy to resist such attacks effectively.
+In this paper, we primarily focuses on the offline brute-force attacks.
+Throughout the subsequent sections, any reference to brute-force attacks, unless explicitly stated otherwise, pertains to offline brute-force attacks.
 
-% 在本章节中，我们将针对密码协议中常见的低熵密钥以及相应的攻击进行介绍。我们首先在2.1节介绍Diffie-Hellman密钥交换中的小子群约束攻击。然后在2.2节介绍WPA2 PMKID攻击。最后在2.3节介绍BC BLE密钥协商降级攻击。
+\subsection{Protocols with low-entropy keys} 
+Low-entropy keys applied in in cryptographic protocols are not rare in practice. 
+Just as we mentioned before, the compatibility for old devices, the power consumption for low-power devices, 
+and the user experience prevent protocols from guaranteeing all keys of them possess high entropy.
+The use of low-entropy keys is a trade-off between security and practicality. A lot of wide used protocols have low-entropy keys in them, such as WPA2-PSK, Bluetooth Low Energy and Bluetooth Classic.
 
-In this section, we will provide an overview of common low-entropy keys in  protocols and the associated attacks.
-We first review the small subgroup confinement attack in Diffie-Hellman key exchange in  \autoref{sec:2knob_bc}.
-In \autoref{sec:2knob_ble}, we discuss the KNOB attack against Bluetooth Classic(BC) and Bluetooth Low Energy(BLE).
-In \autoref{sec:2wpa}, we introduce the WPA/WPA2 PMKID attack.
+\subsubsection{WPA2-PSK}
+% WPA与WPA2源于IEEE 802.11i标准，其中WPA作为过渡性解决方案，旨在修复WEP（Wired Equivalent Privacy）的安全漏洞，而WPA2则完整实现了IEEE 802.11i标准，提供更为完善的安全机制。WPA2-PSK（预共享密钥）是WPA2的一种简化模式，利用预共享密钥代替复杂的企业级认证过程，适用于不需要RADIUS服务器的小型网络。WPA2-PSK广泛应用于家庭、咖啡馆和中小型办公场所，因其配置简便且能够提供较高的安全性。
+Wi-Fi Protected Access (WPA) and WPA2 are both derived from the IEEE 802.11i standard \cite{80211i}, with WPA serving as an interim solution to address security vulnerabilities in Wired Equivalent Privacy (WEP), while WPA2 fully implements the 802.11i standard to provide more robust security mechanisms.
+WPA2-PSK (Pre-Shared Key) is a simplified version of WPA2, using a pre-shared key instead of a complex enterprise-level authentication process, making it suitable for small networks without a RADIUS server.
+WPA2-PSK is widely deployed in home environments, cafes, and small to medium-sized offices due to its ease of configuration and strong security.
 
+% WPA2的4-way Handshake是一种用于在无线网络中安全地生成和交换加密密钥的协议过程，确保客户端与接入点之间的通信安全。与企业级WPA2认证机制依赖于802.1X和RADIUS服务器进行动态密钥分配的方式有所不同，在WPA2-PSK（Pre-Shared Key）模式下，4-way Handshake利用预共享密钥进行身份验证，
+The 4-way handshake of is protocol designed to securely generate and exchange encryption keys within wireless networks, thereby ensuring secure communication between clients and access points.
+In contrast to WPA2-Enterprise, which utilizes 802.1X and RADIUS servers for dynamic key distribution, the WPA2-PSK (Pre-Shared Key) employs a pre-shared key for the purpose of authentication.
 
+\begin{figure}[hbtp]
+    \centering
+    \includegraphics[width=0.870780\columnwidth]{img/4-way-handshake} 
+    \caption{4-way-handshake}
+    \label{fig:4-way-handshake}
+\end{figure}
 
+% \autoref{fig:4-way-handshake} 展示了用户设备（supplicant）与access point（authenticator）之间通过4-way handshake从PMK协商出PTK与GTK的全部过程。
+% WPA2-PSK 使用PBKDF2密钥派生函数，从Passphrase和Service Set Identification (SSID)生成PSK，PBKDF2的定义如下：
+% \[
+%    PSK = PBKDF2(Passphrase, SSID, 4096, 256)
+% \]
+% Passphrase 是由用户定义的秘密短语，由8到63个字符组成，SSID是网络的名称，通常是公开的，因此PSK的安全性将取决于Passphrase的强度。在WPA2-PSK中，Pairwise Master Key (PMK)与PSK是一致的。基于PMK，authenticator与supplicant直接执行4-way握手。首先，authenticator发送一个随机数ANonce给supplicant，supplicant收到后，生成自己的随机数SNonce，并计算出PTK。PTK的计算过程如下：
+% \[
+%     PTK = PRF(PMK, "Pairwise key expansion", ANonce || SNonce || MAC_authenticator || MAC_supplicant)
+% \]
+% 其中，PRF是伪随机函数，MAC_authenticator和MAC_supplicant分别是authenticator和supplicant的MAC地址，$\{\}_{min\_max}$ 代表了变量以由小到大的顺序拼接 。PTK被用于确保通信的隐私性和完整性。 接下来，authenticator发送GTK给supplicant，用于组播通信的加密密钥。最后，supplicant发送EAPOL消息4给authenticator，用于验证握手的完整性。当authenticator收到EAPOL消息4后，握手完成，supplicant与authenticator之间的通信将使用PTK和GTK进行加密。值得注意的是，根据802.1x 标准，4-way handshake由四条EAPOLkey类型的消息组成，其中，第一条EAPOLkey消息会包含一个额外的字段PMKID，它的计算方式如下：
+% \[
+%     PMKID = HMAC-SHA1-128(PSK, "PMK Name" || MAC_authenticator || MAC_supplicant)
+% \]
+% PMKID允许设备在重新连接时迅速完成身份验证。然而，由于PMK（PSK）的强度直接受用户选择的Passphrase决定，如果用户选择了弱Passphrase，攻击者可以通过暴力破解PMKID来获取PSK，从而破坏通信的安全性，这种攻击方式被称为PMKID攻击{cite}。
+\autoref{fig:4-way-handshake} illustrates the complete process of negotiating the Pairwise Transient Key (PTK) and Group Temporal Key (GTK) from the Pairwise Master Key (PMK) between the user device (supplicant) and access point (authenticator) via the 4-way handshake.
 
-% \subsection{Entropy}
-% Entropy, a fundamental concept in information theory, plays a pivotal role in quantifying uncertainty.
-Originally introduced by Claude Shannon {cite}, entropy serves as a measure of the unpredictability or information content in a give system.
-Formally, consider a discrete random variable $X$ defined over a countable set $\Sigma = \{x_1, x_2, \ldots, x_n\}$ with a probability distribution $\mathcal{P}$.
-The Shannon entropy of $X$, denoted as $H(X)$, is defined by Eq.
-\ref{eq:entropy}.
-% \begin{equation}
-%     H(X) = -\sum_{i = 1}^{n} p(x_i) \log_b p(x_i)
-%     \label{eq:entropy}
-% \end{equation}
-% where $b$ represents the base of the logarithm, commonly chosen as 2 when measuring information in bits.
-The function captures the expected value of the information content, with higher entropy indicating greater uncertainty about the outcome of $X$.
+WPA2-PSK uses the key derivation function PBKDF2 to generate the Pre-Shared Key (PSK) from the Passphrase and Service Set Identification (SSID), defined as follows:
+\begin{equation}
+    \text{PSK} = PBKDF2(\text{Passphrase}, \text{SSID})
+\end{equation}
+Passphrase is a user-defined secret phrase consisting of 8 to 63 characters, while the SSID represents the network name, which is typically public. Notably, if a user prefer to selecting the Passphrase from a limited character set, such as simple numerical combinations, the security of the 4-way handshake protocol will be easily compromised by attackers, which we will discuss in \autoref{sec:wpa2-psk}.
 
-% \subsection{Small subgroup confinement attack}  \label{sec:2dh}
+In WPA2-PSK, the Pairwise Master Key (PMK) is equivalent to PSK.
+Based on the PMK, the authenticator and supplicant perform the 4-way handshake.
+First, the authenticator sends a random number ANonce to the supplicant.
+Upon receiving it, the supplicant generates its own random number SNonce and calculates the PTK.
+The calculation of PTK is as follows:
+\begin{equation}
+    \begin{split}
+        \text{PTK} = PRF&(\text{PMK},\text{MAC}_\text{AU},\text{MAC}_\text{SUP}, \text{ANonce}, \text{SNonce})
+    \end{split} 
+\end{equation}
+Here, $PRF$ represents a pseudo-random function, $\text{MAC}_\text{AU}$ and $\text{MAC}_\text{SUP}$ denote the MAC addresses of the authenticator and supplicant, respectively.
+The PTK is then used to ensure the secrecy and integrity of the communication between the supplicant and authenticator.
+Subsequently, the authenticator transmits the GTK to the supplicant for use as an encryption key in multicast communications.
+Finally, the supplicant dispatches EAPOL message 4 to the authenticator to confirm the handshake's integrity.
+Upon receipt of EAPOL message 4 by the authenticator, the handshake is finalized, and communication between the supplicant and authenticator is encrypted using both the PTK and GTK.
+It is important to note that, according to the 802.1x standard, the 4-way handshake is composed of four EAPOL-key type messages, with the first EAPOL-key message incorporating an additional variable, PMKID, calculated as follows:
+\begin{equation}
+    \begin{split}
+        \text{PMKID} = \text{HMAC}(\text{PMK}, \text{``PMK Name''} \| \text{MAC}_\text{AU} \| \text{MAC}_\text{SUP})
+    \end{split} 
+\end{equation}
+Here, the PMKID assists devices in rapidly completing authentication upon reconnection.
 
-% % 介绍 DH
-% Diffie-Hellman algorithm is a widely used key exchange protocol that allows two parties to establish a shared secret key over an insecure channel.
-The algorithm operates in a finite field $\mathbb{Z}_p$ (where  $p$ is a large prime number).
-Suppose $g$ is a generator of this field.
-The key exchange between Alice and Bob can be summarized as follows:
-% \begin{enumerate}
-%     \item Alice and Bob agree on a large prime number $p$ and a generator $g$ of $\mathbb{Z}_p$.
-%     \item Alice selects a secret integer $a$, computes $A = g^a \mod p$, and sends $A$ to Bob.
-%     \item Bob selects a secret integer $b$ computes $B = g^b \mod p$, and sends $B$ to Alice.
-%     \item Both Alice and Bob compute the shared secret: Alice computes $s = B^a \mod p$ and Bob computes $s = A^b \mod p$.
-By the property of modular exponentiation, both end up with the same shared secret $s$, which is $g^{ab} \mod p$.
-% \end{enumerate}
-
-% The small subgroup confinement attack occurs when the generator $g$ doesn't generator a sufficiently large group, allowing the attacker to induce operations within a smaller, more predictable subgroup.
-This reduce the key space, making it easier for an attacker to brute-force the key.
-Suppose an attacker, Eve, can manipulate the generator $g$ used in the  Diffie-Hellman protocol:
-% \begin{enumerate}
-%     \item Eve chooses a generator $g$ from a small subgroup and provides it to Alice and Bob.
-
-%     \item Alice and Bob perform the key exchange using the small subgroup generator $g$ without realizing that the key space is significantly reduced.
-%     \item Since $g$ comes from a small subgroup, the intermediate values $g^a$ and $g^b$ are also confined to the small subgroup.
-
-%     \item Eve can exhaustively try all possible values within the subgroup to recover the $a$ and $b$ values, thereby obtaining the shared secret key $g^{ab}$.
-% \end{enumerate}
-
-
-\subsection{KNOB against Bluetooth Classic} \label{sec:2knob_bc}
-
+\subsubsection{Bluetooth Low Energy}
 % Bluetooth是一种短距离无线通信技术，旨在替代有线连接，实现设备间的数据交换和通信。Bluetooth由Bluetooth Special Interest Group (SIG)维护和推广，其主要特点包括低功耗、低成本和高兼容性。Bluetooth协议栈包括多个层次，从物理层（Physical Layer, PHY）到应用层（Application Layer），每一层次都有特定的功能和协议。根据数据速率和功耗的不同，Bluetooth技术分为两大类，即Bluetooth Classic（传统蓝牙）和Bluetooth Low Energy（BLE，低功耗蓝牙），在后文中我们将以BC代指Bluetooth Classic，以BLE代指Bluetooth Low Energy。
-
 Bluetooth is a short-range wireless communication technology designed to replace wired connections, facilitating data exchange and communication between devices.
 The Bluetooth Special Interest Group (SIG) is responsible for maintaining and promoting this technology.
 The primary characteristics of Bluetooth include low power consumption, cost-effectiveness, and high compatibility.
-The Bluetooth protocol stack consists of multiple layers, ranging from Physical Layer (PHY) to the Application Layer, each serving distinct functions and protocols.
-Based on variations in data rate and power consumption, Bluetooth technology is categorized into two types: Bluetooth Classic (BC) and Bluetooth Low Energy (BLE).
+Based on variations in data rate and power consumption, Bluetooth technology is categorized into two types: 
+Bluetooth Classic(BC), which is appropriate for high-bandwidth applications, such as audio streaming, 
+and Bluetooth Low Energy (BLE), which was first introduced in Bluetooth 4.0\cite{bluetooth4} and is specifically engineered for low-power applications, 
+making it particularly suitable for sensors and Internet of Things (IoT) devices.
 In the subsequent discussion, we will refer to Bluetooth Classic as BC, while BLE will denote Bluetooth Low Energy.
 
-% Bluetooth Classic，也称为BR/EDR（Basic Rate/Enhanced Data Rate），是最早期的Bluetooth标准，主要面向高数据速率的应用，如音频传输、文件传输和串行通信。BC标准中规定了链路层安全机制，为上层应用提供了机密性、完整性以及认证性。配对被用来在两个蓝牙设备间协商长期密钥LK。标准定义的配对方法是 Secure Simple Pairing{cite}，该流程使用了ECDH里协商密钥。在配对之后，session establishment 允许设备从LK以及其他一些参数派生出 Session Key(SK)，来保护后续的通信。
+Bluetooth utilizes a pairing mechanism in both BLE and BC to establish a secure communication framework between devices, thereby ensuring the confidentiality and integrity of data transmission.
+First we take a look at the pairing process between BLE devices.
 
-Bluetooth Classic, also referred to as BR/EDR (Basic Rate/Enhanced Date Rate), represents the initial Bluetooth standard, predominantly designed for applications requiring high data transfer rates such as audio streaming , file transfer and serial communication.
+\begin{figure}[hbtp]
+    \centering
+    \includegraphics[width=0.912689\columnwidth]{img/ble-pairing} 
+    \caption{BLE pairing}
+    \label{fig:ble-pairing}
+\end{figure}
+
+The pairing process between two BLE devices, designated as the Initiator and the Responder, involves three phases, as depicted in \autoref{fig:ble-pairing}.
+In the first phase, the devices exchange pairing features, which include the IO capabilities and the length of the Long Term Key (LTK).
+These IO capabilities determine the pairing scheme to be implemented in the subsequent phase.
+The IO capabilities include NoInputNoOutput, DisplayOnly, DisplayYesNo, KeyboardOnly, and KeyboardDisplay.
+
+During the second phase, an appropriate pairing scheme is selected based on the exchanged features.
+Options include Just Works, Passkey Entry, and Out of Band.
+By the conclusion of this phase, both devices successfully negotiate the Long Term Key (LTK).
+
+In the final phase, the Initiator and Responder utilize the LTK to derive a Session Key (SK).
+This SK is then employed to secure the channel over which transport-specific keys are distributed, such as the Identity Resolving Key (IRK) and Identity Address information.
+
+\subsubsection{Bluetooth Classic}
+% Bluetooth Classic，也称为BR/EDR（Basic Rate/Enhanced Data Rate），是最早期的Bluetooth标准，主要面向高数据速率的应用，如音频传输、文件传输和串行通信。BC标准中规定了链路层安全机制，为上层应用提供了机密性、完整性以及认证性。配对被用来在两个蓝牙设备间协商长期密钥LK。标准定义的配对方法是 Secure Simple Pairing{cite}，该流程使用了ECDH里协商密钥。在配对之后，session establishment 允许设备从LK以及其他一些参数派生出 Session Key(SK)，来保护后续的通信。
+BC, also referred to as BR/EDR (Basic Rate/Enhanced Date Rate), represents the initial Bluetooth standard, predominantly designed for applications requiring high data transfer rates such as audio streaming , file transfer and serial communication.
 The BC standard delineates link layer security mechanisms that ensure confidentiality , integrity and authentication for higher-layer applications.
 Pairing is employed to negotiate a long-term key (LK) between tow Bluetooth devices.
-The standard-defined pairing method, Secure Simple Pairing{cite}, utilizes Elliptic Curve Diffie-Hellman (ECDH) for key agreement.
-Subsequent to the pairing procedure, the session establishment phase enables devices to derive a Session Key (SK) from the LK and other parameters, thereby safeguarding subsequent communications.
+The standard-defined pairing method, Secure Simple Pairing\cite{bluetooth6}, utilizes Elliptic Curve Diffie-Hellman (ECDH) for key agreement.
 
+\begin{figure}[hbtp]
+    \centering
+    \includegraphics[width=0.902212\columnwidth]{img/bc-session} 
+    \caption{BC Session}
+    \label{fig:bc-session}
+\end{figure}
 
+Subsequent to the pairing procedure, the session establishment protocol enables devices to derive a Session Key (SK) from the LK and other parameters, to safeguard subsequent communication. \autoref{fig:bc-session} illustrates this phase between paired BC devices.
 
+Like BLE, the devices involved in BC session establishment protocol are designated as the central device and the peripheral device.
+Prior to the initiation of the session, both entities share a Link Key, denoted as LK.
 
-The Bluetooth Low Energy (BLE) Key Negotiation Downgrade Attack, also known as the BC (Bluetooth Classic) BLE Key Negotiation Downgrade Attack, exposes another facet of how modern attackers can manipulate cryptographic protocols.
-This attack exploits a vulnerability in the BLE pairing process where an attacker can force the devices to negotiate a lower level of security, specifically by downgrading the key strength used for encryption.
+Before establishing the encrypted session, the central device and peripheral build a link connection first. 
+In this phase, the devices exchange their device features, including FeatureSC which means whether the device supports Secure Connections.
+After the link connection is established, the two devices start the authentication process. There are two methods to authenticate the devices, one is the secure authentication and the other is the legacy authentication. If both devices support Secure Connections, they will use the secure authentication method, otherwise, they will use the legacy authentication method.
+In the secure authentication, both devices will authenticate each other. They will exchange two authentication random numbers, $\text{AuRand}_{\text{I}}$ and $\text{AuRand}_{\text{R}}$. Then they will use the Link Key to compute $\text{SERS}_{\text{I}}$, $\text{SERS}_{\text{R}}$ respectively and the Authenticated Channel Offset (ACO) based on the exchanged random numbers. Both of them will verify the correctness of the received SERS. If the verification is successful, the next phase will be started.
+In the legacy authentication, only the central device will authenticate the peripheral device. The central device will send a random number $\text{AuRand}$ to the peripheral device. The peripheral device then computes the response $\text{SERS}$ and ACO based on the received random number and the Link Key. After the central device verifies the correctness of the received SERS, they come to the next phase.
+In the following phase, the central and peripheral devices engage in negotiation regarding the length of the session key.
+In the final phase, the central device dispatches an encrypted random number, EnRand, to the peripheral device.
+Utilizing EnRand in conjunction with ACO, both devices generate the session key SK.
+The peripheral device then encrypts a predetermined format \Tfunction{ACCEPT} message using SK and transmits it to the central device.
+The successful decryption of this message by the central device signifies the establishment of the encrypted session.
 
-By intercepting and modifying the key negotiation process, attackers can downgrade the encryption from a stronger key to a weaker one, which is easier to brute-force.
-Once the weaker key is in place, the attacker can use brute-force methods to break the encryption, gaining access to the communication channel.
-This attack is particularly concerning for IoT devices, which often use BLE for communication and may not have the computational power to implement stronger cryptographic measures.
-
-The BLE Key Negotiation Downgrade Attack highlights the broader issue of how at`tackers can exploit key management flaws to weaken the security of cryptographic protocols, making them vulnerable to brute-force attacks.
-It also underscores the importance of ensuring that protocols are resilient not just against brute-force attacks on high-entropy keys, but also against downgrade attacks that reduce key entropy.
-
-\subsection{The Key Negotiation Of Bluetooth Attack} \label{sec:2knob_ble}
-
-
-
-\subsection{WPA2 PMKID Attack}  \label{sec:2wpa}
-The WPA2 PMKID Attack, discovered in 2018, is a prime example of how attackers can exploit protocol vulnerabilities to facilitate brute-force attacks.
-The attack targets the WPA2 handshake process, specifically the PMKID (Pairwise Master Key Identifier) that is transmitted during the initial connection between a client and an access point.
-Traditionally, capturing a full four-way handshake was required to launch a brute-force attack on the WPA2 Pre-Shared Key (PSK).
-However, the PMKID Attack simplifies this process by allowing attackers to capture the PMKID and then brute-force the PSK offline without needing the full handshake.
-
-This attack is particularly dangerous because it exploits a design flaw in the WPA2 protocol, not just an implementation error.
-The availability of tools like Hashcat, which can efficiently perform such brute-force attacks using GPUs, has further lowered the barrier for attackers to successfully compromise Wi-Fi networks.
-The PMKID Attack demonstrates how even protocols considered secure can be vulnerable when attackers leverage their brute-force capabilities.
-This attack is particularly dangerous because it exploits a design flaw in the WPA2 protocol, not just an implementation error.
-The availability of tools like Hashcat, which can efficiently perform such brute-force attacks using GPUs, has further lowered the barrier for attackers to successfully compromise Wi-Fi networks.
-The PMKID Attack demonstrates how even protocols considered secure can be vulnerable when attackers leverage their brute-force capabilities.
-
-
-\subsection{Tamarin Prover} \label{sec:2tamarin}
+\subsection{Tamarin Prover}
 Tamarin Prover is a state-of-the-art formal verification tool for cryptographic protocols.
 It provides a powerful and expressive language for modeling protocols and properties, allowing researchers to analyze the security of their designs rigorously.
 Tamarin supports a wide range of cryptographic primitives and protocols, making it a versatile tool for formal analysis.
@@ -144,13 +212,11 @@ By leveraging Tamarin, researchers can systematically verify the correctness and
 The tool's automation capabilities enable researchers to explore various scenarios and configurations, providing insights into potential weaknesses and areas for improvement.
 Tamarin Prover has been widely used in academia and industry to analyze and verify the security of cryptographic protocols, making it a valuable asset for researchers in the field of cryptography and security.
 
-\subsubsection{multiset rewriting rules}
+% \subsubsection{multiset rewriting rules}
 
-\subsubsection{functions and equations}
+% \subsubsection{functions and equations}
 
-\subsubsection{pattern matching}
-
-
+% \subsubsection{pattern matching}
 
 
 \end{document}

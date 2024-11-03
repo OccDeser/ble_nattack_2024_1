@@ -21,9 +21,9 @@
 \begin{document}
 \begin{tikzpicture}
 
-\node[AGENT] (n_initiator) {Initiator};
+\node[AGENT] (n_initiator) {Central};
 \node[AGENT, right=0.08\textwidth of n_initiator] (n_attacker) {\textcolor{xhs_red}{Attacker}};
-\node[AGENT, right=0.08\textwidth of n_attacker] (n_responder) {Responder};
+\node[AGENT, right=0.08\textwidth of n_attacker] (n_responder) {Peripheral};
 
 \coordinate (end_initiator) at ($(n_initiator.south)+(0,-43ex)$);
 \draw[semithick] (n_initiator.south) -- (end_initiator);
