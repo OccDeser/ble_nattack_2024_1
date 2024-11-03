@@ -1,4 +1,3 @@
-
 \documentclass[class={IEEEtran}]{standalone}
 
 \usepackage{amsmath}
@@ -6,81 +5,120 @@
 \usepackage{pifont}
 
 \newcommand{\whiteding}[1]{\large{\ding{\numexpr171+#1\relax}}}
+
 \pagestyle{empty}
+
 \usetikzlibrary{shapes.geometric,shapes.arrows,positioning,calc,arrows.meta,math}
 
-\tikzset{AGENT/.style={rectangle,minimum width=6.5em,minimum height=3.5ex,draw,semithick,align=flush center}}
-\tikzset{NOTE/.style={rectangle,rounded corners,draw,semithick,align=flush center,fill=white}}
+\tikzset{AGENT/.style={rectangle,minimum width=6.5em,minimum height=3.5ex,draw,semithick,align=flush center, anchor=north}}
+\tikzset{ACTION/.style={rectangle,rounded corners,draw,semithick,align=flush center,fill=white}, anchor=north}
 \tikzset{ARROW/.style={thick, -stealth}}
-\tikzset{DARROW/.style={<->,>={Triangle Cap[cap angle=90]}, line width=4ex, gray!20 }}
+\tikzset{DARROW/.style={<->,>=latex, line width=4ex, gray!20}}
+\tikzset{PREPARATION/.style={rectangle,draw,semithick,align=flush center,fill=white,dashed, anchor=north}}
+
 
 \begin{document}
 \begin{tikzpicture}
 
-\node[AGENT] (n_alice) {Alice};
-\node[AGENT, right=0.5\textwidth of n_alice] (n_bob) {Bob};
+\node[AGENT] (n_initiator) {Initiator};
+\node[AGENT, right=0.25\textwidth of n_initiator] (n_responder) {Responder};
 
-\coordinate (c_0_0) at ($(n_alice.south)+(0,-18ex)$);
-\coordinate (c_0_1) at ($(c_0_0-|n_bob)$);
-\draw[ARROW] (c_0_0) -- (c_0_1) node[midway,above=-0.3ex]{LMP \{ $AuRand$ \}};
+\coordinate (end_initiator) at ($(n_initiator.south)+(0,-83ex)$);
+\draw[semithick] (n_initiator.south) -- (end_initiator);
+\draw[fill=black] ($(end_initiator)+(-1em,0)$) rectangle ($(end_initiator)+(1em,-0.6ex)$);
 
-\coordinate (c_1_0) at ($(c_0_1)+(0,-10ex)$);
-\coordinate (c_1_1) at ($(c_1_0-|n_alice)$);
-\draw[ARROW] (c_1_0) -- (c_1_1) node[midway,above=-0.3ex]{LMP \{ $SRES$ \}};
+\coordinate (end_responder) at ($(end_initiator-|n_responder)$);
+\draw[semithick] (n_responder.south) -- (end_responder);
+\draw[fill=black] ($(end_responder)+(-1em,0)$) rectangle ($(end_responder)+(1em,-0.6ex)$);
 
-\coordinate (c_2_0) at ($(c_1_1)+(0,-8ex)$);
-\coordinate (c_2_1) at ($(c_2_0-|n_bob)$);
-\draw[ARROW] (c_2_0) -- (c_2_1) node[midway,above=-0.3ex]{LMP \{ ENCRYPTION\_MODE: 1 \}};
+\coordinate (c_middle) at ($(n_initiator.south)!0.5!(n_responder.south)$);
+\node[PREPARATION, minimum width=24em] (n_prep) at ($(c_middle)+(0, -1ex)$) {Pair and Share LK};
 
-\coordinate (c_3_0) at ($(c_2_1)+(0,-4ex)$);
-\coordinate (c_3_1) at ($(c_3_0-|n_alice)$);
-\draw[ARROW] (c_3_0) -- (c_3_1) node[midway,above=-0.3ex]{LMP\_ACCEPTED};
+\coordinate (c_init_pair_req) at ($(n_prep.south-|n_initiator)+(0,-3.2ex)$);
+\coordinate (c_res_pair_req) at ($(c_init_pair_req-|n_responder)$);
+\draw[ARROW] (c_init_pair_req) -- (c_res_pair_req) node[midway,above=-0.3ex]{$\text{FeatureSC}_\text{I}$};
 
-\coordinate (c_4_0) at ($(c_3_1)+(0,-4ex)$);
-\coordinate (c_4_1) at ($(c_4_0-|n_bob)$);
-\draw[ARROW] (c_4_0) -- (c_4_1) node[midway,above=-0.3ex]{LMP \{ ENCRYPTION\_KEY\_SIZE: $keysize$ \}};
+\coordinate (c_res_pair_rsp) at ($(c_res_pair_req)+(0,-3.2ex)$);
+\coordinate (c_init_pair_rsp) at ($(c_res_pair_rsp-|n_initiator)$);
+\draw[ARROW] (c_res_pair_rsp) -- (c_init_pair_rsp) node[midway,above=-0.3ex]{$\text{FeatureSC}_\text{R}$};
+\node[PREPARATION, minimum width=24em] (n_user) at ($(c_res_pair_rsp-|c_middle)+(0,-1ex)$) {
+    Establish Link Connection
+};
 
-\coordinate (c_5_0) at ($(c_4_1)+(0,-4ex)$);
-\coordinate (c_5_1) at ($(c_5_0-|n_alice)$);
-\draw[ARROW] (c_5_0) -- (c_5_1) node[midway,above=-0.3ex]{LMP\_ACCEPTED};
+\coordinate (c_init_au1) at ($(n_user.south-|n_initiator)+(0,-5ex)$);
+\coordinate (c_res_au1) at ($(c_init_au1-|n_responder)$);
+\draw[ARROW] (c_init_au1) -- (c_res_au1) node[midway,above=-0.3ex]{$\text{AuRand}_\text{I}$};
 
-\coordinate (c_6_0) at ($(c_5_1)+(0,-12ex)$);
-\coordinate (c_6_1) at ($(c_6_0-|n_bob)$);
-\draw[ARROW] (c_6_0) -- (c_6_1) node[midway,above=-0.3ex]{LMP \{ $EnRand$ \}};
+\coordinate (c_res_au2) at ($(c_res_au1)+(0,-3.2ex)$);
+\coordinate (c_init_au2) at ($(c_res_au2-|n_initiator)$);
+\draw[ARROW] (c_res_au2) -- (c_init_au2) node[midway,above=-0.3ex]{$\text{AuRand}_\text{R}$};
 
-\coordinate (c_7_0) at ($(c_6_1)+(0,-10ex)$);
-\coordinate (c_7_1) at ($(c_7_0-|n_alice)$);
-\draw[ARROW] (c_7_0) -- (c_7_1) node[midway,above=-0.3ex]{$Encrypt$( LMP\_ACCEPTED, $K_S$)};
+\node[ACTION] (n_res_au) at ($(c_res_au2)+(0,-1ex)$) {Calculate\\ACO, $\text{SERS}_\text{R}$};
 
-\coordinate (c_end_0) at ($(c_7_1-|n_alice)+(0,-8ex)$);
-\draw[semithick] (n_alice.south) -- (c_end_0);
-\draw[fill=black] ($(c_end_0)+(-1em,0)$) rectangle ($(c_end_0)+(1em,-0.6ex)$);
+\node[ACTION] (n_init_ver) at ($(c_init_au2)+(0,-1ex)$) {Calculate \\ACO, $\text{SERS}_\text{I}$};
+% Verify $\text{SERS}_\text{R}$\\
+\coordinate (c_res_ser) at ($(n_init_ver.south-|n_responder)+(0,-1ex)$);
+\coordinate (c_init_ser) at ($(c_res_ser-|n_initiator)$);
+\draw[ARROW] (c_res_ser) -- (c_init_ser) node[midway,above=-0.3ex]{$\text{SERS}_\text{R}$};
 
-\coordinate (c_end_1) at ($(c_end_0-|n_bob)$);
-\draw[semithick] (n_bob.south) -- (c_end_1);
-\draw[fill=black] ($(c_end_1)+(-1em,0)$) rectangle ($(c_end_1)+(1em,-0.6ex)$);
+\node[ACTION] (n_res_ver) at ($(c_init_ser)+(0,-1ex)$) {Verify $\text{SERS}_\text{R}$};
+
+\coordinate (c_init_sei) at ($(n_res_ver.south)+(0,-1ex)$);
+\coordinate (c_res_sei) at ($(c_init_sei-|n_responder)$);
+\draw[ARROW] (c_init_sei) -- (c_res_sei) node[midway,above=-0.3ex]{$\text{SERS}_\text{I}$};
+
+% \coordinate (c_init_se1) at ($(n_init_au.south)+(0,-1ex)$);
+% \coordinate (c_res_se1) at ($(c_init_se1-|n_responder)$);
+% \draw[ARROW] (c_init_se1) -- (c_res_se1) node[midway,above=-0.3ex]{$\text{SERS}_\text{I}$};
+
+\node[ACTION] (n_res_se) at ($(c_res_sei)+(0,-1ex)$) {Verify $\text{SERS}_\text{I}$};
+
+\coordinate (c_sc_south_east) at ($(n_res_se.south east)+(0.5em, -1ex)$);
+\coordinate (c_sc_north_west) at ($(c_init_au1)+(-4.4em, 3ex)$);
+\draw[dashed] (c_sc_south_east) rectangle (c_sc_north_west);
+
+\node[align=flush left] (n_secure) at ($(c_sc_north_west)+(2.2em, 0.4ex)$) {SecureAU};
+
+\coordinate (c_init_au) at ($(n_res_se.south-|n_initiator)+(0,-5ex)$);
+\coordinate (c_res_au) at ($(c_init_au-|n_responder)$);
+\draw[ARROW] (c_init_au) -- (c_res_au) node[midway,above=-0.3ex]{AuRand};
+
+\node[ACTION] (n_res_au) at ($(c_res_au)+(0,-1ex)$) {Calculate \\SERS, ACO};
+
+\coordinate (c_res_se) at ($(n_res_au.south-|n_responder)+(0,-1ex)$);
+\coordinate (c_init_se) at ($(c_res_se-|n_initiator)$);
+\draw[ARROW] (c_res_se) -- (c_init_se) node[midway,above=-0.3ex]{SERS};
+
+\node[ACTION] (n_init_au) at ($(c_init_se)+(0,-1ex)$) {Verify SERS\\Calculate ACO};
+
+\coordinate (c_legacy_south_west) at ($(n_init_au.south west-|c_sc_north_west)+(0, -1ex)$);
+\coordinate (c_legacy_north_east) at ($(c_res_au-|n_res_au.east)+(0.5em, 3ex)$);
+\draw[dashed] (c_legacy_south_west) rectangle (c_legacy_north_east);
+
+\coordinate (c_legacy_north_west) at ($(c_legacy_south_west |- c_legacy_north_east)$);
+\node[align=flush left] (n_legacy) at ($(c_legacy_north_west)+(2.2em, 0.4ex)$) {LegacyAU};
+
+\coordinate (c_init_ks) at ($(n_init_au.south-|n_initiator)+(0,-4.5ex)$);
+\coordinate (c_res_ks) at ($(c_init_ks-|n_responder)$);
+\draw[ARROW] (c_init_ks) -- (c_res_ks) node[midway,above=-0.3ex]{KeySize:16};
+
+\coordinate (c_res_ks) at ($(c_res_ks)+(0,-3.2ex)$);
+\coordinate (c_init_ks) at ($(c_res_ks-|n_initiator)$);
+\draw[ARROW] (c_res_ks) -- (c_init_ks) node[midway,above=-0.3ex]{ACCEPT};
 
 
-\draw[DARROW] ($(n_alice.south)+(-4ex,-3ex)$) to node[black,sloped]{Alice and Bob share $K_L$} ($(n_bob.south)+(4ex,-3ex)$);
+\coordinate (c_init_en) at ($(c_res_ks-|n_initiator)+(0,-3.2ex)$);
+\coordinate (c_res_en) at ($(c_init_en-|n_responder)$);
 
-\node[NOTE,minimum height=3.5ex] (n_alice1) at ($(n_alice.south)+(0,-11ex)$) {Random $AuRand$ \\ $SERS, ACO = $\\$E1(K_L, AuRand, AddressB)$};
+\draw[ARROW] (c_init_en) -- (c_res_en) node[midway,above=-0.3ex]{EnRand};
 
-\node[NOTE,minimum height=3.5ex] (n_bob1) at ($(c_0_1)+(0,-5ex)$) {$SERS, ACO = $\\$E1(LK, AuRand, AddressB)$};
+\node[ACTION] (n_res_en) at ($(c_res_en)+(0,-1ex)$) {Derive SK$'$ \\SK $\leftarrow$ SK$'$[1:16]};
+\node[ACTION] (n_init_en) at ($(c_init_en)+(0,-1ex)$) {Derive SK$'$\\SK $\leftarrow$ SK$'$[1:16]};
 
-\node[NOTE,minimum height=3.5ex] (n_alice2) at ($(c_1_1)+(0,-4ex)$) {Verify $SERS$};
-
-\node[NOTE,minimum height=3.5ex] (n_alice3) at ($(c_5_1)+(0,-6ex)$) {Random $EnRand$ \\ $K = E3(K_L, EnRand, ACO)$ \\ $K_S = resize(K, keysize)$};
-
-\node[NOTE,minimum height=3.5ex] (n_bob2) at ($(c_6_1)+(0,-5ex)$) {$K = E3(K_L, EnRand, ACO)$ \\ $K_S = resize(K, keysize)$};
-
-\node[NOTE,minimum height=3.5ex] (n_alice4) at ($(c_7_1)+(0,-4ex)$) {Decrypt ( Encrypt ( LMP\_ACCEPTED, $K_S$), $K_S$ )};
-
-
-
-
-% \node[NOTE,minimum height=3.5ex] (n_bob_1) at ($(c_0_1)+(0,-4ex)$) 
-%     { $SERS = E1(LK, AuRand, AddressB)[0,...,3]$ \\ 
-%       $ACO = E1(LK, AuRand, AddressB)[4,...,15]$ };
+\coordinate (c_res_en) at ($(n_res_en.south)+(0,-1ex)$);
+\coordinate (c_init_en) at ($(c_res_en-|n_initiator)$);
+\draw[ARROW] (c_res_en) -- (c_init_en) node[midway,above=-0.3ex]{$\{\text{ACCEPT}\}_\text{SK}$};
 
 \end{tikzpicture}
+
 \end{document}

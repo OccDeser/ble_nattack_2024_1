@@ -1,0 +1,89 @@
+\documentclass[class={IEEEtran}]{standalone}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{pifont}
+\usepackage{xcolor}
+\definecolor{xhs_red}{HTML}{c13c33}
+
+\newcommand{\whiteding}[1]{\large{\ding{\numexpr171+#1\relax}}}
+
+\pagestyle{empty}
+
+\usetikzlibrary{shapes.geometric,shapes.arrows,positioning,calc,arrows.meta,math}
+
+\tikzset{AGENT/.style={rectangle,minimum width=6.5em,minimum height=3.5ex,draw,semithick,align=flush center, anchor=north}}
+\tikzset{ACTION/.style={rectangle,rounded corners,draw,semithick,align=flush center,fill=white}, anchor=north}
+\tikzset{ARROW/.style={thick, -stealth}}
+\tikzset{DARROW/.style={<->,>=latex, line width=4ex, gray!20}}
+\tikzset{PREPARATION/.style={rectangle,draw,semithick,align=flush center,fill=white,dashed, anchor=north}}
+
+
+\begin{document}
+\begin{tikzpicture}
+
+\node[AGENT] (n_initiator) {Initiator};
+\node[AGENT, right=0.08\textwidth of n_initiator] (n_attacker) {\textcolor{xhs_red}{Attacker}};
+\node[AGENT, right=0.08\textwidth of n_attacker] (n_responder) {Responder};
+
+\coordinate (end_initiator) at ($(n_initiator.south)+(0,-43ex)$);
+\draw[semithick] (n_initiator.south) -- (end_initiator);
+\draw[fill=black] ($(end_initiator)+(-1em,0)$) rectangle ($(end_initiator)+(1em,-0.6ex)$);
+
+\coordinate (end_attacker) at ($(end_initiator-|n_attacker)$);
+\draw[semithick] (n_attacker.south) -- (end_attacker);
+\draw[fill=black] ($(end_attacker)+(-1em,0)$) rectangle ($(end_attacker)+(1em,-0.6ex)$);
+
+\coordinate (end_responder) at ($(end_initiator-|n_responder)$);
+\draw[semithick] (n_responder.south) -- (end_responder);
+\draw[fill=black] ($(end_responder)+(-1em,0)$) rectangle ($(end_responder)+(1em,-0.6ex)$);
+
+\node[PREPARATION, minimum width=25em] (n_auth) at ($(n_attacker.south)+(0,-1ex)$) {
+    Legacy $|$ Secure Authentication
+};
+
+\coordinate (c_init_ks) at ($(n_auth.south-|n_initiator)+(0,-3.2ex)$);
+\coordinate (c_atta_ks) at ($(c_init_ks-|n_attacker)$);
+\draw[ARROW] (c_init_ks) -- (c_atta_ks) node[midway,above=-0.3ex]{KeySize:16};
+
+\coordinate (c_atta_ks) at ($(c_atta_ks)+(0,-1ex)$);
+\coordinate (c_res_ks) at ($(c_atta_ks-|n_responder)$);
+\draw[ARROW] (c_atta_ks) -- (c_res_ks) node[midway,above=-0.3ex]{KeySize:\textcolor{xhs_red}{1}};
+
+\coordinate (c_res_accept) at ($(c_res_ks)+(0,-3.2ex)$);
+\coordinate (c_atta_accept) at ($(c_res_accept-|n_attacker)$);
+\draw[ARROW] (c_res_accept) -- (c_atta_accept) node[midway,above=-0.3ex]{ACCEPT};
+
+\coordinate (c_atta_accept) at ($(c_atta_accept)+(0,-1ex)$);
+\coordinate (c_init_accept) at ($(c_atta_accept-|n_initiator)$);
+\draw[ARROW] (c_atta_accept) -- (c_init_accept) node[midway,above=-0.3ex]{KeySize:\textcolor{xhs_red}{1}};
+
+\coordinate (c_init_accept) at ($(c_init_accept)+(0,-3.2ex)$);
+\coordinate (c_atta_accept) at ($(c_init_accept-|n_attacker)$);
+\draw[ARROW] (c_init_accept) -- (c_atta_accept) node[midway,above=-0.3ex]{ACCEPT};
+
+\node[ACTION] (n_atta_accept) at ($(c_atta_accept)+(0,-1ex)$) {Drop ACCEPT};
+
+\coordinate (c_init_en) at ($(n_atta_accept.south-|n_initiator)+(0,-1ex)$);
+\coordinate (c_atta_en) at ($(c_init_en-|n_attacker)$);
+\draw[ARROW] (c_init_en) -- (c_atta_en) node[midway,above=-0.3ex]{EnRand};
+
+\coordinate (c_atta_en) at ($(c_atta_en)+(0,-1ex)$);
+\coordinate (c_res_en) at ($(c_atta_en-|n_responder)$);
+\draw[ARROW] (c_atta_en) -- (c_res_en) node[midway,above=-0.3ex]{EnRand};
+
+\node[ACTION] (n_init_sk) at ($(c_init_en)+(0,-1ex)$) {Derive SK$'$\\\textcolor{xhs_red}{$\text{SK}_{low}$} $\leftarrow$ \textcolor{xhs_red}{SK$'$[1:1]}};
+\node[ACTION] (n_res_sk) at ($(c_res_en)+(0,-1ex)$) {Derive SK$'$\\\textcolor{xhs_red}{$\text{SK}_{low}$} $\leftarrow$ \textcolor{xhs_red}{SK$'$[1:1]}};
+
+\coordinate (c_res_encrypted) at ($(n_res_sk.south)+(0,-3ex)$);
+\coordinate (c_atta_encrypted) at ($(c_res_encrypted-|n_attacker)$);
+\draw[ARROW] (c_res_encrypted) -- (c_atta_encrypted) node[midway,above=-0.3ex,xshift=-0.3em]{$\{\text{ACCEPT}\}_{\textcolor{xhs_red}{\text{SK}_{low}}}$};
+
+\node[ACTION] (n_atta_bf) at ($(c_atta_encrypted)+(0,-1ex)$) {Brute Force \textcolor{xhs_red}{$\text{SK}_{low}$}};
+
+\coordinate (c_atta_encrypted) at ($(n_atta_bf.south)+(0,-3ex)$);
+\coordinate (c_init_encrypted) at ($(c_atta_encrypted-|n_initiator)$);
+\draw[ARROW] (c_atta_encrypted) -- (c_init_encrypted) node[midway,above=-0.3ex,xshift=-0.3em]{$\{\text{ACCEPT}\}_{\textcolor{xhs_red}{\text{SK}_{low}}}$};
+
+\end{tikzpicture}
+
+\end{document}

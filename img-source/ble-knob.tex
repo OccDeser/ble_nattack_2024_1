@@ -1,0 +1,102 @@
+\documentclass[class={IEEEtran}]{standalone}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{pifont}
+\usepackage{xcolor}
+\definecolor{xhs_red}{HTML}{c13c33}
+
+\newcommand{\whiteding}[1]{\large{\ding{\numexpr171+#1\relax}}}
+
+\pagestyle{empty}
+
+\usetikzlibrary{shapes.geometric,shapes.arrows,positioning,calc,arrows.meta,math}
+
+\tikzset{AGENT/.style={rectangle,minimum width=6.5em,minimum height=3.5ex,draw,semithick,align=flush center, anchor=north}}
+\tikzset{ACTION/.style={rectangle,rounded corners,draw,semithick,align=flush center,fill=white}, anchor=north}
+\tikzset{ARROW/.style={thick, -stealth}}
+\tikzset{DARROW/.style={<->,>=latex, line width=4ex, gray!20}}
+\tikzset{PREPARATION/.style={rectangle,draw,semithick,align=flush center,fill=white,dashed, anchor=north}}
+
+
+\begin{document}
+\begin{tikzpicture}
+
+\node[AGENT] (n_initiator) {Initiator};
+\node[AGENT, right=0.08\textwidth of n_initiator] (n_attacker) {\textcolor{xhs_red}{Attacker}};
+\node[AGENT, right=0.08\textwidth of n_attacker] (n_responder) {Responder};
+
+\coordinate (end_initiator) at ($(n_initiator.south)+(0,-55ex)$);
+\draw[semithick] (n_initiator.south) -- (end_initiator);
+\draw[fill=black] ($(end_initiator)+(-1em,0)$) rectangle ($(end_initiator)+(1em,-0.6ex)$);
+
+\coordinate (end_attacker) at ($(end_initiator-|n_attacker)$);
+\draw[semithick] (n_attacker.south) -- (end_attacker);
+\draw[fill=black] ($(end_attacker)+(-1em,0)$) rectangle ($(end_attacker)+(1em,-0.6ex)$);
+
+\coordinate (end_responder) at ($(end_initiator-|n_responder)$);
+\draw[semithick] (n_responder.south) -- (end_responder);
+\draw[fill=black] ($(end_responder)+(-1em,0)$) rectangle ($(end_responder)+(1em,-0.6ex)$);
+
+\coordinate (c_init_ks) at ($(n_initiator.south-|n_initiator)+(0,-3.2ex)$);
+\coordinate (c_atta_ks) at ($(c_init_ks-|n_attacker)$);
+\draw[ARROW] (c_init_ks) -- (c_atta_ks) node[midway,above=-0.3ex]{$\text{KeySize}_\text{I}$:16};
+
+\coordinate (c_atta_ks) at ($(c_atta_ks)+(0,-1ex)$);
+\coordinate (c_res_ks) at ($(c_atta_ks-|n_responder)$);
+\draw[ARROW] (c_atta_ks) -- (c_res_ks) node[midway,above=-0.3ex]{$\text{KeySize}_\text{I}$:\textcolor{xhs_red}{7}};
+
+\coordinate (c_res_ks) at ($(c_res_ks)+(0,-3.2ex)$);
+\coordinate (c_atta_ks) at ($(c_res_ks-|n_attacker)$);
+\draw[ARROW] (c_res_ks) -- (c_atta_ks) node[midway,above=-0.3ex]{$\text{KeySize}_\text{R}$:16};
+
+\coordinate (c_atta_ks) at ($(c_atta_ks)+(0,-1ex)$);
+\coordinate (c_init_ks) at ($(c_atta_ks-|n_initiator)$);
+\draw[ARROW] (c_atta_ks) -- (c_init_ks) node[midway,above=-0.3ex]{$\text{KeySize}_\text{R}$:\textcolor{xhs_red}{7}};
+
+\node[PREPARATION, minimum width=25em] (n_user) at ($(c_init_ks-|n_attacker)+(0,-1.5ex)$) {
+    Pair Phase 2 \\
+    JW $|$ NC $|$ PE $|$ OOB
+};
+
+\node[ACTION] (n_initiator_ltk) at ($(n_user.south-|n_initiator)+(0,-1ex)$) {Derive LTK$'$ \\ \textcolor{xhs_red}{$\text{LTK}_{low}$} $\leftarrow$ \textcolor{xhs_red}{LTK$'$[1:7]}};
+\node[ACTION] (n_responder_ltk) at ($(n_user.south-|n_responder)+(0,-1ex)$) {Derive LTK$'$ \\ \textcolor{xhs_red}{$\text{LTK}_{low}$} $\leftarrow$ \textcolor{xhs_red}{LTK$'$[1:7]}};
+
+\coordinate (c_init_ltk) at ($(n_initiator_ltk.south)+(0,-3.2ex)$);
+\coordinate (c_atta_ltk) at ($(c_init_ltk-|n_attacker)$);
+\draw[ARROW] (c_init_ltk) -- (c_atta_ltk) node[midway,above=-0.3ex,xshift=0em]{$\text{IV}_\text{I}$, $\text{SKD}_\text{I}$};
+
+\coordinate (c_atta_ltk) at ($(c_atta_ltk)+(0,-1ex)$);
+\coordinate (c_res_ltk) at ($(c_atta_ltk-|n_responder)$);
+\draw[ARROW] (c_atta_ltk) -- (c_res_ltk) node[midway,above=-0.3ex,xshift=-0em]{$\text{IV}_\text{I}$, $\text{SKD}_\text{I}$};
+
+\coordinate (c_res_ltk) at ($(c_res_ltk)+(0,-3.2ex)$);
+\coordinate (c_atta_ltk) at ($(c_res_ltk-|n_attacker)$);
+\draw[ARROW] (c_res_ltk) -- (c_atta_ltk) node[midway,above=-0.3ex,xshift=-0em]{$\text{IV}_\text{R}$, $\text{SKD}_\text{R}$};
+
+\coordinate (c_atta_ltk) at ($(c_atta_ltk)+(0,-1ex)$);
+\coordinate (c_init_ltk) at ($(c_atta_ltk-|n_initiator)$);
+\draw[ARROW] (c_atta_ltk) -- (c_init_ltk) node[midway,above=-0.3ex,xshift=0em]{$\text{IV}_\text{R}$, $\text{SKD}_\text{R}$};
+
+\node[ACTION] (n_initiator_sk) at ($(c_init_ltk)+(0,-1ex)$) {Derive \textcolor{xhs_red}{$\text{SK}_{low}$}};
+\node[ACTION] (n_responder_sk) at ($(c_res_ltk)+(0,-1ex)$) {Derive \textcolor{xhs_red}{$\text{SK}_{low}$}};
+
+\coordinate (c_init_sk) at ($(n_initiator_sk.south)+(0,-1ex)$);
+\coordinate (c_atta_sk) at ($(c_init_sk-|n_attacker)$);
+\draw[ARROW] (c_init_sk) -- (c_atta_sk) node[midway,above=-0.3ex,xshift=1em]{$\{\text{RspPkt}\}_{\textcolor{xhs_red}{\text{SK}_{low}}}$};
+
+\node[ACTION] (n_attacker_sk) at ($(c_atta_sk)+(0,-1ex)$) {
+    Brute-force $\textcolor{xhs_red}{\text{LTK}_{low}}$\\
+    Derive $\textcolor{xhs_red}{\text{SK}_{low}}$
+};
+
+\coordinate (c_atta_sk) at ($(n_attacker_sk.south)+(0,-3.2ex)$);
+\coordinate (c_res_sk) at ($(c_atta_sk-|n_responder)$);
+\draw[ARROW] (c_atta_sk) -- (c_res_sk) node[midway,above=-0.3ex,xshift=1em]{$\{\text{RspPkt}\}_{\textcolor{xhs_red}{\text{SK}_{low}}}$};
+
+\node[PREPARATION, minimum width=25em] (n_distribution) at ($(c_res_sk-|n_attacker)+(0,-1ex)$) {
+    Distribute Keys
+};
+
+\end{tikzpicture}
+
+\end{document}

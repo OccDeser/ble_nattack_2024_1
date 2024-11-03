@@ -1,0 +1,24 @@
+\documentclass[class={IEEEtran}]{standalone}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{bm}
+
+\newcommand{\Term}[1]{\text{\ttfamily #1}}
+\newcommand{\TermBF}[1]{\text{\ttfamily \textbf{#1}}}
+\newcommand{\String}[1]{\text{\textcolor{gray}{\ttfamily "#1"}}}
+
+\linespread{1.25}
+
+\begin{document}
+
+$
+\begin{array}{rcl}
+    \TermBF{Rule}   &\bm{::=}& \String{rule} \quad \Term{Ident} \quad \String{:} \quad [\Term{Let}]\\
+                    &   & \hspace{3.5em} \Term{Facts} \quad (\String{-->} \; | \; \String{--[} \; \Term{Facts} \; \String{]->}) \quad \Term{Facts} \\
+    \TermBF{Facts}  &\bm{::=}& \String{[} \quad \Term{Fact} \quad (\String{,} \quad \Term{Fact})^* \quad \String{]}  \\
+    \TermBF{Fact}   &\bm{::=}& \Term{Ident} \quad \String{(} \quad \Term{Term} \quad (\String{,} \quad \Term{Term})^* \quad \String{)}  \\
+    \TermBF{Let}    &\bm{::=}& \String{let} \quad ( \Term{Term} \; \String{=} \; \Term{Term} )^+ \quad \String{in}\\
+\end{array}
+$
+
+\end{document}

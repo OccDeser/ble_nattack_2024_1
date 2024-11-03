@@ -1,0 +1,59 @@
+\documentclass[class={IEEEtran}]{standalone}
+\usepackage{tikz}
+\usepackage{graphicx}
+\pagestyle{empty}
+\usetikzlibrary{shapes.geometric,shapes.arrows,positioning,calc,arrows.meta,math}
+
+\tikzset{MODULE/.style={rectangle,minimum width=5.5em,minimum height=6.5ex,draw,semithick,align=flush center}}
+\tikzset{LABEL/.style={minimum width=5.5em,minimum height=6.5ex,anchor=north,align=flush center}}
+
+
+% \linespread{1.25}
+
+\begin{document}
+\begin{tikzpicture}[my/.style={-{Triangle[width=\the\dimexpr1.8\pgflinewidth,length=\the\dimexpr0.8\pgflinewidth]}}]
+
+    % \draw[line width=6pt,my](0,0) -- (1, 0); 
+    % \draw[line width=8pt,my](2,0) -- (3, 0);
+
+    \coordinate (input) at (0, 0);
+    \node at (input) {\includegraphics[width=1.5cm]{assets/file}};
+    \node[LABEL] at ($(input.south)+(0, -0.75cm)$) {Low-Entropy\\Labelled Model};
+
+    \node[MODULE, right=0.1\textwidth of input] (parser) {Model\\Parser};
+
+    \coordinate (IP0) at ($(input)+(0.7cm,0ex)$);
+    \coordinate (IP1) at ($(parser.west)+(-0.1cm,0ex)$);
+    \draw[line width=8pt,my](IP0) -- (IP1);
+    
+    \node[MODULE, right=0.06\textwidth of parser, yshift=1.5cm, minimum width=7em] (interpreter) {Label\\Interpretation};
+    \coordinate (PI0) at ($(parser.north east)+(0.1cm,0ex)$);
+    \coordinate (PI1) at ($(interpreter.south west)+(-0.1cm,0ex)$);
+    \draw[line width=8pt,my](PI0) -- (PI1);
+
+    \node[MODULE, right=0.06\textwidth of parser, yshift=-1.5cm, minimum width=7em] (generator) {Derivation\\Generation};
+    \coordinate (PG0) at ($(parser.south east)+(0.1cm,0ex)$);
+    \coordinate (PG1) at ($(generator.north west)+(-0.1cm,0ex)$);
+    \draw[line width=8pt,my](PG0) -- (PG1);
+
+
+    \node[MODULE, right=0.06\textwidth of generator, yshift=1.5cm] (completer) {Oracle\\Complement};\
+    \coordinate (IC0) at ($(interpreter.south east)+(0.1cm,0ex)$);
+    \coordinate (IC1) at ($(completer.north west)+(-0.1cm,0ex)$);
+    \draw[line width=8pt,my](IC0) -- (IC1);
+    \coordinate (GC0) at ($(generator.north east)+(0.1cm,0ex)$);
+    \coordinate (GC1) at ($(completer.south west)+(-0.1cm,0ex)$);
+    \draw[line width=8pt,my](GC0) -- (GC1);
+
+    \coordinate (output) at ($(completer.east)+(0.1\textwidth,0ex)$);
+    \node at (output) {\includegraphics[width=1.5cm]{assets/file}};
+    \node[LABEL] at ($(output.south)+(0, -0.75cm)$) {Tamarin\\Model};
+
+    \coordinate (OC0) at ($(completer.east)+(0.1cm,0ex)$);
+    \coordinate (OC1) at ($(output.west)+(-0.7cm,0ex)$);
+    \draw[line width=8pt,my](OC0) -- (OC1);
+
+
+\end{tikzpicture}
+
+\end{document}

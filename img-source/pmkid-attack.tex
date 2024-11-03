@@ -1,0 +1,97 @@
+\documentclass[class={IEEEtran}]{standalone}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{pifont}
+\usepackage{xcolor}
+\definecolor{xhs_red}{HTML}{c13c33}
+
+\newcommand{\whiteding}[1]{\large{\ding{\numexpr171+#1\relax}}}
+
+\pagestyle{empty}
+
+\usetikzlibrary{shapes.geometric,shapes.arrows,positioning,calc,arrows.meta,math}
+
+\tikzset{AGENT/.style={rectangle,minimum width=6.5em,minimum height=3.5ex,draw,semithick,align=flush center, anchor=north}}
+\tikzset{ACTION/.style={rectangle,rounded corners,draw,semithick,align=flush center,fill=white}, anchor=north}
+\tikzset{ARROW/.style={thick, -stealth}}
+\tikzset{DARROW/.style={<->,>=latex, line width=4ex, gray!20}}
+\tikzset{PREPARATION/.style={rectangle,draw,semithick,align=flush center,fill=white,dashed, anchor=north}}
+
+
+\begin{document}
+\begin{tikzpicture}
+
+\node[AGENT] (n_station) {Station};
+\node[AGENT, right=0.08\textwidth of n_station] (n_attacker) {\textcolor{xhs_red}{Attacker}};
+\node[AGENT, right=0.08\textwidth of n_attacker] (n_ap) {Access Point};
+
+\coordinate (end_station) at ($(n_station.south)+(0,-50ex)$);
+\draw[semithick] (n_station.south) -- (end_station);
+\draw[fill=black] ($(end_station)+(-1em,0)$) rectangle ($(end_station)+(1em,-0.6ex)$);
+
+\coordinate (end_attacker) at ($(end_station-|n_attacker)$);
+\draw[semithick] (n_attacker.south) -- (end_attacker);
+\draw[fill=black] ($(end_attacker)+(-1em,0)$) rectangle ($(end_attacker)+(1em,-0.6ex)$);
+
+\coordinate (end_ap) at ($(end_station-|n_ap)$);
+\draw[semithick] (n_ap.south) -- (end_ap);
+\draw[fill=black] ($(end_ap)+(-1em,0)$) rectangle ($(end_ap)+(1em,-0.6ex)$);
+
+\coordinate (c_msg1_ap) at ($(n_ap.south)+(0,-3.2ex)$);
+\coordinate (c_msg1_at) at ($(c_msg1_ap-|n_attacker)$);
+\draw[ARROW] (c_msg1_ap) -- (c_msg1_at) node[midway,above=-0.3ex]{\textbf{M1}(ANonce, PMKID)};
+
+\coordinate (c_msg1_at) at ($(c_msg1_at)+(0,-1ex)$);
+\coordinate (c_msg1_st) at ($(c_msg1_at-|n_station)$);
+\draw[ARROW] (c_msg1_at) -- (c_msg1_st) node[midway,above=-0.3ex]{\textbf{M1}(ANonce, PMKID)};
+
+\node[ACTION] (n_attacker_bf) at ($(c_msg1_at)+(0,-1ex)$) {
+    % Know \textcolor{xhs_red}{PMKID} \\
+    Brute-force \textcolor{xhs_red}{passphrase} \\
+    Derive PMK(PSK)
+};
+
+\node[ACTION] (n_station_anonce) at ($(c_msg1_st)+(0,-1.5ex)$) {Derive PTK};
+
+
+\coordinate (c_msg2_st) at ($(n_attacker_bf.south-|n_station)+(0,-3.2ex)$);
+\coordinate (c_msg2_at) at ($(c_msg2_st-|n_attacker)$);
+\draw[ARROW] (c_msg2_st) -- (c_msg2_at) node[midway,above=-0.3ex]{\textbf{M2}(SNonce)};
+
+\node[ACTION] (n_attack_ptk) at ($(c_msg2_at)+(0,-1ex)$) {
+    Derive \textcolor{xhs_red}{PTK}
+};
+
+\coordinate (c_msg2_at) at ($(n_attack_ptk.south)+(0,-3.2ex)$);
+\coordinate (c_msg2_ap) at ($(c_msg2_at-|n_ap)$);
+\draw[ARROW] (c_msg2_at) -- (c_msg2_ap) node[midway,above=-0.3ex]{\textbf{M2}(SNonce)};
+
+\node[ACTION] (n_ap_snonce) at ($(c_msg2_ap)+(0,-1ex)$) {Derive PTK};
+
+\coordinate (c_msg3_ap) at ($(n_ap_snonce.south)+(0,-3.2ex)$);
+\coordinate (c_msg3_at) at ($(c_msg3_ap-|n_attacker)$);
+\draw[ARROW] (c_msg3_ap) -- (c_msg3_at) node[midway,above=-0.3ex,]{\textbf{M3}($\{\text{GTK}\}_\text{PTK}$)};
+
+\node[ACTION] (n_attack_gtk) at ($(c_msg3_at)+(0,-1ex)$) {
+    Decrypt $\{\text{GTK}\}_\text{PTK}$\\
+    Get \textcolor{xhs_red}{GTK}
+};
+
+\coordinate (c_msg3_at) at ($(n_attack_gtk.south)+(0,-3.2ex)$);
+\coordinate (c_msg3_st) at ($(c_msg3_at-|n_station)$);
+\draw[ARROW] (c_msg3_at) -- (c_msg3_st) node[midway,above=-0.3ex]{\textbf{M3}($\{\text{GTK}\}_\text{PTK}$)};
+
+\coordinate (c_msg4_st) at ($(c_msg3_st)+(0,-3.2ex)$);
+\coordinate (c_msg4_at) at ($(c_msg4_st-|n_attacker)$);
+\draw[ARROW] (c_msg4_st) -- (c_msg4_at) node[midway,above=-0.3ex]{\textbf{M4}};
+
+\coordinate (c_msg4_at) at ($(c_msg4_at)+(0,-1ex)$);
+\coordinate (c_msg4_ap) at ($(c_msg4_at-|n_ap)$);
+\draw[ARROW] (c_msg4_at) -- (c_msg4_ap) node[midway,above=-0.3ex]{\textbf{M4}};
+
+\node[ACTION] (n_station_gtk) at ($(c_msg4_st)+(0,-1ex)$) {Install GTK, PTK};
+\node[ACTION] (n_ap_gtk) at ($(c_msg4_ap)+(0,-1ex)$) {Install PTK};
+
+\end{tikzpicture}
+
+\end{document}
