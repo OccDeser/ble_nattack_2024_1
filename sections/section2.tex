@@ -2,14 +2,9 @@
 
 \begin{document}
 
-\section{Background}
+\section{Background} \label{sec:2background}
 
-% 在密码学中，熵是衡量系统随机性和不确定性的重要概念。特别是密钥的熵，指的是密钥空间的大小和复杂性，它直接关系到密码系统的安全性。高熵密钥意味着更大的密钥空间，从而增加了攻击者通过暴力破解找到密钥的难度。因此，确保密钥具有足够的熵是设计安全密码协议的关键因素之一。
 
-In cryptographic systems, entropy is a fundamental concept used to quantify the randomness and uncertainty inherent in the system.
-Specifically, entropy pertains to the size and complexity of the key space, which is directly correlated with the security of the cryptographic system.
-A key with high entropy demotes a larger key space, thereby augmenting the difficulty for an attacker to recover the key through brute-force methods.
-Though ensuring that a key possesses sufficient entropy is a critical factor in the design of secure cryptographic protocols, low-entropy keys seam to be inevitable in practice. There are several reasons for this, such as performance, power consumption, compatibility, and user experience.
 
 % % 历史上，密钥熵在密码学研究中一直占据重要地位。早期的密码系统往往由于密钥熵不足而遭遇失败。例如，经典的维吉尼亚密码（Vigenère cipher）由于其密钥空间有限而易于被频率分析破解。随着密码学的发展，研究人员不断探索新的方法来增加密钥的熵和复杂性。例如，Shannon在其信息理论中提出了熵的概念，为现代密码学的发展奠定了理论基础。
 
@@ -41,7 +36,7 @@ Though ensuring that a key possesses sufficient entropy is a critical factor in 
 
 In this section, we provide an overview of the concepts of entropy and brute-force attacks.
 Then we discuss some wide-known protocols and the low-entropy keys involved in them.
- we introduce the TAMARIN prover\cite{meier2013tamarin}, one of state-of-the-art symbolic tools for verifying cryptographic protocols.
+ we introduce the TAMARIN prover\cite{meier2013tamarin}, one of state-of-the-art symbolic tools for cryptographic protocols verification.
 
 
 \subsection{Entropy and brute force attacks}
@@ -175,11 +170,13 @@ In the final phase, the Initiator and Responder utilize the LTK to derive a Sess
 This SK is then employed to secure the channel over which transport-specific keys are distributed, such as the Identity Resolving Key (IRK) and Identity Address information.
 
 \subsubsection{Bluetooth Classic}
-% Bluetooth Classic，也称为BR/EDR（Basic Rate/Enhanced Data Rate），是最早期的Bluetooth标准，主要面向高数据速率的应用，如音频传输、文件传输和串行通信。BC标准中规定了链路层安全机制，为上层应用提供了机密性、完整性以及认证性。配对被用来在两个蓝牙设备间协商长期密钥LK。标准定义的配对方法是 Secure Simple Pairing{cite}，该流程使用了ECDH里协商密钥。在配对之后，session establishment 允许设备从LK以及其他一些参数派生出 Session Key(SK)，来保护后续的通信。
-BC, also referred to as BR/EDR (Basic Rate/Enhanced Date Rate), represents the initial Bluetooth standard, predominantly designed for applications requiring high data transfer rates such as audio streaming , file transfer and serial communication.
+BC, also referred to as BR/EDR (Basic Rate/Enhanced Date Rate), represents the initial Bluetooth standard, 
+predominantly designed for applications requiring high data transfer rates such as audio streaming , file transfer and serial communication.
 The BC standard delineates link layer security mechanisms that ensure confidentiality , integrity and authentication for higher-layer applications.
 Pairing is employed to negotiate a long-term key (LK) between tow Bluetooth devices.
-The standard-defined pairing method, Secure Simple Pairing\cite{bluetooth6}, utilizes Elliptic Curve Diffie-Hellman (ECDH) for key agreement.
+Subsequent to the pairing procedure, the session establishment protocol enables devices to derive a Session Key (SK) from the LK and other parameters, to safeguard subsequent communication. \autoref{fig:bc-session} illustrates this phase between paired BC devices.
+The devices involved in BC session establishment are designated as the central device and the peripheral device.
+Prior to the initiation of the session, both entities share LK.
 
 \begin{figure}[hbtp]
     \centering
@@ -188,35 +185,34 @@ The standard-defined pairing method, Secure Simple Pairing\cite{bluetooth6}, uti
     \label{fig:bc-session}
 \end{figure}
 
-Subsequent to the pairing procedure, the session establishment protocol enables devices to derive a Session Key (SK) from the LK and other parameters, to safeguard subsequent communication. \autoref{fig:bc-session} illustrates this phase between paired BC devices.
-
-Like BLE, the devices involved in BC session establishment protocol are designated as the central device and the peripheral device.
-Prior to the initiation of the session, both entities share a Link Key, denoted as LK.
-
 Before establishing the encrypted session, the central device and peripheral build a link connection first. 
-In this phase, the devices exchange their device features, including FeatureSC which means whether the device supports Secure Connections.
-After the link connection is established, the two devices start the authentication process. There are two methods to authenticate the devices, one is the secure authentication and the other is the legacy authentication. If both devices support Secure Connections, they will use the secure authentication method, otherwise, they will use the legacy authentication method.
-In the secure authentication, both devices will authenticate each other. They will exchange two authentication random numbers, $\text{AuRand}_{\text{I}}$ and $\text{AuRand}_{\text{R}}$. Then they will use the Link Key to compute $\text{SERS}_{\text{I}}$, $\text{SERS}_{\text{R}}$ respectively and the Authenticated Channel Offset (ACO) based on the exchanged random numbers. Both of them will verify the correctness of the received SERS. If the verification is successful, the next phase will be started.
-In the legacy authentication, only the central device will authenticate the peripheral device. The central device will send a random number $\text{AuRand}$ to the peripheral device. The peripheral device then computes the response $\text{SERS}$ and ACO based on the received random number and the Link Key. After the central device verifies the correctness of the received SERS, they come to the next phase.
+In this phase, the devices exchange their device features, like FeatureSC which means whether the device supports Secure Connections.
+After the link connection is established, the two devices start the authentication process. 
+There are two methods to authenticate the devices:
+\begin{itemize}[left=0.5em]
+    \item \textbf{Legacy Authentication}: Only the central device will authenticate the peripheral device.
+    \item \textbf{Secure Authentication}: Both devices will authenticate each other.
+\end{itemize}
+During the both authentication methods, the two devices will using the Link Key to compute the Authenticated Channel Offset (ACO) based on the exchanged random numbers. 
+If both devices support Secure Connections, they will use the secure authentication method, otherwise, they will use the legacy authentication method.
 In the following phase, the central and peripheral devices engage in negotiation regarding the length of the session key.
 In the final phase, the central device dispatches an encrypted random number, EnRand, to the peripheral device.
 Utilizing EnRand in conjunction with ACO, both devices generate the session key SK.
-The peripheral device then encrypts a predetermined format \Tfunction{ACCEPT} message using SK and transmits it to the central device.
+The peripheral device then encrypts an \Tfunction{ACCEPT} message using SK and transmits it to the central device.
 The successful decryption of this message by the central device signifies the establishment of the encrypted session.
 
 \subsection{Tamarin Prover}
-Tamarin Prover is a state-of-the-art formal verification tool for cryptographic protocols.
+The Tamarin prover is a state-of-the-art formal verification tool for cryptographic protocols.
 It provides a powerful and expressive language for modeling protocols and properties, allowing researchers to analyze the security of their designs rigorously.
 Tamarin supports a wide range of cryptographic primitives and protocols, making it a versatile tool for formal analysis.
-By leveraging Tamarin, researchers can systematically verify the correctness and security properties of their protocols, including resistance to known attacks and vulnerabilities.
-The tool's automation capabilities enable researchers to explore various scenarios and configurations, providing insights into potential weaknesses and areas for improvement.
-Tamarin Prover has been widely used in academia and industry to analyze and verify the security of cryptographic protocols, making it a valuable asset for researchers in the field of cryptography and security.
+In TAMARIN, we use terms to represent messages and the behavior of protocols and adversaries are captured through multiset rewriting rules. 
+TAMARIN also allows using logic formulas to specific security properties of protocols.
 
-% \subsubsection{multiset rewriting rules}
+\subsubsection{Messages and terms}
 
-% \subsubsection{functions and equations}
+\subsubsection{Protocols and multiset rewriting rules}
 
-% \subsubsection{pattern matching}
+\subsubsection{Properties and logic formulas}
 
 
 \end{document}
