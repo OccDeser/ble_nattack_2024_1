@@ -4,24 +4,33 @@
 
 \section{Introduction}
 
-In cryptographic systems, entropy is a fundamental concept used to quantify the randomness and uncertainty inherent in the system.
-Specifically, entropy pertains to the size and complexity of the key space, which is directly correlated with the security of the cryptographic system.
-A key with high entropy demotes a larger key space, thereby augmenting the difficulty for an attacker to recover the key through brute-force methods.
-Ideally keys in cryptographic protocols are considered ``perfect'', meaning that an attacker cannot recover the key from any ciphertext. 
-In the formal analysis of security protocols using symbolic models, such \emph{perfect encryption assumption} is commonly employed.
+% In cryptographic systems, entropy is a fundamental concept used to quantify the randomness and uncertainty inherent in the system.
+% Specifically, entropy pertains to the size and complexity of the key space, which is directly correlated with the security of the cryptographic system.
+% A key with high entropy demotes a larger key space, thereby augmenting the difficulty for an attacker to recover the key through brute-force methods.
+% Ideally keys in cryptographic protocols are considered ``perfect'', meaning that an attacker cannot recover the key from any ciphertext. 
+% In the formal analysis of security protocols using symbolic models, such \emph{perfect encryption assumption} is commonly employed.
 
-However, in practice, achieving an absolutely perfect key is unattainable. 
-An attacker with adequate computational resources can potentially brute force any key from the corresponding ciphertext. 
-The recent advancements in chip technology have greatly enhanced attackers' computational capabilities, which in turn challenges the security of traditional key lengths previously deemed secure. 
-Unfortunately, some vulnerabilities in protocols associated with low-entropy keys have been exploited by attackers, exemplified by the PMKID \cite{pmkidattack} and KNOB \cite{antonioli2019knob} attacks. 
-These attacks compromise the security properties of the protocols by recovering low-entropy keys.
+% However, in practice, achieving an absolutely perfect key is unattainable. 
+% An attacker with adequate computational resources can potentially brute force any key from the corresponding ciphertext. 
+% The recent advancements in chip technology have greatly enhanced attackers' computational capabilities, which in turn challenges the security of traditional key lengths previously deemed secure. 
+% Unfortunately, some vulnerabilities in protocols associated with low-entropy keys have been exploited by attackers, exemplified by the PMKID \cite{pmkidattack} and KNOB \cite{antonioli2019knob} attacks. 
+% These attacks compromise the security properties of the protocols by recovering low-entropy keys.
 
-There are several reasons for the adoption of low-entropy keys in modern cryptographic design. 
-First, some protocols might regard certain key lengths as secure; however, these can become susceptible to attacks over the years.
-Second, current versions of such protocols might maintain compatibility with these obsolete designs for the sake of backward compatibility.
-Third, some protocols opt for shorter keys to cater to devices with limited computational or power resources \cite{bluetooth6}. 
-Lastly, in pursuit of user-friendliness, certain protocols permit the use of user-selected passwords as keys \cite{80211i}, which may result in the choice of easily predictable password combinations.
+% There are several reasons for the adoption of low-entropy keys in modern cryptographic design. 
+% First, some protocols might regard certain key lengths as secure; however, these can become susceptible to attacks over the years.
+% Second, current versions of such protocols might maintain compatibility with these obsolete designs for the sake of backward compatibility.
+% Third, some protocols opt for shorter keys to cater to devices with limited computational or power resources \cite{bluetooth6}. 
+% Lastly, in pursuit of user-friendliness, certain protocols permit the use of user-selected passwords as keys \cite{80211i}, which may result in the choice of easily predictable password combinations.
 
+Entropy is a fundamental concept which is directly correlated with the security of the cryptographic system, where a key with high entropy denotes difficulty for an attacker to recover the key from the ciphertext.
+However, in practice, modern cryptographic protocols usually tolerate low-entropy keys to xxxxxxx.
+% such as WPA2-PSK, Bluetooth Low Energy and Bluetooth Classic. 将协议有机地引入到上面的这句话中
+This introduces a security issue about recovering low-entropy keys in these protocols, such as PMKID~\cite{pmkidattack} and KNOB~\cite{antonioli2019knob} attacks.
+
+% 使用符号模型分析协议，pioneered by Dolve et al.~\cite{}，是主流的确保协议设计安全的方法。
+% 然而符号模型假设xxx，不能直接用来推到密钥熵。
+% 现有研究xxx，他们有xxx缺陷。
+% 或者，符号模型下分析协议密钥熵具有xxx挑战。
 Using symbolic models to formally analyze protocols has become a mainstream research approach, and a great number of  works\cite{basin2021emv,basin20185G,cremers2017tls13} successfully confirmed this.
 This raises a pivotal question: how can one capture the brute-force behaviors of attackers within the existing symbolic models?
 A few of studies\cite{shi2023blesc, claverie2023tamarin} have proposed their solutions by manually identifying keys that vulnerable to be compromised and defining specific rules that allow the direct revelation of these keys' values to attackers.
@@ -29,6 +38,7 @@ However, these studies didn't provide a neither general or automated method to a
 For one thing, this approach requires manual analysis of the vulnerabilities inherent in the protocol keys instead of automated analysis.
 For another, manual analysis is inherently constrained, as it can only provide attacker with limited ways to compromise low-entropy keys and fails to provide a comprehensive strategy for attackers to exploit low-entropy keys effectively.
 
+% 我们如何解决这些挑战，我们是怎么做的
 This paper aims to bridge this gap by introducing a generalized and automated method for modeling low-entropy keys and the adversary's brute-force capabilities within symbolic analysis frameworks. 
 We focus on enhancing the TAMARIN Prover\cite{meier2013tamarin}, to support the modeling of low-entropy keys and to describe generalized brute-force attacks by adversaries. 
 TAMARIN Prover is a state-of-the-art protocol verification tool widely used for formal analysis of many protocols, including Bluetooth\cite{shi2023blesc,claverie2023tamarin, jangid2023bluepe}, TLS\cite{cremers2017tls13}, 5G-AKA\cite{basin20185G, wang20215G}, etc.
@@ -36,6 +46,8 @@ Our methodology involves extending the TAMARIN Prover's syntax with new keywords
 We develop a compilation tool that translates the extended syntax into formal models recognizable by the TAMARIN Prover. 
 This tool automatically generates necessary facts and rules, including key-breaking oracles that simulate an adversary's ability to compromise low-entropy keys when certain conditions are met.
 Our methodology can be employed to identify and address security issues arising from low entropy within protocols.
+
+% 有什么效果，结论，发现。
 
 \noindent\textbf{Contributions.}
 \begin{itemize}[leftmargin=*]
