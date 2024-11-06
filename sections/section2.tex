@@ -36,7 +36,7 @@
 
 In this section, we provide an overview of the concepts of entropy and brute-force attacks.
 Then we discuss some wide-known protocols and the low-entropy keys involved in them.
- we introduce the TAMARIN prover\cite{meier2013tamarin}, one of state-of-the-art symbolic tools for cryptographic protocols verification.
+We introduce the TAMARIN prover\cite{meier2013tamarin}, one of state-of-the-art symbolic tools for cryptographic protocols verification.
 
 
 \subsection{Entropy and brute force attacks}
@@ -57,28 +57,28 @@ For an adversary employing exhaustive search techniques to locate the key, the n
 Therefore, an increase in the key's entropy directly correlates with a higher level of difficulty for an attacker attempting to restore the key.
 
 % 这种遍历密钥空间的方法，不断地尝试密钥，直到找到正确的密钥，就是暴力破解攻击。通过是否需要与目标系统进行实时交互可以分为在线攻击与离线攻击。在线的攻击，攻击者需要不断地将尝试的密钥发送给目标系统以判断密钥是否正确。离线攻击，通常是通过获取目标系统的密文，攻击者可以在不与目标系统交互的情况下，尝试所有的密钥通过解密密文的方式来鉴别密钥。通常来说在线的暴力破解攻击主要受限于网络速度和目标系统的响应时间，而离线的攻击主要受限于攻击者的计算速度。离线暴力破解攻击的运行效率完全掌握在攻击者手中，密钥因此需要具有足够的熵来抵御这种攻击。因此本文主要研究的就是离线的暴力破解攻击，后文提到的暴力破解攻击如果没有特别制定，均指离线的暴力破解攻击。
-The method of exhaustively searching the key space by continually attempting different keys until the correct one is identified is termed a brute-force attack.
-Brute-force attacks can be classified into online and offline categories based on the necessity for real-time interaction with the target system.
+The method of exhaustively searching the key space by continually attempting different keys until the correct one is identified as a brute-force attack.
+Brute-force attacks can be classified into two categories, online and offline attacks, based on the necessity for real-time interaction with the target system.
 In an online attack, the adversary must persistently transmit the attempted keys to the target system to verify their correctness.
-Conversely, in an offline attack, the adversary acquires the ciphertext or other calculation result from the target system and can attempt all possible keys by decrypting the ciphertext, thereby obviating the need for interaction with the target system.
+% Conversely, in an offline attack, the adversary acquires the ciphertext or other calculation result from the target system and can attempt all possible keys by decrypting the ciphertext, thereby obviating the need for interaction with the target system.
+In an offline one, the adversary obtains the ciphertext and can try all possible keys to decrypt it, without needing to interact with the target system.
 
-Typically, the efficacy of online brute-force attacks is constrained by network latency and the response time of the target system 
-and offline attacks are predominantly limited by the computational power available to the attacker.
-The operational efficiency of offline brute-force attacks is entirely governed by the attacker's capabilities; therefore, the cryptographic key must possess adequate entropy to resist such attacks effectively.
+Typically, the efficiency of online brute-force attacks is constrained by network latency and the response time of the target system and offline attacks are predominantly limited by the attacker's computational resources.
+The operational efficiency of offline brute-force attacks is entirely governed by the attacker's capabilities; therefore, the cryptographic key must possess adequate entropy to resist such attacks.
 In this paper, we primarily focuses on the offline brute-force attacks.
 Throughout the subsequent sections, any reference to brute-force attacks, unless explicitly stated otherwise, pertains to offline brute-force attacks.
 
 \subsection{Protocols with low-entropy keys} 
 Low-entropy keys applied in in cryptographic protocols are not rare in practice. 
-Just as we mentioned before, the compatibility for old devices, the power consumption for low-power devices, 
-and the user experience prevent protocols from guaranteeing all keys of them possess high entropy.
-The use of low-entropy keys is a trade-off between security and practicality. A lot of wide used protocols have low-entropy keys in them, such as WPA2-PSK, Bluetooth Low Energy and Bluetooth Classic.
+Just as we mentioned before, the compatibility for old devices, the power consumption for low-power devices, and the user experience prevent protocols from guaranteeing all keys of them possess high entropy.
+The use of low-entropy keys is a trade-off between security and practicality. 
+A lot of wide used protocols have low-entropy keys in them, such as WPA2-PSK, Bluetooth Low Energy and Bluetooth Classic.
 
 \subsubsection{WPA2-PSK}
 % WPA与WPA2源于IEEE 802.11i标准，其中WPA作为过渡性解决方案，旨在修复WEP（Wired Equivalent Privacy）的安全漏洞，而WPA2则完整实现了IEEE 802.11i标准，提供更为完善的安全机制。WPA2-PSK（预共享密钥）是WPA2的一种简化模式，利用预共享密钥代替复杂的企业级认证过程，适用于不需要RADIUS服务器的小型网络。WPA2-PSK广泛应用于家庭、咖啡馆和中小型办公场所，因其配置简便且能够提供较高的安全性。
 Wi-Fi Protected Access (WPA) and WPA2 are both derived from the IEEE 802.11i standard \cite{80211i}.
 WPA2-PSK (Pre-Shared Key) is a simplified version of WPA2, using a pre-shared key instead of a complex enterprise-level authentication process, making it suitable for small networks without a RADIUS server.
-WPA2-PSK is widely deployed in home environments, cafes, and small to medium-sized offices due to its ease of configuration and strong security.
+WPA2-PSK is widely deployed in home environments, cafés, and small to medium-sized offices due to its ease of configuration and strong security.
 
 % WPA2的4-way Handshake是一种用于在无线网络中安全地生成和交换加密密钥的协议过程，确保客户端与接入点之间的通信安全。与企业级WPA2认证机制依赖于802.1X和RADIUS服务器进行动态密钥分配的方式有所不同，在WPA2-PSK（Pre-Shared Key）模式下，4-way Handshake利用预共享密钥进行身份验证，
 The 4-way handshake of is protocol designed to securely generate and exchange encryption keys within wireless networks, thereby ensuring secure communication between clients and access points.
@@ -105,49 +105,48 @@ In contrast to WPA2-Enterprise, which utilizes 802.1X and RADIUS servers for dyn
 %     PMKID = HMAC-SHA1-128(PSK, "PMK Name" || MAC_authenticator || MAC_supplicant)
 % \]
 % PMKID允许设备在重新连接时迅速完成身份验证。然而，由于PMK（PSK）的强度直接受用户选择的Passphrase决定，如果用户选择了弱Passphrase，攻击者可以通过暴力破解PMKID来获取PSK，从而破坏通信的安全性，这种攻击方式被称为PMKID攻击{cite}。
-\autoref{fig:4-way-handshake} illustrates the complete process of negotiating the Pairwise Transient Key (PTK) and Group Temporal Key (GTK) from the Pairwise Master Key (PMK) between the user device (supplicant) and access point (authenticator) via the 4-way handshake.
+\autoref{fig:4-way-handshake} illustrates the complete process of negotiating the Pairwise Transient Key~$PTK$ and Group Temporal Key~$GTK$ from the Pairwise Master Key~$PMK$ between the user device (supplicant) and access point (authenticator) via the 4-way handshake.
 
-WPA2-PSK uses the key derivation function PBKDF2 to generate the Pre-Shared Key (PSK) from the Passphrase and Service Set Identification (SSID), defined as follows:
+WPA2-PSK uses the key derivation function PBKDF2 to generate the Pre-Shared Key~$PSK$ from the Passphrase and Service Set Identification~$SSID$, defined as follows:
 \begin{equation}
-    \text{PSK} = PBKDF2(\text{Passphrase}, \text{SSID})
+    PSK = \text{PBKDF2}(Passphrase, SSID)
 \end{equation}
-Passphrase is a user-defined secret phrase consisting of 8 to 63 characters, while the SSID represents the network name, which is typically public. Notably, if a user prefer to selecting the Passphrase from a limited character set, such as simple numerical combinations, the security of the 4-way handshake protocol will be easily compromised by attackers, which we will discuss in \autoref{sec:wpa2-psk}.
+Passphrase is a user-defined secret phrase consisting of 8 to 63 characters, while $SSID$ represents the network name, which is typically public. Notably, if a user prefer to selecting the Passphrase from a limited character set, such as simple numerical combinations, the security of the 4-way handshake protocol will be easily compromised by attackers, which we will discuss in \autoref{sec:wpa2-psk}.
 
-In WPA2-PSK, the Pairwise Master Key (PMK) is equivalent to PSK.
-Based on the PMK, the authenticator and supplicant perform the 4-way handshake.
-First, the authenticator sends a random number ANonce to the supplicant.
-Upon receiving it, the supplicant generates its own random number SNonce and calculates the PTK.
-The calculation of PTK is as follows:
+In WPA2-PSK, the Pairwise Master Key~$PMK$ is equivalent to $PSK$.
+Based on the $PMK$, the authenticator and supplicant perform the 4-way handshake.
+First, the authenticator and supplicant exchange random values $N_A$ and $N_B$ in message 1 and 2. 
+Then they calculate $PTK$ as follows:
 \begin{equation}
     \begin{split}
-        \text{PTK} = PRF&(\text{PMK},\text{MAC}_\text{AU},\text{MAC}_\text{SUP}, \text{ANonce}, \text{SNonce})
+        PTK = \text{PRF}(PMK,{MAC}_{A},{MAC}_\text{S}, N_A, N_B)
     \end{split} 
 \end{equation}
-Here,~$PRF$ represents a pseudo-random function,~$\text{MAC}_\text{AU}$ and~$\text{MAC}_\text{SUP}$ denote the MAC addresses of the authenticator and supplicant, respectively.
-The PTK is then used to ensure the secrecy and integrity of the communication between the supplicant and authenticator.
-Subsequently, the authenticator transmits the GTK to the supplicant for use as an encryption key in multicast communications.
-Finally, the supplicant dispatches EAPOL message 4 to the authenticator to confirm the handshake's integrity.
-Upon receipt of EAPOL message 4 by the authenticator, the handshake is finalized, and communication between the supplicant and authenticator is encrypted using both the PTK and GTK.
-It is important to note that, according to the 802.1x standard, the 4-way handshake is composed of four EAPOL-key type messages, with the first EAPOL-key message incorporating an additional variable, PMKID, calculated as follows:
+Here, $PRF$ is a pseudo-random function. 
+${MAC}_{A}$ and ${MAC}_\text{S}$ denote the MAC addresses of the authenticator and supplicant, respectively.
+The $PTK$ is then used to ensure the secrecy and integrity of the communication between the supplicant and authenticator.
+Subsequently, the authenticator transmits the $GTK$ to the supplicant in message 3, which is used as an encryption key in multicast communications.
+Finally, the supplicant sends message 4 to the authenticator to confirm the handshake's integrity.
+It is important to note that, according to the 802.1x standard, the 4-way handshake is composed of four EAPOL-key type messages, with the first EAPOL-key message incorporating an additional variable, $PMKID$, calculated as follows:
 \begin{equation}
     \begin{split}
-        \text{PMKID} = \text{HMAC}(\text{PMK}, \text{``PMK Name''} \| \text{MAC}_\text{AU} \| \text{MAC}_\text{SUP})
+        PMKID = \text{HMAC}(PMK, {MAC}_{A} \| {MAC}_{S})
     \end{split} 
 \end{equation}
-Here, the PMKID assists devices in rapidly completing authentication upon reconnection.
+The $PMKID$ here assists devices in rapidly completing authentication when reconnecting.
 
 \subsubsection{Bluetooth Low Energy}
 % Bluetooth是一种短距离无线通信技术，旨在替代有线连接，实现设备间的数据交换和通信。Bluetooth由Bluetooth Special Interest Group (SIG)维护和推广，其主要特点包括低功耗、低成本和高兼容性。Bluetooth协议栈包括多个层次，从物理层（Physical Layer, PHY）到应用层（Application Layer），每一层次都有特定的功能和协议。根据数据速率和功耗的不同，Bluetooth技术分为两大类，即Bluetooth Classic（传统蓝牙）和Bluetooth Low Energy（BLE，低功耗蓝牙），在后文中我们将以BC代指Bluetooth Classic，以BLE代指Bluetooth Low Energy。
 Bluetooth is a short-range wireless communication technology designed to replace wired connections, facilitating data exchange and communication between devices.
-The Bluetooth Special Interest Group (SIG) is responsible for maintaining and promoting this technology.
+The Bluetooth Special Interest Group~(SIG) is responsible for maintaining and promoting this technology.
 The primary characteristics of Bluetooth include low power consumption, cost-effectiveness, and high compatibility.
 Based on variations in data rate and power consumption, Bluetooth technology is categorized into two types: 
-Bluetooth Classic(BC), which is appropriate for high-bandwidth applications, such as audio streaming, 
-and Bluetooth Low Energy (BLE), which was first introduced in Bluetooth 4.0\cite{bluetooth4} and is specifically engineered for low-power applications, 
-making it particularly suitable for sensors and Internet of Things (IoT) devices.
+Bluetooth Classic~(BC), which is appropriate for high-bandwidth applications, such as audio streaming, 
+and Bluetooth Low Energy~(BLE), which was first introduced in Bluetooth 4.0\cite{bluetooth4} and is specifically engineered for low-power applications, 
+making it particularly suitable for sensors and Internet of Things~(IoT) devices.
 In the subsequent discussion, we will refer to Bluetooth Classic as BC, while BLE will denote Bluetooth Low Energy.
 
-Bluetooth utilizes a pairing mechanism in both BLE and BC to establish a secure communication framework between devices, thereby ensuring the confidentiality and integrity of data transmission.
+Bluetooth utilizes a pairing mechanism in both BLE and BC to share a long-term key between devices, thereby ensuring the secrecy and integrity of data transmission.
 First we take a look at the pairing process between BLE devices.
 
 \begin{figure}[hbtp]
@@ -158,25 +157,21 @@ First we take a look at the pairing process between BLE devices.
 \end{figure}
 
 The pairing process between two BLE devices, designated as the Initiator and the Responder, involves three phases, as depicted in \autoref{fig:ble-pairing}.
-In the first phase, the devices exchange pairing features, which include the IO capabilities and the length of the Long Term Key (LTK).
-These IO capabilities determine the pairing scheme to be implemented in the subsequent phase.
-The IO capabilities include NoInputNoOutput, DisplayOnly, DisplayYesNo, KeyboardOnly, and KeyboardDisplay.
-
-During the second phase, an appropriate pairing scheme is selected based on the exchanged features.
-Options include Just Works, Passkey Entry, and Out of Band.
-By the conclusion of this phase, both devices successfully negotiate the Long Term Key (LTK).
-
-In the final phase, the Initiator and Responder utilize the LTK to derive a Session Key (SK).
-This SK is then employed to secure the channel over which transport-specific keys are distributed, such as the Identity Resolving Key (IRK) and Identity Address information.
+In the first phase, the devices exchange pairing features, which include the IO capabilities and the length of the Long Term Key~$LTK$.
+During the second phase, the two devices conduct a pairing scheme determined by IO capabilities exchanged in last phase.
+The pairing schemes include Just Works, Passkey Entry, and Out of Band.
+At the end of this phase, both devices successfully negotiate~$LTK$.
+In the final phase, the Initiator and Responder utilize the $LTK$ to derive a Session Key$SK$.
+This $SK$ is then employed to secure the channel over which transport-specific keys are distributed, such as the Identity Resolving Key$IRK$ and Identity Address information.
 
 \subsubsection{Bluetooth Classic}
-BC, also referred to as BR/EDR (Basic Rate/Enhanced Date Rate), represents the initial Bluetooth standard, 
+BC, also referred to as Basic Rate/Enhanced Date Rate~(BR/EDR), represents the initial Bluetooth standard, 
 predominantly designed for applications requiring high data transfer rates such as audio streaming , file transfer and serial communication.
-The BC standard delineates link layer security mechanisms that ensure confidentiality , integrity and authentication for higher-layer applications.
-Pairing is employed to negotiate a long-term key (LK) between tow Bluetooth devices.
-Subsequent to the pairing procedure, the session establishment protocol enables devices to derive a Session Key (SK) from the LK and other parameters, to safeguard subsequent communication. \autoref{fig:bc-session} illustrates this phase between paired BC devices.
+The BC standard delineates link layer security mechanisms that ensure secrecy, integrity and authentication for higher-layer applications.
+Pairing is employed to negotiate a long-term link key~LK between tow Bluetooth devices.
+Subsequent to the pairing procedure, the session establishment protocol enables devices to derive a Session Key~SK from the LK and other parameters, to safeguard subsequent communication. \autoref{fig:bc-session} illustrates this phase between paired BC devices.
 The devices involved in BC session establishment are designated as the central device and the peripheral device.
-Prior to the initiation of the session, both entities share LK.
+Prior to the initiation of the session, both entities share~LK.
 
 \begin{figure}[hbtp]
     \centering
@@ -186,19 +181,21 @@ Prior to the initiation of the session, both entities share LK.
 \end{figure}
 
 Before establishing the encrypted session, the central device and peripheral build a link connection first. 
-In this phase, the devices exchange their device features, like FeatureSC which means whether the device supports Secure Connections.
+In this phase, the devices exchange features supported by them, like $FeatSC$ which means whether the device supports \emph{Secure Connections}.
 After the link connection is established, the two devices start the authentication process. 
 There are two methods to authenticate the devices:
-\begin{itemize}[left=0.5em]
+\begin{itemize}[leftmargin=*]
     \item \textbf{Legacy Authentication}: Only the central device will authenticate the peripheral device.
     \item \textbf{Secure Authentication}: Both devices will authenticate each other.
 \end{itemize}
-During the both authentication methods, the two devices will using the Link Key to compute the Authenticated Channel Offset (ACO) based on the exchanged random numbers. 
-If both devices support Secure Connections, they will use the secure authentication method, otherwise, they will use the legacy authentication method.
+In the both authentication methods, the two devices would use $LK$ to compute the Authenticated Channel Offset~$ACO$ based on the random value(s).
+If both devices' $FeatSC$ is \emph{True}, they will use the secure authentication method, otherwise, they will use the legacy authentication method.
 In the following phase, the central and peripheral devices engage in negotiation regarding the length of the session key.
-In the final phase, the central device dispatches an encrypted random number, EnRand, to the peripheral device.
-Utilizing EnRand in conjunction with ACO, both devices generate the session key SK.
-The peripheral device then encrypts an \Tfunction{ACCEPT} message using SK and transmits it to the central device.
+In the final phase, the central device send an random value~$EnRand$, to the peripheral device.
+The two devices then utilize the $LK$, $EnRand$ and $ACO$ to derive the session key~$SK'$.
+But in \emph{Secure Connections}, $EnRand$ will be ignored by the peripheral device and the $SK'$ will be derived from $LK$ and $ACO$.
+After that, the central device and peripheral device will take a few bytes of $SK'$ as the session key~$SK$ based on the negotiated key length.
+The peripheral device then encrypts an \Tfunction{ACCEPT} message using $SK$ and sends it to the central device.
 The successful decryption of this message by the central device signifies the establishment of the encrypted session.
 
 \subsection{TAMARIN Prover}
