@@ -223,12 +223,12 @@ In the Bluetooth Core Specification version 5.1 and preceding versions, the mini
 However, starting from Bluetooth version 5.2, it is advised that BC devices support the minimum key size should not be less than 7 bytes.
 The subsequent text is extracted from the most recent Bluetooth Core Specification version 6.0, which elaborates on this recommendation.
 \BlueQuote{[Vol 2, Part C, 4.2.5.2]}{ 
-    L\_max\_c and L\_max\_p \textbf{shall} be set to at least 7 octets.
-L\_min\_c and L\_min\_p \textbf{should} be set to at least 7 octets.
+    L\_max\_c and L\_max\_p \emph{shall} be set to at least 7 octets.
+L\_min\_c and L\_min\_p \emph{should} be set to at least 7 octets.
 
 }
 % 在蓝牙specification中，\textbf{shall} 代表了强制要求，\textbf{should} 代表了建议。因此，支持最大的密钥长度低于7字节的BC设备是不符合规范的。然而，我们在最新的规范中找到了有关BC设备允许的最大密钥长度的另一处表述，如下所示：
-In the Bluetooth specification, the term \textbf{shall} denotes a mandatory requirement, whereas \textbf{should} indicates a recommended practice.
+In the Bluetooth specification, the term \emph{shall} denotes a mandatory requirement, whereas \emph{should} indicates a recommended practice.
 So BC devices that support a maximum key size of less than 7 bytes are deemed non-compliant with the specification.
 Nonetheless, in the same specification, we have identified an alternative statement pertaining to the permissible maximum key length for BC devices, which is detailed as follows:
 \BlueQuote{[Vol 2, Part H, 4.1]}{ \\

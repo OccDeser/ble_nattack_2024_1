@@ -46,14 +46,14 @@ Then we discuss some wide-known protocols and the low-entropy keys involved in t
 % 其中N是密钥空间的大小。该公式说明了，均匀分布的密钥的熵就是该密钥的比特数。那么对于想要通过穷尽搜索的方式找到密钥的攻击者来说，他需要尝试的密钥的数量就是2^H，其中H是密钥的熵。因此，密钥的熵越高，攻击者找到密钥的难度就越大。
 Entropy was introduced by Shannon in 1948 \cite{shannon1948communicationtheory}, to quantify the randomness and uncertainty within a system.
 In the domain of cryptography, the entropy of a key serves as a crucial metric for assessing its strength.
-Formally, consider a uniformly distributed key $K$ within a key space of size $N$.
+Formally, consider a uniformly distributed key~$K$ within a key space of size~$N$.
 The entropy of such a key can be represented by \autoref{eq:entropy_definition}.
 \begin{equation} 
     H(K) = \log_2(N) \label{eq:entropy_definition}
 \end{equation}
-where $H(K)$ denotes the entropy of the key $K$.
+where~$H(K)$ denotes the entropy of the key~$K$.
 This equation illustrates that the entropy of a uniformly distributed key is equivalent to its bit length.
-For an adversary employing exhaustive search techniques to locate the key, the number of keys that must be tested is $2^{H(K)}$.
+For an adversary employing exhaustive search techniques to locate the key, the number of keys that must be tested is~$2^{H(K)}$.
 Therefore, an increase in the key's entropy directly correlates with a higher level of difficulty for an attacker attempting to restore the key.
 
 % 这种遍历密钥空间的方法，不断地尝试密钥，直到找到正确的密钥，就是暴力破解攻击。通过是否需要与目标系统进行实时交互可以分为在线攻击与离线攻击。在线的攻击，攻击者需要不断地将尝试的密钥发送给目标系统以判断密钥是否正确。离线攻击，通常是通过获取目标系统的密文，攻击者可以在不与目标系统交互的情况下，尝试所有的密钥通过解密密文的方式来鉴别密钥。通常来说在线的暴力破解攻击主要受限于网络速度和目标系统的响应时间，而离线的攻击主要受限于攻击者的计算速度。离线暴力破解攻击的运行效率完全掌握在攻击者手中，密钥因此需要具有足够的熵来抵御这种攻击。因此本文主要研究的就是离线的暴力破解攻击，后文提到的暴力破解攻击如果没有特别制定，均指离线的暴力破解攻击。
@@ -76,7 +76,7 @@ The use of low-entropy keys is a trade-off between security and practicality. A 
 
 \subsubsection{WPA2-PSK}
 % WPA与WPA2源于IEEE 802.11i标准，其中WPA作为过渡性解决方案，旨在修复WEP（Wired Equivalent Privacy）的安全漏洞，而WPA2则完整实现了IEEE 802.11i标准，提供更为完善的安全机制。WPA2-PSK（预共享密钥）是WPA2的一种简化模式，利用预共享密钥代替复杂的企业级认证过程，适用于不需要RADIUS服务器的小型网络。WPA2-PSK广泛应用于家庭、咖啡馆和中小型办公场所，因其配置简便且能够提供较高的安全性。
-Wi-Fi Protected Access (WPA) and WPA2 are both derived from the IEEE 802.11i standard \cite{80211i}, with WPA serving as an interim solution to address security vulnerabilities in Wired Equivalent Privacy (WEP), while WPA2 fully implements the 802.11i standard to provide more robust security mechanisms.
+Wi-Fi Protected Access (WPA) and WPA2 are both derived from the IEEE 802.11i standard \cite{80211i}.
 WPA2-PSK (Pre-Shared Key) is a simplified version of WPA2, using a pre-shared key instead of a complex enterprise-level authentication process, making it suitable for small networks without a RADIUS server.
 WPA2-PSK is widely deployed in home environments, cafes, and small to medium-sized offices due to its ease of configuration and strong security.
 
@@ -123,7 +123,7 @@ The calculation of PTK is as follows:
         \text{PTK} = PRF&(\text{PMK},\text{MAC}_\text{AU},\text{MAC}_\text{SUP}, \text{ANonce}, \text{SNonce})
     \end{split} 
 \end{equation}
-Here, $PRF$ represents a pseudo-random function, $\text{MAC}_\text{AU}$ and $\text{MAC}_\text{SUP}$ denote the MAC addresses of the authenticator and supplicant, respectively.
+Here,~$PRF$ represents a pseudo-random function,~$\text{MAC}_\text{AU}$ and~$\text{MAC}_\text{SUP}$ denote the MAC addresses of the authenticator and supplicant, respectively.
 The PTK is then used to ensure the secrecy and integrity of the communication between the supplicant and authenticator.
 Subsequently, the authenticator transmits the GTK to the supplicant for use as an encryption key in multicast communications.
 Finally, the supplicant dispatches EAPOL message 4 to the authenticator to confirm the handshake's integrity.
@@ -201,18 +201,47 @@ Utilizing EnRand in conjunction with ACO, both devices generate the session key 
 The peripheral device then encrypts an \Tfunction{ACCEPT} message using SK and transmits it to the central device.
 The successful decryption of this message by the central device signifies the establishment of the encrypted session.
 
-\subsection{Tamarin Prover}
-The Tamarin prover is a state-of-the-art formal verification tool for cryptographic protocols.
-It provides a powerful and expressive language for modeling protocols and properties, allowing researchers to analyze the security of their designs rigorously.
-Tamarin supports a wide range of cryptographic primitives and protocols, making it a versatile tool for formal analysis.
+\subsection{TAMARIN Prover}
+The TAMARIN prover provides a powerful and expressive language for modeling protocols and properties, allowing researchers to analyze the security of their designs rigorously.
+TAMARIN supports a wide range of cryptographic primitives and protocols, making it a versatile tool for formal analysis.
 In TAMARIN, we use terms to represent messages and the behavior of protocols and adversaries are captured through multiset rewriting rules. 
 TAMARIN also allows using logic formulas to specific security properties of protocols.
 
-\subsubsection{Messages and terms}
+\subsubsection{Messages and term algebra}
+Messages in symbolic models are typically represent as terms in a term algebra. 
+A term is an expression built from symbols that encode the data exchanged in the protocol. 
+The symbolic model abstracts away the concrete cryptographic operations, representing them through algebraic terms that capture their logical structure.
+For example, the encryption of a message~$m$ with a key~$k$ can be represented as a term:~$\text{senc}(m, k)$. 
+Here,~$\text{senc}$ is a function symbol representing symmetric encryption.
+Formally, we assume a signature~$\Sigma$ defining the set of such function or operator symbols and their arities and a countably infinite set of variables~$\mathcal{V}$. 
+Similarly, a countable set~$\mathcal{N}$ is defined as the set of names(like keys, nonces, public identifiers etc.). 
+The set of terms is the closure of~$\mathcal{V}$ and~$\mathcal{N}$ under the operators in~$\Sigma$ and donated as~$T_\Sigma(\mathcal{V}, \mathcal{N})$.
+A \emph{message} is a special \emph{term} which doesn't contain any variables.
+We use equations to specify the algebraic properties of cryptographic functions.
+An equation is a pair of terms, denoted as~$t_1 = t_2$, which specifies that the~$t_1$ can be substituted by~$t_2$, for~$t_1,t_2 \in T_\Sigma(\mathcal{V})$.
+For instance, the equation~$\text{sdec}(\text{senc}(m, k), k) = m$ models the property that the decryption of an encryption with the same key yields the original message.
+
 
 \subsubsection{Protocols and multiset rewriting rules}
+Multiset rewriting system are used to model protocols and adversaries in TAMARIN. 
+Every state of the transition system is a multiset of facts. 
+A \emph{fact} is defined as~$F(t_1, \ldots, t_n)$, for~$t_i \in T_\Sigma(\mathcal{V}, \mathcal{N})$.
+The transitions of states are defined by labeled multiset rewriting rules, which is denoted as~$F_l \xrightarrow{F_a} F_r$.
+Here,~$F_l$,~$F_a$ and~$F_r$ are the \emph{left-hand side}, \emph{action} and \emph{right-hand side} facts of the rule, respectively.
+When all of the facts in~$F_l$ are present in the current state, the rule can be applied, and the facts in~$F_a$ are consumed, while the facts in~$F_r$ are added to the new state.
+There are two sorts of facts: linear facts and persistent facts.
+Linear facts can only be consumed once after their creation, while persistent facts can be consumed an unlimited number of times.
+Action facts in~$F_a$ represent the label of the rule and can be used to restrict executions of the rule or to verify properties of the protocol.
 
 \subsubsection{Properties and logic formulas}
-
+Trace properties are usually expressed as first-order logic formulas which are evaluated over the traces (states sequences) of the protocol.
+The trace properties in TAMARIN are defined as first-order logic formulas with time points using action facts.
+When it comes to cryptographic protocols, secrecy or authentication are usually included in the trace properties to be verified.
+For example, the secrecy requires that a secret message~$m$ cannot be known by adversaries in any trace of the protocol.
+This property can be encoded in the following lemma:
+\begin{flalign*}
+    & \hspace{0em} \text{\TLemma{All}} \;\, \text{\Tterm{m \#i.}} \;\, \text{\TFact{Send(m)@i}} \implies \neg (\text{\TLemma{Ex \#j.}} \;\, \text{\TFact{K(m)@j}} ) &\\
+\end{flalign*}
+This formula describes that for all time points~$i$, if a message~$m$ is sent at time~$i$, then there doesn't exist a time point~$j$ at which the message~$m$ is known by an adversary.
 
 \end{document}
