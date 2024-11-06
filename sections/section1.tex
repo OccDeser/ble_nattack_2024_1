@@ -28,6 +28,10 @@ Entropy is a fundamental concept which is directly correlated with the security 
 However, in practice, modern cryptographic protocols, such as WPA2-PSK, Bluetooth Low Energy~(BLE) and Bluetooth Classic~(BC), usually tolerate low-entropy keys to accommodate user-friendly designs, backward compatibility, or resource-constrained devices.
 This introduces a security issue about recovering low-entropy keys in these protocols, such as PMKID~\cite{pmkidattack} and KNOB~\cite{antonioli2019knob} attacks.
 
+Entropy is a fundamental concept directly correlated with the security of cryptographic systems, where a high-entropy key typically makes it challenging for an attacker to deduce the key from ciphertext.
+However, in practice, modern cryptographic protocols often tolerate low-entropy keys, as seen in widely-used standards such as WPA2-PSK, Bluetooth Low Energy, and Bluetooth Classic.
+This tolerance introduces potential vulnerabilities, allowing attackers to exploit lower-entropy keys in these protocols, as demonstrated by security issues like the PMKID attack on WPA2-PSK~\cite{pmkidattack} and the KNOB attack on Bluetooth~\cite{antonioli2019knob}.
+
 % 使用符号模型分析协议，pioneered by Dolve et al.~\cite{}，是主流的确保协议设计安全的方法。
 % 然而符号模型假设xxx，不能直接用来推到密钥熵。
 % 现有研究xxx，他们有xxx缺陷。
