@@ -28,9 +28,9 @@ Entropy is a fundamental concept which is directly correlated with the security 
 However, in practice, modern cryptographic protocols, such as WPA2-PSK, Bluetooth Low Energy~(BLE) and Bluetooth Classic~(BC), usually tolerate low-entropy keys to accommodate user-friendly designs, backward compatibility, or resource-constrained devices.
 This introduces a security issue about recovering low-entropy keys in these protocols, such as PMKID~\cite{pmkidattack} and KNOB~\cite{antonioli2019knob} attacks.
 
-Entropy is a fundamental concept directly correlated with the security of cryptographic systems, where a high-entropy key typically makes it challenging for an attacker to deduce the key from ciphertext.
-However, in practice, modern cryptographic protocols often tolerate low-entropy keys, as seen in widely-used standards such as WPA2-PSK, Bluetooth Low Energy, and Bluetooth Classic.
-This tolerance introduces potential vulnerabilities, allowing attackers to exploit lower-entropy keys in these protocols, as demonstrated by security issues like the PMKID attack on WPA2-PSK~\cite{pmkidattack} and the KNOB attack on Bluetooth~\cite{antonioli2019knob}.
+% Entropy is a fundamental concept directly correlated with the security of cryptographic systems, where a high-entropy key typically makes it challenging for an attacker to deduce the key from ciphertext.
+% However, in practice, modern cryptographic protocols often tolerate low-entropy keys, as seen in widely-used standards such as WPA2-PSK, Bluetooth Low Energy, and Bluetooth Classic.
+% This tolerance introduces potential vulnerabilities, allowing attackers to exploit lower-entropy keys in these protocols, as demonstrated by security issues like the PMKID attack on WPA2-PSK~\cite{pmkidattack} and the KNOB attack on Bluetooth~\cite{antonioli2019knob}.
 
 % 使用符号模型分析协议，pioneered by Dolve et al.~\cite{}，是主流的确保协议设计安全的方法。
 % 然而符号模型假设xxx，不能直接用来推到密钥熵。
@@ -68,8 +68,9 @@ Our methodology can be employed to identify and address security issues arising 
 \begin{itemize}[leftmargin=*]
     \item  We propose a general method to model low-entropy keys and brute-force attacks in symbolic models, enabling automated identification of vulnerable keys within protocols.
     \item We enhance the Tamarin Prover's modeling language by introducing new syntax and develop a compilation tool to facilitate the translation of extended models, improving usability and automation.
-    \item Applying our method to real-world protocols such as 4-way-handshake protocol of WPA2-PSK, BLE pairing protocol and BC session establishment protocol,   
+    \item Applying our method to real-world protocols such as 4-way-handshake protocol of WPA2-PSK, BLE pairing protocol and BC session establishment protocol, we re-discover known vulnerabilities in these protocols, including the PMKID and KNOB attacks.
     we demonstrate its effectiveness by re-discovering known vulnerabilities, including the PMKID and KNOB attacks, and previously undetected attacks, the unilateral multi-downgrade(UMD) attack against BR/EDR. 
+    \item We discovered a novel attack against the BC session establishment protocol, the unilateral multi-downgrade(UMD) attack, which significantly reduces the difficulty for attackers to brute force the complete session keys. This attack induces one side of the devices to use keys of different downgraded-lengths multiple times, potentially reducing the computational complexity to as low as $\frac{1}{2^{116}}$ of the normal scenario.
 \end{itemize}
 
 \noindent\textbf{Overview.} 
