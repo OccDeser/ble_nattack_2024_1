@@ -44,6 +44,12 @@ However, these studies didn't provide a neither general or automated method to a
 For one thing, this approach requires manual analysis of the vulnerabilities inherent in the protocol keys instead of automated analysis.
 For another, manual analysis is inherently constrained, as it can only provide attacker with limited ways to compromise low-entropy keys and fails to provide a comprehensive strategy for attackers to exploit low-entropy keys effectively.
 
+To automatically analyze protocols with low-entropy keys, we are facing three main challenges:
+First, the symbolic analysis tools only remain the logical structure of messages or keys, and the entropy of keys is hard to be expressed and analyzed. 
+Second, brute-force attacks require three prerequisites: known encryption algorithm, known ciphertext, and no additional values~(salt value, IV, etc.) required for calculating the ciphertext. 
+These prerequisites are ambiguous, and it is hard to capture different numbers of additional values  and cryptographic operators in a single rule.
+Third, adversaries' brute force ability needs to be improved, no longer targeting a specific key, but can be freely combined with other capabilities and applied to the attack.
+
 % 我们如何解决这些挑战，我们是怎么做的
 This paper aims to bridge this gap by introducing a generalized and automated method for modeling low-entropy keys and the adversary's brute-force capabilities within symbolic analysis frameworks. 
 We focus on enhancing the TAMARIN Prover, to support the modeling of low-entropy keys and to describe generalized brute-force attacks by adversaries. 
@@ -54,7 +60,6 @@ This tool automatically generates necessary facts and rules, including key-break
 Our methodology can be employed to identify and address security issues arising from low entropy within protocols.
 
 % 有什么效果，结论，发现。
-
 \noindent\textbf{Contributions.}
 \begin{itemize}[leftmargin=*]
     \item  We propose a general method to model low-entropy keys and brute-force attacks in symbolic models, enabling automated identification of vulnerable keys within protocols.
