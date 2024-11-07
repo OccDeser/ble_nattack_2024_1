@@ -237,7 +237,7 @@ When it comes to cryptographic protocols, secrecy or authentication are usually 
 For example, the secrecy requires that a secret message~$m$ cannot be known by adversaries in any trace of the protocol.
 This property can be encoded in the following lemma:
 \begin{flalign*}
-    & \hspace{0em} \text{\TLemma{All}} \;\, \text{\Tterm{m \#i.}} \;\, \text{\TFact{Send(m)@i}} \implies \neg (\text{\TLemma{Ex \#j.}} \;\, \text{\TFact{K(m)@j}} ) &\\
+    & \hspace{0em} \text{\TLemma{All}} \;\, \text{\Tterm{m \#i.}} \;\, \text{\TFact{Send(m)@i}} \implies \neg (\text{\TLemma{Ex \#j.}} \;\, \text{\TFact{K(m)@j}} ) &
 \end{flalign*}
 This formula describes that for all time points~$i$, if a message~$m$ is sent at time~$i$, then there doesn't exist a time point~$j$ at which the message~$m$ is known by an adversary.
 
