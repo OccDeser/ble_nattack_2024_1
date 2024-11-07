@@ -476,8 +476,9 @@ However, modern protocols like WPA2-PSK and Bluetooth seem to be tolerant of low
 This tolerance can lead to vulnerabilities that have been exploited in practice.
 Existing symbolic analysis tools do not effectively model low-entropy keys or consider adversaries' computational capabilities. 
 This paper introduces a general and automated method for modeling low-entropy keys and brute-force attacks in TAMARIN prover.
-We enhance the TAMARIN Prover by introducing new syntax to explicitly mark low-entropy keys and develop a compilation tool to translate these models for analysis. 
-Our method identifies vulnerabilities in real-world protocols, rediscovering known attacks and uncovering a novel one, the unilateral multi-downgrade (UMD) attack in Bluetooth, which significantly reduces the difficulty of adversaries to compromise session keys.
+We enhance TAMARIN by introducing new syntax to explicitly mark low-entropy keys and develop a compilation tool to translate these models for analysis. 
+Our method identifies vulnerabilities in real-world protocols, rediscovering known attacks and uncovering a novel one, 
+the unilateral multi-downgrade (UMD) attack in Bluetooth, which significantly reduces the difficulty for the attacker to compromise the session key, increasing the attack efficiency by up to $2^{116}$ times.
 \end{abstract}     
 
 % no keywords
