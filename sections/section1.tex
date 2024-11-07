@@ -38,13 +38,13 @@ This introduces a security issue about recovering low-entropy keys in these prot
 % 或者，符号模型下分析协议密钥熵具有xxx挑战。
 % Using symbolic models to formally analyze protocols has become a mainstream research approach, and a great number of  works\cite{basin2021emv,basin20185G,cremers2017tls13} successfully confirmed this.
 Using symbolic models to formally analyze protocols, pioneered by Dolev et al.~\cite{dolev1983security}, has become a mainstream research approach.
-Using symbolic models, many tools, such as~\cite{armando2005avispa,blanchet2018proverif,escobar2007maude,cremers2008scyther,meier2013tamarin}, have been developed to analyze security protocols automatically.
+Many symbolic model tools, such as~\cite{armando2005avispa,blanchet2018proverif,escobar2007maude,cremers2008scyther,meier2013tamarin}, have been developed to analyze security protocols automatically.
 These tools, e.g., TAMARIN\cite{meier2013tamarin}, usually assume ideal conditions where cryptographic primitives are unbreakable by ignoring concrete cryptographic operations and focusing on the logical structure of cryptographic values.
 Current automated analysis tools do not distinguish between high-entropy and low-entropy keys, nor do they consider computational capabilities of adversaries.
 
 This raises a pivotal question: how can one capture the brute-force behaviors of attackers within the existing symbolic models?
 A few of studies\cite{shi2023blesc, claverie2023tamarin} have proposed their solutions by manually identifying keys that vulnerable to be compromised and defining specific rules that allow the direct revelation of these keys' values to attackers.
-However, these studies didn't provide a neither general or automated method to analyze the impact of low-entropy keys on the whole protocol. 
+However, these studies didn't provide a neither general nor automated method to analyze the impact of low-entropy keys on the whole protocol. 
 For one thing, this approach requires manual analysis of the vulnerabilities inherent in the protocol keys instead of automated analysis.
 For another, manual analysis is inherently constrained, as it can only provide attacker with limited ways to compromise low-entropy keys and fails to provide a comprehensive strategy for attackers to exploit low-entropy keys effectively.
 
