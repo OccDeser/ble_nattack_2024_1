@@ -471,9 +471,14 @@
 % As a general rule, do not put math, special symbols or citations
 % in the abstract
 \begin{abstract}
-    Your Abstract Text Goes Here.  Just a few facts.
-    Whet our appetites.  The application of formal methods to analyze and verify protocol security has gained widespread acceptance in recent research. This approach involves constructing formal models of protocols to assess their security properties rigorously. Many studies in this field focus on demonstrating the validity of their models by showcasing their ability to detect known attacks, particularly targeting weak key mechanisms within protocols. For instance, recent works such as those by Shi (2023) and Claverie et al. (2023) introduce explicit ``oracle'' rules in their formal models, granting attackers insights into specific keys. However, these methodologies are not universally applicable or automated, as they primarily rely on pre-existing knowledge of potential vulnerabilities. Therefore, while they highlight key weaknesses that can be exploited, the determination of which keys are susceptible still necessitates manual intervention and analysis. This paper reviews current trends in formal methods for protocol security analysis, emphasizing both the advancements made and the ongoing challenges in achieving comprehensive and automated security verification.
-\end{abstract}
+Entropy is crucial for cryptographic security preventing adversaries from brute-forcing keys.
+However, modern protocols like WPA2-PSK and Bluetooth seem to be tolerant of low-entropy keys for user-friendliness or compatibility.
+This tolerance can lead to vulnerabilities that have been exploited in practice.
+Existing symbolic analysis tools do not effectively model low-entropy keys or consider adversaries' computational capabilities. 
+This paper introduces a general and automated method for modeling low-entropy keys and brute-force attacks in TAMARIN prover.
+We enhance the TAMARIN Prover by introducing new syntax to explicitly mark low-entropy keys and develop a compilation tool to translate these models for analysis. 
+Our method identifies vulnerabilities in real-world protocols, rediscovering known attacks and uncovering a novel one, the unilateral multi-downgrade (UMD) attack in Bluetooth, which significantly reduces the difficulty of adversaries to compromise session keys.
+\end{abstract}     
 
 % no keywords
 
