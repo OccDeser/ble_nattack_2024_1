@@ -93,7 +93,7 @@ The $PTK$ is then used to ensure the secrecy and integrity of the communication 
 Subsequently, the authenticator transmits the $GTK$ to the supplicant in message 3, which is used as an encryption key in multicast communications.
 Finally, the supplicant sends message 4 to the authenticator to confirm the handshake's integrity.
 It is important to note that, according to the 802.1x standard, the 4-way handshake is composed of four EAPOL-key type messages, with the first EAPOL-key message incorporating an additional variable, $PMKID$, calculated as follows:
-\begin{equation}
+\begin{equation} \label{eq:pmkid}
     \begin{split}
         PMKID = \text{HMAC}(PMK, {MAC}_{A} \| {MAC}_{S})
     \end{split} 
