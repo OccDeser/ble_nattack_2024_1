@@ -126,17 +126,17 @@ In the first phase, the devices exchange pairing features, which include the IO 
 During the second phase, the two devices conduct a pairing scheme determined by IO capabilities exchanged in last phase.
 The pairing schemes include Just Works, Passkey Entry, and Out of Band.
 At the end of this phase, both devices successfully negotiate~$LTK$.
-In the final phase, the Initiator and Responder utilize the $LTK$ to derive a Session Key$SK$.
-This $SK$ is then employed to secure the channel over which transport-specific keys are distributed, such as the Identity Resolving Key$IRK$ and Identity Address information.
+In the final phase, the Initiator and Responder utilize $LTK$ to derive a Session Key~$SK$.
+This $SK$ is then employed to secure the channel over which transport-specific keys are distributed, such as the Identity Resolving Key~$IRK$ and Identity Address information.
 
 \subsubsection{Bluetooth Classic}
 BC, also referred to as Basic Rate/Enhanced Date Rate~(BR/EDR), represents the initial Bluetooth standard, 
 predominantly designed for applications requiring high data transfer rates such as audio streaming, file transfer and serial communication.
 The BC standard delineates link layer security mechanisms that ensure secrecy, integrity and authentication for higher-layer applications.
-Pairing is employed to negotiate a long-term link key~LK between tow Bluetooth devices.
-After the pairing procedure, the session establishment protocol enables devices to derive a Session Key~SK from the LK and other parameters, to safeguard subsequent communication. \autoref{fig:bc-session} illustrates this phase between paired BC devices.
+Pairing is employed to negotiate a long-term link key~$LK$ between tow Bluetooth devices.
+After the pairing procedure, the session establishment protocol enables devices to derive a Session Key~$SK$ from the $LK$ and other parameters, to safeguard subsequent communication. \autoref{fig:bc-session} illustrates this phase between paired BC devices.
 The devices involved in BC session establishment are designated as the central device and the peripheral device.
-Prior to the initiation of the session, both entities share~LK.
+Prior to the initiation of the session, both entities share~$LK$.
 
 \begin{figure}[hbtp]
     \centering

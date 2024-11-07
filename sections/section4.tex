@@ -2,22 +2,20 @@
 
 \begin{document}
 
-
-
-\section{Automation and Generalization} \label{sec:4automation-and-generalization}
+\section{Syntax Extension and Compilation} \label{sec:4extension-and-compilation}
 
 % 在上一小节中我们介绍了如何通过一组通用的rule建模攻击者的暴力破解能力，在这一小节中，我们将介绍如何将我们的方法应用于协议建模。为了尽可能方便建模地建模协议，我们拓展了Tamarin的语法，引入了新的关键词，以标明协议中需要重点关注的低熵密钥。同时，实现了一套编译工具 Tamarin-Compilation-Tool，将拓展的Tamarin语法编译为Tamarin prover可识别的形式化模型。此外，为了配合oracle的建模，我们的工具支持分析rule中的消息生成关系，自动化地为模型添加消息派生fact。然后，为了模型的自动化验证，我们的编译工具支持为oracle rule根据不同的协议情况，来定义搜索边界，以避免分析不终止。
-In the preceding section, we detailed the methodology for modeling the attacker's brute-force capabilities using a set of general rules.
+In the preceding section, we detailed our methodology for modeling the attacker's brute-force capabilities using a set of general rules.
 This section elucidates the application of our approach to protocol modeling.
-To streamline the modeling of protocols, we extended Tamarin Prover's syntax by introducing new keywords that explicitly identify low-entropy keys requiring special attention within the protocol.
+To streamline the modeling of protocols, we extended TAMARIN's syntax by introducing new keywords that explicitly identify low-entropy keys requiring special attention within the protocol.
 
-We also developed a compilation tool named Tamarin-Compilation-Tool which translates the extended Tamarin syntax into a formal model recognizable by the Tamarin Prover.
-In support of the key cracking oracle model, our tool analyzes derivation relationships between variables and automatically incorporates message derivation facts into the model.
+We also developed a compilation tool which translates the extended TAMARIN's syntax into a TAMARIN recognizable model.
+Besides this, our tool will automatically add message derivation facts by analyzing the derivation relationships between variables in the model. 
 
-To facilitate automated model verification, our Tamarin-Compilation-Tool supports the definition of search boundaries for oracle rules tailored to different protocol scenarios.
-This feature is crucial for preventing non-terminating analysis, ensuring that the verification process completes efficiently and reliably.
+% To facilitate automated model verification, our Tamarin-Compilation-Tool supports the definition of search boundaries for oracle rules tailored to different protocol scenarios.
+% This feature is crucial for preventing non-terminating analysis, ensuring that the verification process completes efficiently and reliably.
 
-\subsection{ Extended Tamarin Prover Model Language}
+\subsection{ TAMARIN Syntax Extension }
 
 \begin{figure}[htb]
     \centering
@@ -27,10 +25,9 @@ This feature is crucial for preventing non-terminating analysis, ensuring that t
 \end{figure}
 
 % Tamarin 模型通常被定义在spthy文件中（.spthy 代表 security protocol theory）。图一展示了security protocol theory的语法的核心子集，我们的工具专门设计用于解析和分析其中的rule部分。 Tamarin 使用多多重集重写规则来规定协议的执行和敌手的行为。
-The models Tamarin supported are typically defined within spthy files (spthy, representing security protocol theory).
+The models TAMARIN supported are typically defined within ``spthy'' files (spthy, representing security protocol theory).
 \autoref{fig:tamarin-syntax} presents the core subset of the security protocol theory syntax.
-Our tool is specifically designed to parse and analyze the rule section of these models.
-Tamarin utilizes multiset rewriting rules to define both protocol execution and adversarial behavior.
+Our tool is specifically designed to parse and analyze the rule part of these models.
 
 % \begin{figure}[hbtp]
 %     \centering
@@ -39,28 +36,18 @@ Tamarin utilizes multiset rewriting rules to define both protocol execution and 
 %     \label{fig:rule-demo}
 % \end{figure}
 
+TAMARIN utilizes multiset rewriting rules to define both protocol execution and adversarial behavior.
+For instance, consider the following rule demo:
 \begin{flalign*}
-    \text{\Tterm{Se}}   & \text{\Tterm{ndHello}} :                                      & \\
-                        & \text{\Tterm{let}}                                            \\  
-                        & \hspace{2em} \text{\Tterm{ciphertext = senc("hello", key)}}   \\  
-                        & \text{\Tterm{in}}                                             \\  
-                        & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFactSL{} \TFacts{ \text{\TFactTerm{Out}{ciphertext}} }
+\text{\Tterm{Se}}   & \text{\Tterm{ndHello}} :                                      & \\
+                    & \text{\Tterm{let}}                                            \\  
+                    & \hspace{2em} \text{\Tterm{ciphertext = senc("hello", key)}}   \\  
+                    & \text{\Tterm{in}}                                             \\  
+                    & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFactSL{} \TFacts{ \text{\TFactTerm{Out}{ciphertext}} }
 \end{flalign*}
-
-% 以图二中的rule demo为例，一条Tamarin的多重集重写规则，由declarations of Left-hand side(line 5)、action facts(line 6) 被用于标记这个规则背后代表的state transition，以及一个Right-hand side(line 7)。其中，Tamarin支持使用一个局部的宏定义区域，$let ...
-% in$(line 2 - 4)，在这个区域内，每一行定义了一个substitution。Tamarin 会在运行时，使用等号右侧的arbitrary term，替换这条规则中，等号左侧的variable。
-For instance, consider the rule demo in \autoref{fig:rule-demo}.
-A Tamarin multiset rewriting rule comprises declarations of the rule's left-hand side (line 5), action facts (line 6) that label the state transition represented by the rule, and the right-hand side (line 7) of the rule.
-Tamarin also supports local macro definitions in a rule which are defined within the $let...in$ area(lines 2 - 4) called as the let-block, where each line specifies a substitution.
-During execution, Tamarin substitutes variables on the left side of the equation with arbitrary terms from the right side.
-
-% \begin{figure}[hbtp]
-%     \centering
-%     \includegraphics[width=\columnwidth]{img/rule_plus} 
-%     \caption{Rule Plus Demo}
-%     \label{fig:rule-plus-demo}
-% \end{figure}
-
+A TAMARIN multiset rewriting rule comprises declarations of the rule's left-hand side, action facts that label the state transition represented by the rule, and the right-hand side of the rule.
+TAMARIN also supports local macro definitions in a rule which are defined within the $let \ldots in$ area called as the let-block, where each line specifies a substitution.
+In the above demo, \Tterm{ciphertext} in this rule will be replaced by \Tterm{senc("hello", key)} during execution.
 \begin{flalign*}
     \text{\Tterm{Se}}   & \text{\Tterm{ndHello}} :                                      & \\
                         & \text{\Tterm{let}}                                            \\  
@@ -69,25 +56,22 @@ During execution, Tamarin substitutes variables on the left side of the equation
                         & \text{\Tterm{in}}                                             \\  
                         & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFactSL{} \TFacts{ \text{ \TFactTerm{Out}{ciphertext}} }
 \end{flalign*}
-
-% 为了支持我们的方法，我们引入了新操作符``:=''和新关键字``\verb|`L`|''，这些新的语法元素可以更简单地帮助我们标记低熵变量。新的语法下的rule如图三所示，密钥的低熵标记(Line 3)同样被定义在let block内，不同的是``=''被运算符``:=''代替了，``=''右侧的标识``\verb|`L`|''表明左侧的变量``foo''拥有低熵。这个标记会被编译工具转译为右侧的fact，如下所示：
-To facilitate our methodology, we introduced a new operator ``:='' and a keyword ``\verb|`L`|''.
+To apply our methodology, we introduced a new operator ``:='' and a keyword ``\verb|`L`|''.
 These syntax elements streamline the marking of low-entropy variables.
-In the revised syntax, as depicted in \autoref{fig:rule-plus-demo}, the low-entropy annotation for the variable (line 3) is defined within the let block.
-Here, the operator ``:='' replaces ``='', and the label ``\verb|`L`|'' on the right signifies that the variable ``foo'' on the left possesses a low entropy.
-This annotation is subsequently translated by the compilation tool into the fact $\text{\TFact{EntropyLow}}(foo)$ on the right-hand side of the rule.
+In the extended syntax, as depicted in the above rule, the low-entropy annotation for the variable~(line 3) is defined within the let block.
+Here, the operator ``:='' replaces ``='', and the label ``\verb|`L`|'' on the right signifies that the variable $key$ on the left possesses a low entropy.
+This annotation will be translated by our compilation tool into a fact $\text{\TFact{EntropyLow}}(key)$ and added to the right-hand side of the rule.
 
-\subsection{ Design of Tamarin-Compilation-Tool }
-% Tamarin-Compilation-Tool 被设计用来为Tamarin prover生成可识别的形式化模型。执行\autoref{sec:oracle-modeling}定义的模型需要提供\TFact{EntropyLow} 和 \TFact{MDerive} facts，这些facts由我们的Tamarin-Compilation-Tool生成。
-The Tamarin-Compilation-Tool has been developed to create formal models that are compatible with the Tamarin prover.
+\subsection{ Design of the Compilation Tool}
+Our compilation tool is developed to create formal models that are compatible with the TAMARIN prover.
 To implement the model specified in \autoref{sec:oracle-modeling}, it is necessary to supply the \TFact{EntropyLow} and \TFact{MDerive} facts.
-These facts are generated by our Tamarin-Compilation-Tool.
-As shown in \autoref{fig:design-of-compilation-tool}, Tamarin-Compilation-Tool contains 4 modules:
+These facts are generated by our compilation tool.
+As shown in \autoref{fig:design-of-compilation-tool}, our compilation tool contains 4 modules:
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\columnwidth]{img/compilation-tool-design}
-    \caption{Design of Tamarin-Compilation-Tool}
+    \caption{Design of Our Compilation Tool}
     \label{fig:design-of-compilation-tool}
 \end{figure}
 
@@ -104,20 +88,12 @@ As shown in \autoref{fig:design-of-compilation-tool}, Tamarin-Compilation-Tool c
 \textbf{Oracle complement:}  the module adds the key-breaking oracle to the model and incorporates reasonable restrictions to prevent the model's automated verification from entering a non-terminating state.
 
 
-\subsection{ Term and fact sequence notations }
-% 在翻译后的多重集重写系统中的term都与翻译之前保持一致，例如图8中的$x$在翻译后的规则中仍然是$senc('hello',k)$。为了方便描述，我们为term定义一些操作。对于一个term $t$,$\delta(t)$ represents the sequence of all sub-terms that can be deconstructed from $t$.
-% $\rho(t)$代表了构建t所需的所有的无法被解构的term。
-In the translated multiset rewriting system, each term remains consistent with its original form.
-For instance, in \autoref {fig:rule-plus-demo}, $x$ in the translated rule continues to be represented as $senc('hello',k)$.
+\subsection{ Translation Details }
+
+All terms in the translated multiset rewriting rules remain consistent with their original form.
 To aid in description, we define the following operations.
 For a given term $t$, $\delta(t)$ denotes the sequence of all sub-terms that can be deconstructed from $t$.
-Conversely, $\rho(t)$ represents all the terms necessary to construct $t$ that cannot be deconstructed.
-
-% 我们denote $\llbracket e_1, e_2, \ldots, e_n \rrbracket$ 为一个sequence，其中所有$e_i$的类型必须一致，可以是 term、fact 或者 sequence。
-% 在上述符号的基础之上，我们可以将多重集重写规则的left-hand side和right-hand side使用sequence来表示。例如 $F_L \Longrightarrow F_R$ 代表了一条规则，其中$F_L$ 和 $F_R$ 是fact的sequence。
-% $S_1 \circ S_2$ 表示两个sequence $S_1$ 和 $S_2$ 的连接。$S_1 \setminus S_2$ 会生成一个新的sequence，其中包含了所有在$S_1$中但不在$S_2$中的元素。$F$ 是一个fact的sequence，$\tau(F)$ 代表了所有fact中的term的sequence。
-% 对于由$\llbracket t_1, t_2, \ldots, t_n \rrbracket$构成的term sequence$T$,$\varepsilon(T)$代表了$\delta(t_1) \circ \delta(t_2) \circ \ldots \circ \delta(t_n)$。
-% $c(T)$与$v(T)$分别代表了$T$中的所有常量term例如字面量和公共term和变量。
+$\rho(t)$ represents all the terms necessary to construct $t$ that cannot be deconstructed.
 We denote $\llbracket e_1, e_2, \ldots, e_n \rrbracket$ as a sequence where all $e_i$ must be of the same type, which can be a term, fact, or sequence.
 With the sequence notation, we can represent the left-hand side and right-hand side of a multiset rewriting rule using sequences.
 For instance, $[F_{L}] \Longrightarrow [F_{R}]$ denotes a rule where $F_{L}$ and $F_{R}$ are sequences of facts.
@@ -126,7 +102,7 @@ $S_1 \circ S_2$ represents the concatenation of two sequences $S_1$ and $S_2$.
 The operation $S_1 \setminus S_2$ generates a new sequence containing all elements present in $S_1$ but absent in $S_2$.
 Let $F$ be a sequence of facts, and $\tau(F)$ represents the sequence of terms extracted from all facts.
 For a term sequence $T$ composed of $\llbracket t_1, t_2, \ldots, t_n \rrbracket$, $\varepsilon(T)$ denotes the sequence $\delta(t_1) \circ \delta(t_2) \circ \ldots \circ \delta(t_n)$.
-$c(T)$ outputs a sequence of all constant terms, i.e.~literals and public terms in $T$.
+$c(T)$ outputs a sequence of all terms only composed of \emph{constants} in $T$.
 
 % 在上述的notations的基础之上，我们将提出如何翻译一个低熵标记的多重集重写系统。
 Based on the aforementioned notations, we propose to detail the translation of a low-entropy labelled multiset rewriting system.
@@ -171,15 +147,17 @@ $\llbracket \text{\TFact{MDerive}}(\langle \rho(t_i) \setminus c(\rho(t_i)) \ran
 % % \autoref{fig:rule-compile}展示一个
 % \autoref{fig:rule-compile} 
 
-\subsection{ Restrictions of  Oracle Rules}
+\subsection{ Restriction of  Oracle Rules }
 
 % 尽管上述的工作使得oracle具备了运行的条件，然而，为了验证工作的自动化和效率，避免系统进入无法终止的状态，我们需要为oracle的rule添加一些限制。前文我们使用$\rho(t) \setminus c(\rho(t))$来表示参与$t$ 构造的所有变量。通过考虑$\rho(t) \setminus c(\rho(t))$，我们可以给出一个定义：
 % 如果t可以被Oracle破解，那么oracle rule的执行次数一定小于等于$\rho(t) \setminus c(\rho(t))$的中的元素个数。
 
-While the preceding framework enables the oracle to function, additional constraints on the oracle's rules are necessary to ensure automation, efficiency, and to prevent the system from entering a non-terminating state.
-We previously defined $\rho(t) \setminus c(\rho(t))$ as representing all variables involved in the construction of $t$.
-By examining $\rho(t) \setminus c(\rho(t))$, we can establish the following definition:
+Despite the aforementioned work enabling the oracle to operate, additional constraints to the oracle's rules are necessary to ensure automation, efficiency, and to prevent the system from entering a non-terminating state.
 
-If (t) can be deciphered by the oracle, the execution count of the oracle rule must not exceed the number of elements in $\rho(t) \setminus c(\rho(t))$.
+For a given term $t$, we previously defined $\rho(t) \setminus c(\rho(t))$, which contains all variables required to construct $t$.
+% 由于$\rho(t) \setminus c(\rho(t))$的元素个数是有限的，而每次oracle rule的执行都会消耗一个元素，因此，如何t可以被oracle破解，那么oracle rule的执行次数一定小于等于$\rho(t) \setminus c(\rho(t))$的中的元素个数。
+Since the number of elements in $\rho(t) \setminus c(\rho(t))$ is finite and each execution of an oracle rule consumes one element, 
+if $t$ can be compromised by the oracle, the number of times the oracle rule can be executed must be less than the number of elements in $\rho(t) \setminus c(\rho(t))$.
+So in our compilation tool, we reserved a compilation option to freely restrict the number of times the oracle rule can be executed.
 
 \end{document}
