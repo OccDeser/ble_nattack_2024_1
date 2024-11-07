@@ -5,41 +5,20 @@
 \section{ Case studies } \label{sec:5case-study}
 
 % 在之前的章节中，我们详细介绍了我们的建模方法以及翻译方案。To explain the overall methodology we use to 分析低熵密钥对协议安全性的影响，在本节中，我们将会对几个存在低熵密钥存在的真实协议进行全面分析，我们实现的源代码可以在我们的仓库{cite}中找到。
-In the previous sections, we discuss our modeling approach and translation solution.
-To explain the overall methodology we use to analyze the impact of low-entropy keys on protocol security, in this section, we will conduct a comprehensive analysis of several real-world protocols with low-entropy keys.
+
+In the previous sections, we discussed our modeling approach and compilation design. 
+In this section, to demonstrate the effectiveness of our methodology, we will conduct case studies of several real-world protocols that have issues with low-entropy keys. 
 The source code of our implementation can be found in our repository {cite}.
-
-
-The Bluetooth Low Energy (BLE) Key Negotiation Downgrade Attack, also known as the BC (Bluetooth Classic) BLE Key Negotiation Downgrade Attack, exposes another facet of how modern attackers can manipulate cryptographic protocols.
-This attack exploits a vulnerability in the BLE pairing process where an attacker can force the devices to negotiate a lower level of security, specifically by downgrading the key strength used for encryption.
-
-By intercepting and modifying the key negotiation process, attackers can downgrade the encryption from a stronger key to a weaker one, which is easier to brute-force.
-Once the weaker key is in place, the attacker can use brute-force methods to break the encryption, gaining access to the communication channel.
-This attack is particularly concerning for IoT devices, which often use BLE for communication and may not have the computational power to implement stronger cryptographic measures.
-
-The BLE Key Negotiation Downgrade Attack highlights the broader issue of how at`tackers can exploit key management flaws to weaken the security of cryptographic protocols, making them vulnerable to brute-force attacks.
-It also underscores the importance of ensuring that protocols are resilient not just against brute-force attacks on high-entropy keys, but also against downgrade attacks that reduce key entropy.
 
 \subsection{Case 1: The 4-way Handshake of WPA2-PSK} \label{sec:wpa2-psk}
 
-
-The WPA2 PMKID Attack, discovered in 2018, is a prime example of how attackers can exploit protocol vulnerabilities to facilitate brute-force attacks.
-The attack targets the WPA2 handshake process, specifically the PMKID (Pairwise Master Key Identifier) that is transmitted during the initial connection between a client and an access point.
-Traditionally, capturing a full four-way handshake was required to launch a brute-force attack on the WPA2 Pre-Shared Key (PSK).
-However, the PMKID Attack simplifies this process by allowing attackers to capture the PMKID and then brute-force the PSK offline without needing the full handshake.
-
-This attack is particularly dangerous because it exploits a design flaw in the WPA2 protocol, not just an implementation error.
-The availability of tools like Hashcat, which can efficiently perform such brute-force attacks using GPUs, has further lowered the barrier for attackers to successfully compromise Wi-Fi networks.
-The PMKID Attack demonstrates how even protocols considered secure can be vulnerable when attackers leverage their brute-force capabilities.
-This attack is particularly dangerous because it exploits a design flaw in the WPA2 protocol, not just an implementation error.
-The availability of tools like Hashcat, which can efficiently perform such brute-force attacks using GPUs, has further lowered the barrier for attackers to successfully compromise Wi-Fi networks.
-The PMKID Attack demonstrates how even protocols considered secure can be vulnerable when attackers leverage their brute-force capabilities.
-
-
-
-\textbf{PMKID attack:} 
-since the strength of the PMK (PSK) is directly influenced by the user's chosen passphrase, a weak passphrase can enable attackers to brute force the PMKID, thereby obtaining the PMK and compromising communication security, shown in \autoref{fig:pmkid-attack}.
-This attack is known as the ~PMKID attack {cite}.
+% \textbf{PMKID attack:} 
+In WPA2-PSK, the 4-way handshake is used to distribute $PTK$ and $GTK$ between Authenticator and Supplicant. 
+The security of the entire protocol is ensured by the $PMK$~($PSK$). 
+The first message of the handshake includes $PMKID$ which is calculated from the user chosen $passphrase$, see~\autoref{eq:pmkid}. 
+However, if the user chooses a simple passphrase, the entropy of the PMK will be reduced, allowing an attacker to brute-force $PMK$ from $PMKID$. 
+In this case, the attacker can compromise the $PTK$ and $GTK$ through the $PMK$, thereby compromising the security of the entire session. 
+This attack is known as the PMKID attack\cite{pmkidattack} and is shown in \autoref{fig:pmkid-attack}. 
 
 \begin{figure}[hbtp]
     \centering
@@ -50,15 +29,14 @@ This attack is known as the ~PMKID attack {cite}.
 
 % 此外在WPA2-PSK中，PMK(PSK)仅需要用户选择的passphrase便可以计算，因此PMK的熵取决于Passphrase的熵。我们假设存在一个缺乏安全意识的用户，总是选择短且简单的passphrase，这样就导致了PMK的熵较低，我们在模型中添加了这一假设，将PMK标记为低熵的密钥。
 \textbf{Security assumption:} 
-in WPA2-PSK, the PMK (PSK) can be calculated solely from the user-selected passphrase, resulting in the PMK's entropy being contingent on the passphrase's entropy.
+in WPA2-PSK, the PMK (PSK) can be calculated from the user-selected passphrase, resulting in the PMK's entropy being contingent on the passphrase's entropy.
 We assume the existence of a security-unaware user who consistently selects short and simple passphrases, thereby leading to low entropy in the PMK.
-
 
 % cremers_wpa2 提出了WPA2的 4-way handshake协议的形式化模型，该模型包括从PMK派生PTK和GTK的过程。由于该模型主要为了验证密钥重装攻击，因此在第一条握手消息中省略了PMKID，我们补全了这一部分：
 \textbf{Protocol modeling:}  
-\cite{cremers2020wpa2} proposed a formal model of the WPA2 4-way handshake protocol, encompassing the process of deriving the PTK and GTK from the PMK.
-As the model primarily focuses on verifying key reinstallation attacks, the PMKID is omitted in the first handshake message.
-We added PMKID to the first message of the handshake as follows:
+\cite{cremers2020wpa2} proposed a formal model of the WPA2 4-way handshake protocol, including the process of distributing the $PTK$ and $GTK$ with $PMK$.
+As the model primarily focuses on verifying key reinstallation attacks, the $PMKID$ is omitted in the first handshake message.
+We added $PMKID$ to the first message of the handshake as follows:
 \begin{flalign*}
     \text{\ruleNameText{Au}}    & \text{\ruleNameText{thSndM1}} :                                                   & \\
                                 & \text{\Tterm{let}}                                                                \\  
@@ -70,27 +48,25 @@ We added PMKID to the first message of the handshake as follows:
     \TFacts{                    & \text{\TFactTerm{AuthState}{"PTK START", \TPairN{PMK, \TFrTerm{ANonce}}}},        \\
                                 & \text{\TFactTerm{AuthOut}{\TPairN{\TFrTerm{ANonce}, PMKID}}}}
 \end{flalign*}
-Here, we incorporate our security assumption into the model, marking the PMK as a low-entropy key.
+Here, we incorporate our security assumption into the model, marking the $PMK$ as a low-entropy key.
 
 
 % 我们将验证PTK的保密性来探究低熵的PMK是否会被攻击者利用来妥协4-way handshake的安全性。我们引入一个事实 SupplicantInstalledPTK，表示supplicant已经安装了PTK。PTK的保密性形式化定义如下：
 % 这个公式表示supplicant安装某个PTK且攻击者得知此PTK是不可能的。
-\textbf{Property specification:} We will verify the secrecy of PTK to analysis whether attackers can exploit a low-entropy PMK to compromise the security of the 4-way handshake.
+\textbf{Property specification:} We will verify the secrecy of $PTK$ to analysis whether attackers can exploit a low-entropy $PMK$ to compromise the security of the 4-way handshake.
 We introduce a fact, \TFact{SuppInsPTK}, indicating that the supplicant has installed a PTK.
-The formal definition of the secrecy of the PTK is as follows:
+The formal definition of the secrecy of the $PTK$ is as follows:
 \begin{flalign*}
     & \hspace{0em} \text{\TLemma{not}} \;\, \text{\TLemma{Ex}} \;\, \text{\Tterm{suppID  PTK \#i \#j.}} \;\, &\\
     & \hspace{1em} \text{\TFact{K(PTK)@i}} \; \land \; \text{\TFact{SuppInsPTK(suppID, PTK)@j}}
 \end{flalign*}
-This formula indicates that it is impossible for the attacker to know a PTK while the supplicant has installed it.
+This formula indicates that it is impossible for the attacker to know a $PTK$ while the supplicant has installed it.
 
 \subsection{Case 2: The Paring Protocol of BLE}
-% Key Negotiation Of Bluetooth(KNOB)攻击在针对低功耗蓝牙时，攻击者可以通过降低LTK的长度来降低密钥被破解的难度，进而破坏通信的安全性。\autoref{fig:ble-knob}展示了KNOB攻击的过程，攻击者通过篡改双方配对feature中的LTK长度字段，使得Initiator和Responder协商出的LTK长度较短，从而降低了攻击者通过暴力破解LTK的难度。
-\textbf{KNOB attack:}  
-The Key Negotiation of Bluetooth (KNOB) attack poses a significant threat to low-power Bluetooth communications by allowing an attacker to decrease the difficulty of compromising the Long-Term Key (LTK) through the intentional reduction of its length.
-This reduction undermines the security of the communication channel.
-As illustrated in \autoref{fig:ble-knob}, the attacker manipulates the LTK length field within the pairing features exchanged between the Initiator and Responder, leading to the negotiation of a shorter LTK.
-This alteration substantially reduces the complexity of a brute-force attack on the LTK.
+In the BLE pairing protocol, there is a KNOB attack\cite{antonioli2019knob}. 
+Through this attack, an attacker can downgrade the negotiated key length between the pairing parties, thereby enabling the attacker to compromise the long-term key through brute force.
+As illustrated in \autoref{fig:ble-knob}, the attacker manipulates the $LTK$ length field within the pairing features exchanged between the Initiator and Responder, leading to the negotiation of a shorter $LTK$.
+This alteration substantially reduces the complexity of brute-forcing $LTK$.
 \begin{figure}[hbtp]
     \centering
     \includegraphics[width=\columnwidth]{img/ble-knob} 
@@ -98,38 +74,19 @@ This alteration substantially reduces the complexity of a brute-force attack on 
     \label{fig:ble-knob}
 \end{figure}
 
-% 在我们的模型中，我们假设参与配对的BLE设备的IO能力为KeyboardDisplay，且支持的最大密钥长度为协议规定的16字节。在这种场景下，如果没有攻击者的参与，配对的蓝牙设备将会采用Numeric Comparison配对方案，成功协商出完整长度的LTK。
-% 为了充分研究攻击者的计算能力对协议安全性的影响，我们会逐步放松BLE设备对于最低密钥长度的限制，以及提高攻击者的计算能力。我们以下两类设备：
-% \begin{itemize}
-%     \item \textbf{极端安全的设备(ES-D)}：及其注重安全，仅接受使用完整长度的LTK。
-%     \item \textbf{普通安全的设备(NS-D)}：遵守规范的建议，接受7字节到16字节的LTK，但是倾向于使用完整长度的LTK。 
-% \end{itemize}
-% 对于攻击者的计算能力，我们假设攻击者可以在短时间内遍历长度为LTK最大长度一半的密钥的密钥空间，也就是说，攻击者拥有暴力破解出8字节及以下的LTK的能力。
+
 \textbf{Security assumption:} 
-In the proposed model, it is assumed that the participating BLE devices possess an IO capability of KeyboardDisplay, with a maximum expected key length of 16 bytes as stipulated by the protocol.
-In the absence of an adversary, these devices will employ the Numeric Comparison pairing method, achieving a full-length LTK.
-To comprehensively analyze the influence of an attacker's computational capabilities on the security of the protocol, we will incrementally loosen the constraint on the minimum key length for BLE devices, while enhancing the attacker's computational capabilities.
-
-We consider two categories of devices:
-\begin{itemize}
-\item \textbf{Extremely Secure Device(ES-D)}: These devices place a high emphasis on security and only accept full-length LTKs.
-\item \textbf{Normally Secure Device(NS-D)}: These devices conform to the recommended guidelines, accepting LTKs ranging from 7 to 16 bytes, although they prefer full-length LTKs.
-\end{itemize}
-
-With respect to the attacker's computational capabilities, we assume that there are two types of attackers:
-\begin{itemize}
-    \item \textbf{Semi-cracking Attacker(SA)}: This attacker can traverse the key space of a key with a length of half the maximum LTK length in a short period, i.e., the attacker has the ability to brute force key of 8 bytes or less.
-    \item \textbf{Quart-cracking Attacker(QA)}: Similar to the SA, this attacker can crack keys of 4 bytes or less.
-\end{itemize}
-The minimum length of LTK is 7 bytes makes it impossible for QA to compromise any LTKs.
-So we only take SA into consideration in the case of BLE.
+The Bluetooth core specification\cite{bluetooth6} states that Bluetooth Low Energy devices can support key lengths of 7 to 16 bytes. For convenience, we assume that the devices involved in pairing support key lengths of 8 to 16 bytes. In this scenario, without the involvement of an attacker, these devices will negotiate a full-length LTK.
+Additionally, we assume that the attacker has the capability to brute-force an 8-byte key, meaning the attacker can quickly traverse the key space of 8 bytes or fewer.
+\BlueQuote{[Vol 3, Part H, 2.3.4]}{ 
+The maximum and minimum encryption key length parameters shall be between 7 octets (56 bits) and 16 octets (128 bits), in 1 octet (8~bit) steps.}
 
 % \cite{shi2023formal} 开发了BLE-SC配对协议的的全面的形式化模型，涵盖了规范中所有的关联模型。根据蓝牙标准，计算LTK的最后一步是根据协商的密钥长度对LTK进行截取，例如，协商的密钥长度为7字节，那么LTK只会保留7字节的有效数据。考虑到攻击者的计算能力，长度较短的LTK是可以被攻击者获取的，而完整长度的LTK无法被攻击者直接破解。现有的工作直接定义了如下的rule，给攻击者得到低熵密钥的能力：
 \textbf{Protocol modeling:}
 \cite{shi2023blesc} has developed a comprehensive formal model for the BLE-SC pairing protocol, which includes all related models specified in the standards.
-According to the Bluetooth Specification, the final process in LTK derivation involves truncating the LTK to the negotiated key length.
-For instance, if the negotiated key length is 7 bytes, only 7 bytes of the LTK will remain as valid data.
-Given the computational capabilities of an adversary, shorter LTKs are susceptible to being compromised, whereas a full-length LTK remains secure against brute-force attacks.
+According to the Bluetooth Specification, the final process in $LTK$ derivation involves truncating the $LTK$ to the negotiated key length.
+For instance, if the negotiated key length is 7 bytes, only 7 bytes of the $LTK$ will remain as valid data.
+Given the computational capabilities of an adversary, shorter $LTK$s are susceptible to being compromised, whereas a full-length $LTK$ remains secure against brute-force attacks.
 Existing research defines a rule that provides the attacker with the ability to access low-entropy keys:
 \begin{flalign*}
     \text{\ruleNameText{Re}}    & \text{\ruleNameText{vealLTK}} :                                   & \\
@@ -139,17 +96,17 @@ Existing research defines a rule that provides the attacker with the ability to 
     \TFacts{                    & \text{\TFactTerm{In}{senc(m, LTK)}}} \TEmpActFactSL{} \TFacts{ \text{\TFactTerm{Out}{LTK}}}             
 \end{flalign*}
 % 其中，resize函数代表了LTK的截断操作，第一个参数是待截断的密钥，第二个参数是截断后的密钥长度。虽然这条规则虽然赋予了攻击者获取低熵的LTK的能力，但是这条规则并没有还原真实的攻击行为。事实上，配对的蓝牙设备在使用LTK保护通信时，会首先使用LTK派生出SK，然后使用SK加密发往公开信道的数据。delov-yao模型中的攻击者无法获取到使用LTK加密的密文，也就无法使用这条规则来妥协低熵的LTK。这样的模型可以发现KNOB攻击，是因为这个模型简化了SK的参与，直接使用了LTK来保护通信数据。我们希望更加还原协议的行为，因此补充了LTK参与派生SK，以及SK用于保护通信。
-The \funcText{resize} function is designed to model the truncation operation of LTK, with the first parameter being the key to be truncated and the second parameter specifying the desired length of the truncated key.
-While this rule provides the attacker with the theoretical ability to obtain a low-entropy LTK, it does not accurately replicate the actual attack scenario.
-In fact, paired Bluetooth devices utilize the LTK to secure communications by first deriving a Session Key (SK) from the LTK, and subsequently employing the SK to encrypt data transmitted over the public channel.
-In the Dolev-Yao model, the attacker is unable to intercept the ciphertext encrypted with the LTK, thus making it impossible to exploit this rule to compromise a low-entropy LTK.
-The model's ability to discover the KNOB attack arises from its simplification of SK involvement, where the LTK is directly used to secure communication data.
-In our efforts to more faithfully model the protocol's execution, we have incorporated the derivation of the SK from the LTK and the use of the SK in securing communications.
+The \funcText{resize} function is designed to model the truncation operation of $LTK$, with the first parameter being the key to be truncated and the second parameter specifying the desired length of the truncated key.
+While this rule provides the attacker with the theoretical ability to obtain a low-entropy $LTK$, it does not accurately replicate the actual attack scenario.
+In fact, paired Bluetooth devices utilize the $LTK$ to secure communications by first deriving a Session Key (SK) from the $LTK$, and subsequently employing the SK to encrypt data transmitted over the public channel.
+In the Dolev-Yao model, the attacker is unable to intercept the ciphertext encrypted with the $LTK$, thus making it impossible to exploit this rule to compromise a low-entropy $LTK$.
+The model's ability to discover the KNOB attack arises from its simplification of SK involvement, where the $LTK$ is directly used to secure communication data.
+In our efforts to more faithfully model the protocol's execution, we have incorporated the derivation of the SK from the $LTK$ and the use of the SK in securing communications.
 
 % 此外，我们还以更细的粒度建模了reszie函数。定义两种种密钥长度$N_1$与$N_2$，其中$N_1$表示攻击者可以破解的密钥长度，$N_2$表示攻击者无法破解的密钥长度。为了详细地建模出LTK的截取操作，我们定义两个函数 left/1 与 right/1，分别代表了截取密钥的左侧一半与右侧一半。在此基础上，resize函数满足以下等式：
 Furthermore, we have refined the modeling of the \funcText{resize} function for increased granularity.
 From the attacker's perspective, we define two critical key lengths, $N_1$ and $N_2$, where $N_1$ denotes the key lengths susceptible to attack, and $N_2$ denotes those remaining secure.
-To provide a detailed model of the LTK truncation process, we introduce two functions, \funcText{left} and \funcText{right}, which respectively denote the left and right halves of the key.
+To provide a detailed model of the $LTK$ truncation process, we introduce two functions, \funcText{left} and \funcText{right}, which respectively denote the left and right halves of the key.
 The \funcText{resize} function adheres to the following equation:
 \begin{flalign*}
     \text{\Tterm{resize(k, $N_1$)}} & \text{ = \Tterm{left(k)}}    & \\
@@ -157,9 +114,9 @@ The \funcText{resize} function adheres to the following equation:
 \end{flalign*}
 
 % LTK派生的过程建模如下：
-Taking into account the computational capabilities of an adversary, both \Tterm{left(FullLTK)} and \Tterm{right( FullLTK)} are considered vulnerable from the attacker's viewpoint, where \Tterm{FullLTK} is a LTK with the full length.
-Therefore, in our model, both of these LTK parts are marked as low-entropy keys.
-The LTK truncation process is modeled as follows:
+Taking into account the computational capabilities of an adversary, both \Tterm{left(FullLTK)} and \Tterm{right( FullLTK)} are considered vulnerable from the attacker's viewpoint, where \Tterm{FullLTK} is a $LTK$ with the full length.
+Therefore, in our model, both of these $LTK$ parts are marked as low-entropy keys.
+The $LTK$ truncation process is modeled as follows:
 \begin{flalign*}
     \text{\ruleNameText{Re}}    & \text{\ruleNameText{sizeLTK}} :                                   & \\
                                 & \text{\Tterm{let}}                                                \\
@@ -173,15 +130,15 @@ The LTK truncation process is modeled as follows:
     \TFacts{                    & \text{\TFactTerm{InitState}{"LTK CALCED", LTK}}}                  
 \end{flalign*}
 % 为了简洁，我们这里省略了具体计算FullLTK的过程，只展示了LTK的截断操作。在这个规则中，KS是协商的密钥长度，LLTK与RLTK分别代表了LTK的左边部分与右边部分，这两个部分都被标记为低熵密钥。
-For brevity, the detailed computation process for the \Tterm{left(FullLTK)} is not included here; instead, we only focus on the truncation operation of the LTK.
+For brevity, the detailed computation process for the \Tterm{left(FullLTK)} is not included here; instead, we only focus on the truncation operation of $LTK$.
 In this rule, \Tterm{KS} denotes the negotiated key length, while \Tterm{LSEG} and \Tterm{RSEG} represent the left and right segments of \Tterm{FullLTK} respectively.
 Both segments are annotated as low-entropy keys.
 
 % 我们聚焦于分析攻击者能否利用计算能力破解密钥，因此我们着重研究协议中密钥的保密性。我们定义了两个事实，\TFact{LTKNegotiated} 与 \TFact{SKDistributed}，分别代表了LTK成功被协商出来，SK被成功分发。LTK与SK的保密性分别定义如下：
 \textbf{Property specification:}
 Our focus is on analyzing whether an attacker can leverage computational capabilities to compromise keys, thus we emphasize the study of key confidentiality within the protocol.
-We define two facts, \TFact{LtkNegotiated} and \TFact{SkDistributed}, representing the successful negotiation of the LTK and the successful distribution of the SK, respectively.
-The secrecy of LTK and SK for the Initiator and Responder is defined as follows:
+We define two facts, \TFact{LtkNegotiated} and \TFact{SkDistributed}, representing the successful negotiation of $LTK$ and the successful distribution of the SK, respectively.
+The secrecy of $LTK$ and SK for the Initiator and Responder is defined as follows:
 \begin{flalign*}
     & \hspace{0em} \text{\TLemma{All}} \;\, \text{\Tterm{Addr LTK \#i.}} \;\, &\\
     & \hspace{1em} \text{\TFact{LtkNegotiated(Role, Addr, LTK)@i}} \\
@@ -191,13 +148,10 @@ The secrecy of LTK and SK for the Initiator and Responder is defined as follows:
     & \hspace{0em} \implies \neg (\text{\TLemma{Ex \#j.}} \;\, \text{\TFact{K(SK)@j}} ) 
 \end{flalign*}
 where \TFact{Role} could be either "Initiator" or "Responder".
-This formula indicates that it is impossible for the attacker to know the LTK while the Initiator or Responder has successfully negotiated it.
+This formula indicates that it is impossible for the attacker to know the $LTK$ while the Initiator or Responder has successfully negotiated it.
 Similarly, the attacker cannot know the SK while the Initiator or Responder has successfully distributed it.
 
-
 \subsection{Case 3: The Session Establishment of BC}
-
-
 
 \begin{figure}[hbtp]
     \centering
@@ -222,9 +176,8 @@ In the Bluetooth Core Specification version 5.1 and preceding versions, the mini
 However, starting from Bluetooth version 5.2, it is advised that BC devices support the minimum key size should not be less than 7 bytes.
 The subsequent text is extracted from the most recent Bluetooth Core Specification version 6.0, which elaborates on this recommendation.
 \BlueQuote{[Vol 2, Part C, 4.2.5.2]}{ 
-    L\_max\_c and L\_max\_p \emph{shall} be set to at least 7 octets.
+L\_max\_c and L\_max\_p \emph{shall} be set to at least 7 octets.
 L\_min\_c and L\_min\_p \emph{should} be set to at least 7 octets.
-
 }
 % 在蓝牙specification中，\textbf{shall} 代表了强制要求，\textbf{should} 代表了建议。因此，支持最大的密钥长度低于7字节的BC设备是不符合规范的。然而，我们在最新的规范中找到了有关BC设备允许的最大密钥长度的另一处表述，如下所示：
 In the Bluetooth specification, the term \emph{shall} denotes a mandatory requirement, whereas \emph{should} indicates a recommended practice.
@@ -246,8 +199,22 @@ Since there is no strict requirement regarding the minimum key length in the spe
 Furthermore, devices are classified according to their support for the SC feature into three categories: SC-Only, SC-Legacy, and Legacy-Only.
 These categories correspond to devices that only support Secure Connections, those that support both Legacy and Secure Connections, and those limited to Legacy connections, respectively.
 By integrating the SC feature with key support characteristics, six distinct device types emerge.
-Considering that the session encryption key for BC can be as short as 1 byte, there are potential security concerns within the QA model.
-Therefore, both SA and QA model of the adversary will be taken into account.
+
+% 考虑到最小的密钥长度可以低至1字节，我们假设存在两类攻击者：
+% \begin{itemize}
+%     \item \textbf{SA:} 攻击者可以破解一半长度的密钥。
+%     \item \textbf{QA:} 攻击者可以破解四分之一长度的密钥。
+% \end{itemize}
+% 这两类攻击者分别代表了计算能力较强的攻击者（可以暴力破解8字节的密钥）与计算能力较弱的攻击者（可以暴力破解4字节的密钥）。
+% 我们将在模型中分别考虑SA与QA两种攻击者，以验证BC设备在不同的安全假设下的安全性。
+Considering that the minimum key length can be as low as 1 byte, we assume the existence of two types of attackers:
+\begin{itemize}
+    \item \textbf{SA:} An attacker capable of cracking a key that is half the maximum length.
+    \item \textbf{QA:} An attacker capable of cracking a key that is a quarter of the maximum length.
+\end{itemize}
+These two types of attackers represent different levels of computational power: a stronger attacker who can brute-force an 8-byte key and a weaker attacker who can brute-force a 4-byte key.
+So the attacker model we consider in BLE is the SA attacker.
+We will consider both SA and QA attackers in our model to evaluate the security of BC devices under different security assumptions.
 
 % 我们建模了BC-SC与BC-Legacy进行了全面的形式化建模，以支持我们安全假设中不同的设备类型的验证。我们通过如下的equations来建模协议中设备交换双方的认证需求，来选择会话建立方法的过程：
 \textbf{Protocol modeling:}
@@ -271,10 +238,10 @@ Analogous to the BLE model, the functions \Tterm{l} and \Tterm{r} are employed t
 In this scenario, additional key lengths $N_1$, $N_2$, $N_3$, and $N_4$ are introduced.
 The resize function is defined to satisfy the following equations:
 \begin{flalign*}
-    \text{\Tterm{resize(k, $N_1$)}} &= \text{\Tterm{l(l(k))}}                           & \\
+    \text{\Tterm{resize(k, $N_1$)}} &= \text{\Tterm{l(l(k))}}                   & \\
     \text{\Tterm{resize(k, $N_2$)}} &= \text{\TPairN{l(l(k)),r(l(k))}}          \\
-    \text{\Tterm{resize(k, $N_3$)}} &= \text{\TPairN{l(l(k)),r(l(k)),l(r(k))}}          \\
-    \text{\Tterm{resize(k, $N_4$)}} &= \langle \text{\Tterm{l(l(k)),r(l(k)),} }    \\
+    \text{\Tterm{resize(k, $N_3$)}} &= \text{\TPairN{l(l(k)),r(l(k)),l(r(k))}}  \\
+    \text{\Tterm{resize(k, $N_4$)}} &= \langle \text{\Tterm{l(l(k)),r(l(k)),} } \\
                                     &\hspace{6.5em} \text{\Tterm{l(r(k)),r(r(k))}}\rangle
     % \text{\Tterm{resize(k, $N_4$)}} & \text{ = \TPairN{l(l(k)),r(l(k)),l(r(k)),r(r(k))}}         
 \end{flalign*}
@@ -286,13 +253,13 @@ Within the QA attacker model, the key is divided into four segments, with each s
 In the rules of the model, these segments are categorized as low-entropy keys.
 
 \begin{flalign*}
-    \text{\ruleNameText{Re}}    & \text{\ruleNameText{sizeSKQA}} :                                   & \\
-                                & \text{\Tterm{let}}                                                \\
-                                & \hspace{1em} \text{\Tterm{l(l(k)),r(l(k)),l(r(k)),r(r(k)) := `L`}}                     \\
-                                & \hspace{1em} \text{\Tterm{SK = resize(FullSK, KS)}}             \\
-                                & \text{\Tterm{in}}                                                 \\
-    \TFacts{                    & \text{\TFactTerm{State}{"SK CALC", \TPairN{FullSK, KS}}}}   \\
-                                & \TEmpActFact{ }                                                   \\
+    \text{\ruleNameText{Re}}    & \text{\ruleNameText{sizeSKQA}} :                                      & \\
+                                & \text{\Tterm{let}}                                                    \\
+                                & \hspace{1em} \text{\Tterm{l(l(k)),r(l(k)),l(r(k)),r(r(k)) := `L`}}    \\
+                                & \hspace{1em} \text{\Tterm{SK = resize(FullSK, KS)}}                   \\
+                                & \text{\Tterm{in}}                                                     \\
+    \TFacts{                    & \text{\TFactTerm{State}{"SK CALC", \TPairN{FullSK, KS}}}}             \\
+                                & \TEmpActFact{ }                                                       \\
     \TFacts{                    & \text{\TFactTerm{State}{"SK CALCED", SK}}}                 
 \end{flalign*}
 
@@ -308,7 +275,5 @@ The property is specified as follows:
 \end{flalign*}
 where \TFact{Role} could be either "Central" or "Peripheral".
 This formula indicates that it is impossible for the attacker to know the session key while the central or peripheral device has successfully distributed it.
-% 此外我们还考虑了SK密钥的认证性
-
 
 \end{document}
