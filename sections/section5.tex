@@ -172,9 +172,9 @@ Under certain circumstances, an attacker can effectively implement a KNOB attack
 % 在蓝牙specification中，BC设备支持的会话密钥长度从1字节到16字节。在BLE的case中我们提到的两个攻击者SA与QA都可能对BC设备的会话密钥产生威胁，因此我们将在BC的case中考虑这两种攻击者。
 \textbf{Security assumption:} 
 % 在蓝牙Core Specification v5.1以及之前的版本中，BC设备支持的最短密钥长度可以是1字节。在蓝牙v5.2及之后的规范中建议BC设备支持的最短密钥长度至少为7字节。以下是在最新的蓝牙v6.0标准文件中相关内容的表述：
-In the Bluetooth Core Specification version 5.1 and preceding versions, the minimum key size can be allowed by BC devices is 1 byte.
-However, starting from Bluetooth version 5.2, it is advised that BC devices support the minimum key size should not be less than 7 bytes.
-The subsequent text is extracted from the most recent Bluetooth Core Specification version 6.0, which elaborates on this recommendation.
+In the Bluetooth Core Specification version 5.1\cite{bluetooth51} and preceding versions, the minimum key size can be allowed by BC devices is 1 byte.
+However, starting from Bluetooth version 5.2\cite{bluetooth52}, it is advised that BC devices support the minimum key size should not be less than 7 bytes.
+The subsequent text is extracted from the most recent Bluetooth Core Specification version 6.0\cite{bluetooth6}, which elaborates on this recommendation.
 \BlueQuote{[Vol 2, Part C, 4.2.5.2]}{ 
 L\_max\_c and L\_max\_p \emph{shall} be set to at least 7 octets.
 L\_min\_c and L\_min\_p \emph{should} be set to at least 7 octets.
@@ -218,18 +218,18 @@ We will consider both SA and QA attackers in our model to evaluate the security 
 
 % 我们建模了BC-SC与BC-Legacy进行了全面的形式化建模，以支持我们安全假设中不同的设备类型的验证。我们通过如下的equations来建模协议中设备交换双方的认证需求，来选择会话建立方法的过程：
 \textbf{Protocol modeling:}
-We have developed a comprehensive formal model for BC's SC and Legacy session establishment protocols to facilitate the verification of various device types under our specified security assumptions.The procedure for selecting a session establishment method according to the two devices' SC feature are represented by the following equations:
-\begin{flalign*}
-    \text{\Tterm{Select(FALSE, \_)}} &= \text{\Tterm{LegacyMethod}} & \\
-    \text{\Tterm{Select(\_, FALSE)}} &= \text{\Tterm{LegacyMethod}} \\
-    \text{\Tterm{Select(TRUE, TRUE)}} &= \text{\Tterm{SecureMethod}} 
-\end{flalign*}
-% 其中SCY 、 SCN、ScMethod 和 LyMethod 是0 arity function，代表了设备是否支持SC，ScMethod 与 LyMethod 代表了设备选择SC与Legacy建立会话的方法。
-In this context, \Tterm{TRUE}, \Tterm{FALSE}, \Tterm{SecureMethod}, and \Tterm{LegacyMethod} are 0-arity functions.
-The functions \Tterm{TRUE} and \Tterm{FALSE} denote whether a device supports SC.
-Meanwhile, \Tterm{ScMethod} and \Tterm{LyMethod} specify the methods selected by the device for session establishment, respectively.
-The \Tterm{ScMethod} will be chosen only if both devices support secure connections.
-
+We have developed a comprehensive formal model for BC's SC and Legacy session establishment protocols to facilitate the verification of various device types under our specified security assumptions.
+% The procedure for selecting a session establishment method according to the two devices' SC feature are represented by the following equations:
+% \begin{flalign*}
+%     \text{\Tterm{Select(FALSE, \_)}} &= \text{\Tterm{LegacyMethod}} & \\
+%     \text{\Tterm{Select(\_, FALSE)}} &= \text{\Tterm{LegacyMethod}} \\
+%     \text{\Tterm{Select(TRUE, TRUE)}} &= \text{\Tterm{SecureMethod}} 
+% \end{flalign*}
+% % 其中SCY 、 SCN、ScMethod 和 LyMethod 是0 arity function，代表了设备是否支持SC，ScMethod 与 LyMethod 代表了设备选择SC与Legacy建立会话的方法。
+% In this context, \Tterm{TRUE}, \Tterm{FALSE}, \Tterm{SecureMethod}, and \Tterm{LegacyMethod} are 0-arity functions.
+% The functions \Tterm{TRUE} and \Tterm{FALSE} denote whether a device supports SC.
+% Meanwhile, \Tterm{ScMethod} and \Tterm{LyMethod} specify the methods selected by the device for session establishment, respectively.
+% The \Tterm{ScMethod} will be chosen only if both devices support secure connections.
 
 % 在建模攻击者时,我们还需要建模出QA.
 % 与在BLE模型中类似，我们使用l与r函数分别表示密钥的两半,不过此时需要引入更多的密钥长度$N_1$, $N_2$, $N_3$, $N_4$,并且resize函数满足以下等式：

@@ -3,98 +3,107 @@
 \begin{document}
 
 \section{Results} \label{sec:6results}
-% 本节将介绍三个案例的分析结果，并分别与文献的模型进行对比。对于BC模型发现的新攻击，我们将详细描述攻击的过程。
 This section presents the analysis results of the previous three cases and compares them with models from the literature.
-We will provide a detailed description of the process for the novel attack discovered from the BC model analysis results.
+Our experiment was conducted on a server running Ubuntu 22.04 with an AMD 7950X3D CPU and 192GB RAM.
+We will provide a detailed description of the process for the novel attack discovered from the BC analysis results.
 
 \subsection{WPA2-PSK's 4-way handshake}
-% 在\cite{cremers2020wpa2}中，作者开展了对WPA2的四步握手协议的形式化分析，展示了四步握手协议在key reinstallation attacks下的脆弱性。尽管他们的研究重点是nonce reuse对协议的影响，我们使用本文提出的方案，对他们的形式化模型稍加修改，赋予攻击者妥协低熵密钥的能力，以分析常用口令的滥用造成的安全问题。
-% 我们的模型在发现密钥重装攻击的同时，也发现了PMKID攻击，这个攻击在原来的模型中是发现不了的。
-In \cite{cremers2020wpa2}, a formal analysis of the WPA2 four-way handshake protocol is conducted, revealing its vulnerability to key reinstallation attacks.
-While the original study primarily focus on the impact of nonce reuse on protocols, we made slight modifications to their formal model to apply our modelling methods proposed in this paper.
+
+\cite{cremers2020wpa2}'s formal analysis of the WPA2 4-way handshake protocol revealed its vulnerability to Kracks~(Key Reinstallation Attacks)\cite{vanhoef2017krack}.
+While the original study primarily focus on the impact of nonce reuse on protocols, we made slight modifications to their formal model to apply our me proposed in this paper.
 These modifications enable the attacker to compromise low-entropy keys, allowing us to investigate the security vulnerabilities arising from the misuse of common passwords.
 This approach provides a comprehensive understanding of the potential risks associated with low-entropy key exploitation.
-Our model is capable of identifying key reinstallation attacks and has also uncovered the PMKID attack, a vulnerability that was not apparent in the original model.
-
-
-\subsection{BLE's pairing}
-% 使用tamarin-prover针对BLE设备配对协议的形式化分析工作有很多\cite{shi2023blesc, jangid2023blepe}，其中\cite{shi2023blesc}的模型最为全面，建模了BLE设备配对的所有关联模型。该工作分析了BLE配对协议的四个认证属性，与两个保护属性，和长期密钥的保密性。尽管在他们的模型中，作者建模了暴力破解攻击，但是这是一个取巧的方法，因为他们过度简化了配对协议中传输密钥的过程。我们修改了他们的模型，添加了BLE设备建立加密会话，并使用加密信道传输密钥的过程。在这个添加了加密会话的模型上，我们应用了本文的低熵密钥破解建模方法。
-There are many formal analysis works\cite{shi2023blesc, jangid2023blepe} on BLE-SC pairing protocols using the Tamarin-prover.
-Among these studies, the model presented in \cite{shi2023blesc} stands out as the most comprehensive, encompassing all association models during pairing.
-This work introduced several security properties, including four authentication properties, MITM protection, LTK confusion protection, and the secrecy of LTK.
-However, the approach taken in this work to model brute-force attacks is tricky and imprecise due to the oversimplification of the key transmission process within the pairing protocol.
-To address this limitation, we have revised their model to incorporate the establishment of encrypted sessions for BLE devices and the transmission of keys over the protected channel.
-Upon this, we apply the low-entropy key cracking oracle proposed in this paper, thereby offering a more general analysis of the protocol's security.
 
 \begin{table}[ht]
     \centering
-    \caption{Results of BLE Pairing}
-    \label{tab:ble-pairing-result}
-    \renewcommand{\arraystretch}{1.3}  % 调整行间距
-    \setlength{\tabcolsep}{8pt}        % 调整列间距
-    \begin{tabular}{p{2cm}ccccccc}
+    \caption{Results of 4-way handshake }
+    \label{tab:4-way-handshake-result}
+    \begin{tabular}{lccc}
         \hline
-        Model & A1 & A2 & A3 & A4 & P1 & P2 & C \\
+        Model & Executability & PMKID Attack & Kracks \\
+        \hline 
         \hline
-        \hline
-        Pairing & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} \\
-        Pairing + Session & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_green}{\ding{52}} \\
-        \hline
-        Pairing + Session + CrackOracle & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} \\
+        \cite{cremers2020wpa2}'s Model & \textcolor{xhs_green}{\ding{52}} & \textcolor{xhs_green}{\ding{52}} & \textcolor{xhs_red}{\ding{56}} \\
+        Our Model & \textcolor{xhs_green}{\ding{52}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} \\
         \hline
     \end{tabular}
 \end{table}
 
-% 为了对比这三个模型，我们选择了一个配对场景进行实验，这个配对场景下，双方设备的IO能力都是KeyboardDisplay，这些模型的分析结果如\autoref{tab:ble-pairing-result}所示。结果显示，我们的方法应用于完整的paring+session的模型可以正确的发现BLE配对协议的安全问题。
-In order to compare these three models, we selected a pairing scenario where the IO capabilities of both devices are KeyboardDisplay.
-The analysis results of the models are shown in \autoref{tab:ble-pairing-result}.
-The results indicate that our method, when applied to the complete pairing+session model, can correctly identify the security issues in the BLE pairing protocol.
-
-\subsection{BC's session establishment}
-% 我们针对BC的会话建立协议进行了大规模的验证，通过分析两种攻击模型下的所有场景的模型。
-We performed a full-scale study of the session establishment protocol of BC by analyzing all scenarios under the 2 attack models.
-There are 9 device types studied for BC, resulting in a total of 81 possible scenarios.
-In these scenarios, the pairing process between an SCOnly device and a LegacyOnly device has no chance to be completed without an attacker.
-Thus, analyzing the subsequent session establishment in this kind of scenarios is unnecessary.
-This leaves 63 ($9 \times 9 \times \left(1 - \frac{1}{3} \times \frac{1}{3} \times 2\right)$) scenarios to analyze.
-% 我们的实验一个运行Ubuntu 22.04的服务器上完成，该服务器有一颗AMD 7950x3d CPU，配备 196GB 的 DDR5 内存。我们在\autoref{tab:bc-session-result}总结了我们的分析结果。我们找到了x中会话场景违反了session key 的隐私性，其中x中场景的违反隐私性的trace表明存在密钥降级攻击。我们从剩余x种场景的反例trace中发现了一个新攻击，我们称之为单侧密钥降级。
-% 我们的实验在两台服务器上完成，一台运行Ubuntu 22.04，配备AMD 7950X3D CPU和192GB RAM，验证QA假设下的所有会话场景；另一台运行Ubuntu 22.04，配备Intel i9-14900K CPU和192GB RAM，验证SA假设下的所有会话场景。我们在\autoref{tab:bc-session-result}中总结了我们的分析结果。
-Our experiment was conducted on a server running Ubuntu 22.04 with an AMD 7950X3D CPU and 192GB RAM.
-The results of our analysis are summarized in \autoref{tab:bc-session-result}.
-Our findings indicate that x session scenarios compromised the secrecy of the session key, with traces from x scenarios revealing the key negotiation downgrade attack\cite{antonioli2019knob}.
-Additionally, from the counterexample traces of the remaining x scenarios, we identified a novel attack, which we term as the Unilateral Multi-Downgrade(UMD) attack.
+As shown in \autoref{tab:4-way-handshake-result}, 
+our model can discover not only Kracks same as the original one, but also the PMKID attack, which was not apparent in original analysis results.
 
 \begin{table*}[t]
     \centering
-    \caption{Example Table Across Two Columns with Similar Formatting}
-    \label{tab:bc-session-result}
-    \renewcommand{\arraystretch}{1.3}  
-    \setlength{\tabcolsep}{8pt}       
+    \caption{Results of BLE Pairing} \label{tab:ble-pairing-result}
+    \begin{threeparttable}[b]
+        \begin{tabular}{lccccccc}
+            \hline  
+            Model & Executability & Auth of Initiator's LTK & Auth of Responder's LTK & MitM Protection & Secrecy of LTK \\
+            \hline  
+            Model in \cite{shi2023blesc} + Session & \textcolor{xhs_green}{\ding{52}} & \textcolor{xhs_red}{A1} & \textcolor{xhs_red}{A1} & \textcolor{xhs_red}{A1} & \textcolor{xhs_green}{\ding{52}}  \\
+            Our Model + Session & \textcolor{xhs_green}{\ding{52}} & \textcolor{xhs_red}{A2} & \textcolor{xhs_red}{A2} & \textcolor{xhs_red}{A1} & \textcolor{xhs_red}{A2}  \\
+            \hline  
+        \end{tabular}
+        \begin{tablenotes}
+            \item[*] \textbf{A1}: Method Confusion Attack\cite{von2021method}\\
+                     \textbf{A2}: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob}
+        \end{tablenotes}
+    \end{threeparttable}
+\end{table*}
+
+\subsection{BLE's pairing}
+There are many formal analysis works\cite{shi2023blesc, claverie2023tamarin,jangid2023blepe} on BLE-SC pairing protocols using the TAMARIN prover.
+Among these, the model proposed in \cite{shi2023blesc} stands out as the most comprehensive one, which includes all association models during the pairing procedure of BLE devices.
+This work introduced several security properties, including four authentication properties, man-in-the-middle~(MitM) protection, LTK confusion protection, and the secrecy of LTK.
+However, the approach taken in this work to model brute-force attacks is tricky and imprecise due to the oversimplification of the key transmission process within the pairing protocol.
+
+We corrected their work by modeling the establishment of encrypted sessions and the transmission of keys and then applied our methodology in the complemented model. 
+All the analysis results of the two models are shown in \autoref{tab:ble-pairing-result}.
+Our model can discover both the  KNOB attack and Method Confusion Attack\cite{von2021method} which is ignored by the complemented version of \cite{shi2023blesc}'s model.
+
+\subsection{BC's session establishment}
+We performed a full-scale study of the session establishment protocol of BC by analyzing common scenarios under the QA and SA attack models and the results of our analysis are summarized in \autoref{tab:bc-session-result}.
+% 我们发现，BC会话的安全性主要取决于边缘设备最低支持的密钥长度，只要边缘设备支持的最低密钥长度在攻击者妥协的长度范围之内，边缘设备的会话密钥就一定会被妥协。当边缘设备兼容legacy设备时，情况会更加糟糕：即使双方协商出了最长的会话密钥，攻击者也可以通过多次降级边缘设备的密钥，来恢复出完整的会话密钥，即使该密钥的长度远超攻击者的计算能力。
+
+
+We have found that the security of BC sessions largely depends on the minimum key length supported by peripheral devices. 
+As long as this minimum key length falls within the range that an attacker can compromise, the session key of the peripheral device will inevitably be compromised. 
+The situation worsens when the peripheral device is compatible with legacy devices: 
+an attacker can repeatedly downgrade the peripheral device's key, ultimately recovering the longest session key, even if the key length far exceeds the attacker’s computational capacity.
+This attack against BC devices isn't covered by the existing literature, and we term it as the Unilateral Multi-Downgrade(UMD) attack.
+
+\begin{table*}[t]
+    \centering
+    \caption{Example Table Across Two Columns with Similar Formatting} \label{tab:bc-session-result}
+    \begin{threeparttable}[b]
     \begin{tabularx}{\textwidth}{c>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X}
     \hline
     Session Scenario & Adversary Model & SecCenSK & SecPerSK & MitMResistance & Time (s) \\ 
     \hline
-    \hline
 
-\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{E\hfill n\hfill h\hfill a\hfill n\hfill c}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_red}{falsified} & \textcolor{xhs_green}{\ding{52}}  & 18425.63 \\
-\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{E\hfill n\hfill h\hfill a\hfill n\hfill c} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & 37596.46 \\
-\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_red}{falsified} & \textcolor{xhs_red}{falsified} & \textcolor{xhs_red}{falsified} & 44.75 \\
-\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{S\hfill e\hfill c\hfill u\hfill r\hfill e} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & 20145.23 \\
-\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{S\hfill e\hfill c\hfill u\hfill r\hfill e}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_red}{falsified} & \textcolor{xhs_green}{\ding{52}}  & 8643.97 \\
-\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{E\hfill n\hfill h\hfill a\hfill n\hfill c}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_red}{falsified} & \textcolor{xhs_green}{\ding{52}}  & 57965.37 \\
-\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{E\hfill n\hfill h\hfill a\hfill n\hfill c}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_red}{falsified} & \textcolor{xhs_green}{\ding{52}}  & 14515.53 \\
-\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{E\hfill n\hfill h\hfill a\hfill n\hfill c} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & 50798.01 \\
-\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_red}{falsified} & \textcolor{xhs_red}{falsified} & \textcolor{xhs_red}{falsified} & 20891.03 \\
-\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{S\hfill e\hfill c\hfill u\hfill r\hfill e} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & 39212.08 \\
-\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{E\hfill n\hfill h\hfill a\hfill n\hfill c} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & 18263.59 \\
-\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_red}{falsified} & \textcolor{xhs_red}{falsified} & \textcolor{xhs_red}{falsified} & 37.80 \\
-\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{S\hfill e\hfill c\hfill u\hfill r\hfill e} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & 14602.66 \\
-\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{S\hfill e\hfill c\hfill u\hfill r\hfill e}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_red}{falsified} & \textcolor{xhs_green}{\ding{52}}  & 17157.88 \\
-\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{S\hfill e\hfill c\hfill u\hfill r\hfill e}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_red}{falsified} & \textcolor{xhs_green}{\ding{52}}  & 3993.54 \\
+    \makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{E\hfill n\hfill h\hfill a\hfill n\hfill c}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_red}{falsified} & \textcolor{xhs_green}{\ding{52}}  & 18425.63 \\
+    \makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{E\hfill n\hfill h\hfill a\hfill n\hfill c} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & 37596.46 \\
+    \makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_red}{falsified} & \textcolor{xhs_red}{falsified} & \textcolor{xhs_red}{falsified} & 44.75 \\
+    \makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{S\hfill e\hfill c\hfill u\hfill r\hfill e} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & 20145.23 \\
+    \makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{S\hfill e\hfill c\hfill u\hfill r\hfill e}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_red}{falsified} & \textcolor{xhs_green}{\ding{52}}  & 8643.97 \\
+    \makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{E\hfill n\hfill h\hfill a\hfill n\hfill c}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_red}{falsified} & \textcolor{xhs_green}{\ding{52}}  & 57965.37 \\
+    \makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{E\hfill n\hfill h\hfill a\hfill n\hfill c}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_red}{falsified} & \textcolor{xhs_green}{\ding{52}}  & 14515.53 \\
+    \makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{E\hfill n\hfill h\hfill a\hfill n\hfill c} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & 50798.01 \\
+    \makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_red}{falsified} & \textcolor{xhs_red}{falsified} & \textcolor{xhs_red}{falsified} & 20891.03 \\
+    \makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{S\hfill e\hfill c\hfill u\hfill r\hfill e} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & 39212.08 \\
+    \makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{E\hfill n\hfill h\hfill a\hfill n\hfill c} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & 18263.59 \\
+    \makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_red}{falsified} & \textcolor{xhs_red}{falsified} & \textcolor{xhs_red}{falsified} & 37.80 \\
+    \makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{S\hfill e\hfill c\hfill u\hfill r\hfill e} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_green}{\ding{52}}  & 14602.66 \\
+    \makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{S\hfill e\hfill c\hfill u\hfill r\hfill e}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill L\hfill g}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_red}{falsified} & \textcolor{xhs_green}{\ding{52}}  & 17157.88 \\
+    \makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{S\hfill e\hfill c\hfill u\hfill r\hfill e}\hspace{0.5em}$\times$\hspace{0.5em}\makebox[2.25em][s]{S\hfill c\hfill O\hfill n}\hspace{0.1em}-\hspace{0.1em}\makebox[2.9em][s]{L\hfill e\hfill g\hfill a\hfill c\hfill y} & QA & \textcolor{xhs_green}{\ding{52}}  & \textcolor{xhs_red}{falsified} & \textcolor{xhs_green}{\ding{52}}  & 3993.54 \\
 
-    \hline
     \hline
     \end{tabularx}
+    \begin{tablenotes}
+        \item[*] \textbf{ScLg}: Method Confusion Attack\cite{von2021method}\\
+                \textbf{ScOn}: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob}
+    \end{tablenotes}
+    \end{threeparttable}
 \end{table*}
 
 \subsubsection{Unilateral Multi-Downgrade Attack} 
