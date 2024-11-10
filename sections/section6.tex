@@ -10,7 +10,7 @@ We will provide a detailed description of the process for the novel attack disco
 \subsection{WPA2-PSK's 4-way handshake}
 
 \cite{cremers2020wpa2}'s formal analysis of the WPA2 4-way handshake protocol revealed its vulnerability to Kracks~(Key Reinstallation Attacks)\cite{vanhoef2017krack}.
-While the original study primarily focus on the impact of nonce reuse on protocols, we made slight modifications to their formal model to apply our me proposed in this paper.
+While the original study primarily focus on the impact of nonce reuse on protocols, we made slight modifications to their formal model to apply our methodology proposed in this paper.
 These modifications enable the attacker to compromise low-entropy keys, allowing us to investigate the security vulnerabilities arising from the misuse of common passwords.
 This approach provides a comprehensive understanding of the potential risks associated with low-entropy key exploitation.
 
@@ -45,7 +45,7 @@ our model can discover not only Kracks same as the original one, but also the PM
             \hline  
         \end{tabular}
         \begin{tablenotes}
-            \item[*] \textbf{A1}: Method Confusion Attack\cite{von2021method}\\
+            \item[*] \textbf{A1}: Method Confusion Attack\cite{von2021method} \hspace{2em}
                      \textbf{A2}: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob}
         \end{tablenotes}
     \end{threeparttable}
@@ -100,8 +100,12 @@ This attack against BC devices isn't covered by the existing literature, and we 
     \hline
     \end{tabularx}
     \begin{tablenotes}
-        \item[*] \textbf{ScLg}: Method Confusion Attack\cite{von2021method}\\
-                \textbf{ScOn}: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob}
+        \item[*] 
+        \textbf{A1}: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob} 
+        \hspace{1em} \textbf{A2}: novel Unilateral Multi-Downgrade Attack \\
+        \textbf{ScLg}: support both secure and legacy connections.
+        \hspace{2.5em} \textbf{ScOn}: only support secure connections. \\
+        \textbf{Legacy, Enhanc, Secure}: key length ranges, see \autoref{sec:bc-devices} for details.
     \end{tablenotes}
     \end{threeparttable}
 \end{table*}
@@ -126,7 +130,7 @@ The UMD attack encompasses several variations, allowing the attacker to freely c
  Assuming the attacker chooses $n$ downgrade steps, with each step having a consistent interval, the number of computations required by the attacker is $n \times 2^{\frac{128}{n}}$.
 When $n$ is 16, the complexity of brute-forcing a 16-byte session key is significantly reduced from $2^{128}$ to $2^{12}$.
 
-The discovery of the UMD attack implies that even if the central device only permits 16-byte session keys, an attacker can still compromise the session key by repeatedly downgrading the key length of peripheral devices. This attack method highlights the inherent risks associated with compatibility with legacy devices, as it enables attackers to easily compromise session keys without actually downgrading them.
+The discovery of the UMD attack implies that even if the central device only permits 16-byte session keys, an attacker can still compromise the session key by repeatedly downgrading the key length of peripheral devices. This attack highlights the inherent risks associated with compatibility with legacy devices, as it enables attackers to easily compromise session keys without actually downgrading them.
 
 \noindent\textbf{Disclosure.}
 To ensure responsible disclosure, we reported our findings to the Bluetooth Special Interest Group (SIG) security team.

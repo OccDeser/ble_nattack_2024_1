@@ -3,20 +3,20 @@
 \begin{document}
 
 \section{Discussion and Conclusion} \label{sec:8discussion-conclusion}
+Although we imposed restrictions on the key-cracking oracle, in some cases, verification may either fail to terminate or take an excessively long time. 
+Automated verification requires an appropriate verification tactic to proceed effectively. 
+Even so, compared to models without low-entropy labels, the complexity of analyzing models with low-entropy keys increases significantly, leading to varying degrees of increased verification time.
 
-This paper presented an extensive analysis of security vulnerabilities in wireless communication protocols, specifically focusing on Bluetooth Classic (BC), Bluetooth Low Energy (BLE), and WPA2.
-Through detailed case studies, we identified critical weaknesses in session establishment and key negotiation processes that could be exploited by adversaries to compromise the confidentiality, integrity, and availability of wireless communications.
-
-Our findings underscore the urgent need for the adoption of stronger cryptographic standards and more rigorous security practices in protocol design and implementation.
-The continued reliance on outdated and insecure methods, driven by legacy support and usability concerns, represents a significant threat to the security landscape of wireless communications.
-To address these challenges, we recommend the following: the enforcement of robust encryption standards across all devices, the phasing out of deprecated security protocols, and the implementation of adaptive security mechanisms that can dynamically respond to emerging threats.
-
-Moreover, the transition to more secure protocols like WPA3 should be prioritized, supported by industry-wide efforts to educate stakeholders on the importance of updating and securing wireless infrastructure.
-As the ecosystem of connected devices continues to expand, the implications of insecure wireless communications will only grow more severe, necessitating a proactive approach to security by design.
-
-In conclusion, enhancing the security of wireless communication protocols is a multifaceted challenge that requires coordinated efforts across academia, industry, and regulatory bodies.
-By advancing our understanding of existing vulnerabilities and developing innovative solutions, we can better protect the integrity of wireless communications in an increasingly interconnected world.
+In our methodology, we did not consider private functions, as our methodology is based on public protocols. 
+In practical applications, we can model private functions by replacing their implementations with a combination of public functions and private variables. 
+We plan to  consider adding support for private functions to our tool in the future.
 
 
+\textbf{Conclusion.} 
+We proposed the first methodology to analyze the impact of adversarial computation capabilities on the protocols that tolerant low-entropy keys. 
+Our method can determine whether a protocol using a certain key length is secure and under what level of adversarial computation capabilities  it remains secure.
+Our case studies illustrate our methodology is effective in discovering potential weaknesses in protocols, and it can automatically detect brute-force attacks that previously could only be identified through manual analysis.
+The novel attacks discovered through case studies fully demonstrate the advantages of our method over manual analysis.
+It can fully leverage various attacker capabilities to identify weaknesses in protocols.
 
 \end{document}
