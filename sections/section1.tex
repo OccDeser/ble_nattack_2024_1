@@ -38,7 +38,7 @@ This introduces a security issue about recovering low-entropy keys in these prot
 % 或者，符号模型下分析协议密钥熵具有xxx挑战。
 % Using symbolic models to formally analyze protocols has become a mainstream research approach, and a great number of  works\cite{basin2021emv,basin20185G,cremers2017tls13} successfully confirmed this.
 Using symbolic models to formally analyze protocols, pioneered by Dolev et al.~\cite{dolev1983security}, has become a mainstream research approach.
-Many symbolic model tools, such as~\cite{armando2005avispa,blanchet2018proverif,escobar2007maude,cremers2008scyther,meier2013tamarin}, have been developed to analyze security protocols automatically.
+Many symbolic model tools, such as~\cite{armando2005avispa,blanchet2018proverif,escobar2007maude,cremers2008scyther,meier2013tamarin,cspa}, have been developed to analyze security protocols automatically.
 These tools, e.g., TAMARIN\cite{meier2013tamarin}, usually assume ideal conditions where cryptographic primitives are unbreakable by ignoring concrete cryptographic operations and focusing on the logical structure of cryptographic values.
 Current automated analysis tools do not distinguish between high-entropy and low-entropy keys, nor do they consider computational capabilities of adversaries.
 
@@ -57,7 +57,7 @@ Third, adversaries' brute force ability needs to be improved, no longer targetin
 % 我们如何解决这些挑战，我们是怎么做的
 This paper aims to bridge this gap by introducing a generalized and automated method for modeling low-entropy keys and the adversary's brute-force capabilities within symbolic analysis frameworks. 
 We focus on enhancing the TAMARIN Prover, to support the modeling of low-entropy keys and to describe generalized brute-force attacks by adversaries. 
-TAMARIN Prover is a state-of-the-art protocol verification tool widely used for formal analysis of many protocols, including Bluetooth\cite{shi2023blesc,claverie2023tamarin, jangid2023bluepe}, TLS\cite{cremers2017tls13}, 5G-AKA\cite{basin20185G, wang20215G}, etc.
+TAMARIN Prover is a state-of-the-art protocol verification tool widely used for formal analysis of many protocols, including Bluetooth\cite{shi2023blesc,claverie2023tamarin, jangid2023bluepe}, TLS\cite{cremers2017tls13}, 5G-AKA\cite{basin20185G, wang20215G}, EMV\cite{basin2021emv,radu2022emv}, etc.
 Our methodology involves extending the TAMARIN Prover's syntax with new keywords to explicitly mark low-entropy keys within protocols. 
 We develop a compilation tool that translates the extended syntax into formal models recognizable by the TAMARIN Prover. 
 This tool automatically generates necessary facts and rules, including key-breaking oracles that simulate an adversary's ability to compromise low-entropy keys when certain conditions are met.

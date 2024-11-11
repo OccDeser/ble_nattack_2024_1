@@ -198,6 +198,7 @@ Since there is no strict requirement regarding the minimum key length in the spe
 % 此外，按照是否支持SC特性，我们将设备分为SC-Only、SC-Legacy、Legacy-Only，分别代表只支持Secure Connections的设备，同时支持Legacy和Secure Connections的设备，以及只支持Legacy功能的设备。SC特性与密钥支持的特性进行组合，一共有六种设备类型。由于BC的会话加密密钥最低可能低至1字节，在QA模型下并不一定安全，因此我们将同时考虑攻击者二分与四分的攻击能力。
 Furthermore, devices are classified according to their support for the SC feature into three categories: SC-Only, SC-Legacy, and Legacy-Only.
 These categories correspond to devices that only support Secure Connections, those that support both Legacy and Secure Connections, and those limited to Legacy connections, respectively.
+\cite{padgette2017guide} recommends that devices adhere to the following guidelines: only use secure connections and only use the maximum key length.
 By integrating the SC feature with key support characteristics, six distinct device types emerge.
 
 % 考虑到最小的密钥长度可以低至1字节，我们假设存在两类攻击者：
