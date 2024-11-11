@@ -3,6 +3,7 @@
 \begin{document}
 
 \section{Discussion and Conclusion} \label{sec:8discussion-conclusion}
+\textbf{Discussion.} 
 Although we imposed restrictions on the key-cracking oracle, in some cases, verification may either fail to terminate or take an excessively long time. 
 Automated verification requires an appropriate verification tactic to proceed effectively. 
 Even so, compared to models without low-entropy labels, the complexity of analyzing models with low-entropy keys increases significantly, leading to varying degrees of increased verification time.
@@ -10,7 +11,6 @@ Even so, compared to models without low-entropy labels, the complexity of analyz
 In our methodology, we did not consider private functions, as our methodology is based on public protocols. 
 In practical applications, we can model private functions by replacing their implementations with a combination of public functions and private variables. 
 We plan to  consider adding support for private functions to our tool in the future.
-
 
 \textbf{Conclusion.} 
 We proposed the first methodology to analyze the impact of adversarial computation capabilities on the protocols that tolerant low-entropy keys. 
