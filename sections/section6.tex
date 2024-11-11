@@ -18,7 +18,8 @@ This approach provides a comprehensive understanding of the potential risks asso
     \centering
     \caption{Results of 4-way handshake }
     \label{tab:4-way-handshake-result}
-    \begin{tabular}{lccc}
+    \begin{threeparttable}[b]
+        \begin{tabular}{lccc}
         \hline
         Model & Executability & PMKID Attack & Kracks \\
         \hline 
@@ -26,7 +27,12 @@ This approach provides a comprehensive understanding of the potential risks asso
         \cite{cremers2020wpa2}'s Model & \textcolor{xhs_green}{\ding{52}} & \textcolor{xhs_green}{\ding{52}} & \textcolor{xhs_red}{\ding{56}} \\
         Our Model & \textcolor{xhs_green}{\ding{52}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} \\
         \hline
-    \end{tabular}
+        \end{tabular}
+        \begin{tablenotes}
+            \item[*] \textcolor{xhs_green}{\ding{52}}: the property is satisfied. \hspace{1em} 
+                    \textcolor{xhs_red}{\ding{56}}: the property is falsified.
+        \end{tablenotes}
+    \end{threeparttable}
 \end{table}
 
 As shown in \autoref{tab:4-way-handshake-result}, 
@@ -45,8 +51,9 @@ our model can discover not only Kracks same as the original one, but also the PM
             \hline  
         \end{tabular}
         \begin{tablenotes}
-            \item[*] \textbf{A1}: Method Confusion Attack\cite{von2021method} \hspace{2em}
-                     \textbf{A2}: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob}
+            \item[*] A1: Method Confusion Attack\cite{von2021method} \hspace{1em}
+                     A2: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob} \hspace{1em}
+                     \textcolor{xhs_green}{\ding{52}}: the property is satisfied. 
         \end{tablenotes}
     \end{threeparttable}
 \end{table*}
@@ -101,11 +108,12 @@ This attack against BC devices isn't covered by the existing literature, and we 
     \end{tabularx}
     \begin{tablenotes}
         \item[*] 
-        \textbf{A1}: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob} 
-        \hspace{1em} \textbf{A2}: novel Unilateral Multi-Downgrade Attack \\
-        \textbf{ScLg}: support both secure and legacy connections.
-        \hspace{2.5em} \textbf{ScOn}: only support secure connections. \\
-        \textbf{Legacy, Enhanc, Secure}: key length ranges, see \autoref{sec:bc-devices} for details.
+        A1: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob} 
+        \hspace{1em} A2: novel Unilateral Multi-Downgrade Attack 
+        \hspace{1em} \textcolor{xhs_green}{\ding{52}}: the property is satisfied.  \\
+        ScLg: support both secure and legacy connections.
+        \hspace{2.5em} ScOn: only support secure connections. \\
+        Legacy, Enhanc, Secure: key length ranges, see \autoref{sec:bc-devices} for details.
     \end{tablenotes}
     \end{threeparttable}
 \end{table*}
