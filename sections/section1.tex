@@ -38,7 +38,7 @@ This introduces a security issue about recovering low-entropy keys in these prot
 % 或者，符号模型下分析协议密钥熵具有xxx挑战。
 % Using symbolic models to formally analyze protocols has become a mainstream research approach, and a great number of  works\cite{basin2021emv,basin20185G,cremers2017tls13} successfully confirmed this.
 Using symbolic models to formally analyze vulnerabilities of protocols, pioneered by Dolev et al.~\cite{dolev1983security}, has become a mainstream research approach.
-Many symbolic model tools, such as~\cite{armando2005avispa,blanchet2018proverif,escobar2007maude,cremers2008scyther,meier2013tamarin,cspa}, have been developed to automatically analyze protocols and discover attacks.
+Many symbolic model tools, such as~\cite{armando2005avispa,blanchet2018proverif,cremers2008scyther,meier2013tamarin}, have been developed to automatically analyze protocols and discover attacks.
 Messages or keys in symbolic models are abstracted as terms in term algebra, instead of concrete bit sequences which are used in computational models. 
 Thus, the entropy of keys in symbolic models is lost during the abstraction process, making it impossible for existing symbolic model tools, e.g., TAMARIN\cite{meier2013tamarin}, to tell low-entropy keys or to analyze the brute-force capabilities of attackers.
 
