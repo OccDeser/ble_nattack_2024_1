@@ -58,7 +58,9 @@ To automatically analyze protocols tolerating low-entropy keys, we face three ma
 \begin{enumerate}[leftmargin=*]
     \item \textbf{Entropy Representation:}
     Symbolic analysis tools only preserve the logical structure of messages or keys, making it impossible to deduce and analyze the entropy of keys.
-    This abstraction xxxxxxxxxx.
+    % 这种抽象化极大地限制了符号模型对密钥强度的分析，需要添加额外的机制来描述密钥的熵，以在符号模型中cover general的暴力破解攻击
+    This abstraction significantly limits the ability of symbolic models to analyze the strength of keys. 
+    Additional mechanisms are needed to describe the key's entropy in order to cover general brute-force attacks within the symbolic model.
     \item \textbf{Prerequisites for Brute-Force Attacks:}
     Conducting brute-force attacks requires three main prerequisites: known encryption algorithms, access to the ciphertext, and the absence of additional values~(e.g., salt values, initialization vectors).
     However, these prerequisites are often ambiguous, and it is challenging to define a single rule that captures varying numbers of additional values and cryptographic operations used in different scenarios.
