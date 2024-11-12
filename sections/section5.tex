@@ -57,8 +57,8 @@ Here, we incorporate our security assumption into the model, marking the $PMK$ a
 We introduce a fact, \TFact{SuppInsPTK}, indicating that the supplicant has installed a PTK.
 The formal definition of the secrecy of the $PTK$ is as follows:
 \begin{flalign*}
-    & \hspace{0em} \text{\TLemma{not}} \;\, \text{\TLemma{Ex}} \;\, \text{\Tterm{suppID  PTK \#i \#j.}} \;\, &\\
-    & \hspace{1em} \text{\TFact{K(PTK)@i}} \; \land \; \text{\TFact{SuppInsPTK(suppID, PTK)@j}}
+    & \hspace{0em} \TNot \, (\TEx \;\, \text{\Tterm{suppID  PTK \#i \#j.}} \;\, &\\
+    & \hspace{1em} \text{\TFact{K(PTK)@\#i}} \; \land \; \text{\TFact{SuppInsPTK(suppID, PTK)@\#j}})
 \end{flalign*}
 This formula indicates that it is impossible for the attacker to know a $PTK$ while the supplicant has installed it.
 
@@ -140,12 +140,12 @@ Our focus is on analyzing whether an attacker can leverage computational capabil
 We define two facts, \TFact{LtkNegotiated} and \TFact{SkDistributed}, representing the successful negotiation of $LTK$ and the successful distribution of the SK, respectively.
 The secrecy of $LTK$ and SK for the Initiator and Responder is defined as follows:
 \begin{flalign*}
-    & \hspace{0em} \text{\TLemma{All}} \;\, \text{\Tterm{Addr LTK \#i.}} \;\, &\\
-    & \hspace{1em} \text{\TFact{LtkNegotiated(Role, Addr, LTK)@i}} \\
-    & \hspace{0em} \implies \neg (\text{\TLemma{Ex \#j.}} \;\, \text{\TFact{K(LTK)@j}} ) \\
-    & \hspace{0em} \text{\TLemma{All}} \;\, \text{\Tterm{Addr SK \#i.}} \;\, &\\
-    & \hspace{1em} \text{\TFact{SkDistributed(Role, Addr, SK)@i}} \\
-    & \hspace{0em} \implies \neg (\text{\TLemma{Ex \#j.}} \;\, \text{\TFact{K(SK)@j}} ) 
+    & \hspace{0em} \TAll \;\, \text{\Tterm{Addr LTK \#i.}} \;\, &\\
+    & \hspace{1em} \text{\TFact{LtkNegotiated(Role, Addr, LTK)@\#i}} \\
+    & \hspace{0em} \implies \TNot (\TEx \;\, \text{\TLemma{\#j.}} \;\, \text{\TFact{K(LTK)@\#j}} ) \\
+    & \hspace{0em} \TAll \;\, \text{\Tterm{Addr SK \#i.}} \;\, &\\
+    & \hspace{1em} \text{\TFact{SkDistributed(Role, Addr, SK)@\#i}} \\
+    & \hspace{0em} \implies \TNot (\TEx \;\, \text{\TLemma{\#j.}} \;\, \text{\TFact{K(SK)@\#j}} ) 
 \end{flalign*}
 where \TFact{Role} could be either "Initiator" or "Responder".
 This formula indicates that it is impossible for the attacker to know the $LTK$ while the Initiator or Responder has successfully negotiated it.
@@ -270,9 +270,9 @@ In the BC model, the secrecy of the session key is also a critical consideration
 We define the \TFact{SKDistributed} fact to represent the successful distribution of the session key.
 The property is specified as follows:
 \begin{flalign*}
-    & \hspace{0em} \text{\TLemma{All}} \;\, \text{\Tterm{Addr SK \#i.}} \;\, &\\
-    & \hspace{1em} \text{\TFact{SkDistributed(Role, Addr, SK)@i}} \\
-    & \hspace{0em} \implies \neg (\text{\TLemma{Ex \#j.}} \;\, \text{\TFact{K(SK)@j}} ) 
+    & \hspace{0em} \TAll \;\, \text{\Tterm{Addr SK \#i.}} \;\, &\\
+    & \hspace{1em} \text{\TFact{SkDistributed(Role, Addr, SK)@\#i}} \\
+    & \hspace{0em} \implies \TNot (\TEx \;\, \text{\TLemma{\#j.}} \;\, \text{\TFact{K(SK)@\#j}} ) 
 \end{flalign*}
 where \TFact{Role} could be either "Central" or "Peripheral".
 This formula indicates that it is impossible for the attacker to know the session key while the central or peripheral device has successfully distributed it.

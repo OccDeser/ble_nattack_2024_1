@@ -206,7 +206,8 @@ When it comes to cryptographic protocols, secrecy or authentication are usually 
 For example, the secrecy requires that an installed key~$k$ cannot be known by adversaries in any trace of the protocol.
 This property can be encoded in the following lemma:
 \begin{flalign*}
-    & \hspace{0em} \text{\TLemma{All}} \;\, \text{\Tterm{k \#i.}} \;\, \text{\TFact{Install(k)@i}} \implies \neg (\text{\TLemma{Ex \#j.}} \;\, \text{\TFact{K(k)@j}} ) &
+    & \hspace{0em} \TAll \;\, \text{\Tterm{k \#i.}} \;\, \text{\TFact{Install(k)@\#i}} &\\
+    & \hspace{3em} \implies \TNot (\TEx \;\, \text{\TLemma{\#j.}} \;\, \text{\TFact{K(k)@\#j}} ) &
 \end{flalign*}
 This formula describes that for all time points~$i$, if a key~$k$ is installed at time~$i$, then there doesn't exist a time point~$j$ at which the key~$k$ is known by an adversary.
 
