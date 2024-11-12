@@ -20,8 +20,8 @@
 \begin{document}
 \begin{tikzpicture}
 
-\node[AGENT] (n_station) {Station};
-\node[AGENT, right=0.25\textwidth of n_station] (n_ap) {Access Point};
+\node[AGENT] (n_station) {Supplicant};
+\node[AGENT, right=0.25\textwidth of n_station] (n_ap) {Authenticator};
 
 \coordinate (end_station) at ($(n_station.south)+(0,-34ex)$);
 \draw[semithick] (n_station.south) -- (end_station);
@@ -55,7 +55,7 @@
 
 \coordinate (c_msg4_st) at ($(c_msg3_st)+(0,-3.2ex)$);
 \coordinate (c_msg4_ap) at ($(c_msg4_st-|n_ap)$);
-\draw[ARROW] (c_msg4_st) -- (c_msg4_ap) node[midway,above=-0.3ex]{\textbf{Msg4}()};
+\draw[ARROW] (c_msg4_st) -- (c_msg4_ap) node[midway,above=-0.3ex]{\textbf{Msg4}};
 
 \node[ACTION] (n_station_gtk) at ($(c_msg4_st)+(0,-1ex)$) {Install GTK, PTK};
 \node[ACTION] (n_ap_gtk) at ($(c_msg4_ap)+(0,-1ex)$) {Install PTK};

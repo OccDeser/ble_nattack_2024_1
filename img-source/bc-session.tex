@@ -41,45 +41,17 @@
 \coordinate (c_res_pair_rsp) at ($(c_res_pair_req)+(0,-3.2ex)$);
 \coordinate (c_init_pair_rsp) at ($(c_res_pair_rsp-|n_initiator)$);
 \draw[ARROW] (c_res_pair_rsp) -- (c_init_pair_rsp) node[midway,above=-0.3ex]{$\text{FeatureSC}_\text{P}$};
-\node[PREPARATION, minimum width=24em] (n_user) at ($(c_res_pair_rsp-|c_middle)+(0,-1ex)$) {
-    Establish Link Connection
-};
 
-\coordinate (c_init_au1) at ($(n_user.south-|n_initiator)+(0,-5ex)$);
-\coordinate (c_res_au1) at ($(c_init_au1-|n_responder)$);
-\draw[ARROW] (c_init_au1) -- (c_res_au1) node[midway,above=-0.3ex]{$\text{AuRand}_\text{C}$};
 
-\coordinate (c_res_au2) at ($(c_res_au1)+(0,-3.2ex)$);
-\coordinate (c_init_au2) at ($(c_res_au2-|n_initiator)$);
-\draw[ARROW] (c_res_au2) -- (c_init_au2) node[midway,above=-0.3ex]{$\text{AuRand}_\text{P}$};
+% \coordinate (c_link_south_west) at ($(c_init_pair_rsp -| n_prep.west)+(0, -1ex)$);
+% \coordinate (c_link_north_east) at ($(c_res_pair_req -| n_prep.east)+(0, 3ex)$);
+% \draw[dashed] (c_link_south_west) rectangle (c_link_north_east);
 
-\node[ACTION] (n_res_au) at ($(c_res_au2)+(0,-1ex)$) {Calculate\\ACO, $\text{SERS}_\text{P}$};
+% \coordinate (c_link_north_west) at ($(c_link_south_west |- c_link_north_east)$);
+% \node[align=flush left] (n_link) at ($(c_link_north_west)+(2.2em, 0.4ex)$) {Link\\Connect};
 
-\node[ACTION] (n_init_ver) at ($(c_init_au2)+(0,-1ex)$) {Calculate \\ACO, $\text{SERS}_\text{C}$};
-% Verify $\text{SERS}_\text{P}$\\
-\coordinate (c_res_ser) at ($(n_init_ver.south-|n_responder)+(0,-1ex)$);
-\coordinate (c_init_ser) at ($(c_res_ser-|n_initiator)$);
-\draw[ARROW] (c_res_ser) -- (c_init_ser) node[midway,above=-0.3ex]{$\text{SERS}_\text{P}$};
 
-\node[ACTION] (n_res_ver) at ($(c_init_ser)+(0,-1ex)$) {Verify $\text{SERS}_\text{P}$};
-
-\coordinate (c_init_sei) at ($(n_res_ver.south)+(0,-1ex)$);
-\coordinate (c_res_sei) at ($(c_init_sei-|n_responder)$);
-\draw[ARROW] (c_init_sei) -- (c_res_sei) node[midway,above=-0.3ex]{$\text{SERS}_\text{C}$};
-
-% \coordinate (c_init_se1) at ($(n_init_au.south)+(0,-1ex)$);
-% \coordinate (c_res_se1) at ($(c_init_se1-|n_responder)$);
-% \draw[ARROW] (c_init_se1) -- (c_res_se1) node[midway,above=-0.3ex]{$\text{SERS}_\text{C}$};
-
-\node[ACTION] (n_res_se) at ($(c_res_sei)+(0,-1ex)$) {Verify $\text{SERS}_\text{C}$};
-
-\coordinate (c_sc_south_east) at ($(n_res_se.south east)+(0.5em, -1ex)$);
-\coordinate (c_sc_north_west) at ($(c_init_au1)+(-4.4em, 3ex)$);
-\draw[dashed] (c_sc_south_east) rectangle (c_sc_north_west);
-
-\node[align=flush left] (n_secure) at ($(c_sc_north_west)+(2.2em, 0.4ex)$) {SecureAU};
-
-\coordinate (c_init_au) at ($(n_res_se.south-|n_initiator)+(0,-5ex)$);
+\coordinate (c_init_au) at ($(c_init_pair_rsp)+(0,-4.2ex)$);
 \coordinate (c_res_au) at ($(c_init_au-|n_responder)$);
 \draw[ARROW] (c_init_au) -- (c_res_au) node[midway,above=-0.3ex]{AuRand};
 
@@ -91,14 +63,46 @@
 
 \node[ACTION] (n_init_au) at ($(c_init_se)+(0,-1ex)$) {Verify SERS\\Calculate ACO};
 
-\coordinate (c_legacy_south_west) at ($(n_init_au.south west-|c_sc_north_west)+(0, -1ex)$);
+
+% $(c_init_au1)+(-4.4em, 3ex)$
+\coordinate (c_legacy_south_west) at ($(n_init_au.south)+(-4.4em, -1ex)$);
 \coordinate (c_legacy_north_east) at ($(c_res_au-|n_res_au.east)+(0.5em, 3ex)$);
 \draw[dashed] (c_legacy_south_west) rectangle (c_legacy_north_east);
 
 \coordinate (c_legacy_north_west) at ($(c_legacy_south_west |- c_legacy_north_east)$);
 \node[align=flush left] (n_legacy) at ($(c_legacy_north_west)+(2.2em, 0.4ex)$) {LegacyAU};
 
-\coordinate (c_init_ks) at ($(n_init_au.south-|n_initiator)+(0,-4.5ex)$);
+\coordinate (c_init_au1) at ($(n_init_au.south-|n_initiator)+(0,-5ex)$);
+\coordinate (c_res_au1) at ($(c_init_au1-|n_responder)$);
+\draw[ARROW] (c_init_au1) -- (c_res_au1) node[midway,above=-0.3ex]{$\text{AuRand}_\text{C}$};
+
+\coordinate (c_res_au2) at ($(c_res_au1)+(0,-3.2ex)$);
+\coordinate (c_init_au2) at ($(c_res_au2-|n_initiator)$);
+\draw[ARROW] (c_res_au2) -- (c_init_au2) node[midway,above=-0.3ex]{$\text{AuRand}_\text{P}$};
+
+\node[ACTION] (n_res_au) at ($(c_res_au2)+(0,-1ex)$) {Calculate\\ACO, $\text{SERS}_\text{P}$};
+
+\node[ACTION] (n_init_ver) at ($(c_init_au2)+(0,-1ex)$) {Calculate \\ACO, $\text{SERS}_\text{C}$};
+
+\coordinate (c_res_ser) at ($(n_init_ver.south-|n_responder)+(0,-1ex)$);
+\coordinate (c_init_ser) at ($(c_res_ser-|n_initiator)$);
+\draw[ARROW] (c_res_ser) -- (c_init_ser) node[midway,above=-0.3ex]{$\text{SERS}_\text{P}$};
+
+\node[ACTION] (n_res_ver) at ($(c_init_ser)+(0,-1ex)$) {Verify $\text{SERS}_\text{P}$};
+
+\coordinate (c_init_sei) at ($(n_res_ver.south)+(0,-1ex)$);
+\coordinate (c_res_sei) at ($(c_init_sei-|n_responder)$);
+\draw[ARROW] (c_init_sei) -- (c_res_sei) node[midway,above=-0.3ex]{$\text{SERS}_\text{C}$};
+
+\node[ACTION] (n_res_se) at ($(c_res_sei)+(0,-1ex)$) {Verify $\text{SERS}_\text{C}$};
+
+\coordinate (c_sc_south_east) at ($(n_res_se.south east)+(0.5em, -1ex)$);
+\coordinate (c_sc_north_west) at ($(c_init_au1)+(-4.4em, 3ex)$);
+\draw[dashed] (c_sc_south_east) rectangle (c_sc_north_west);
+
+\node[align=flush left] (n_secure) at ($(c_sc_north_west)+(2.2em, 0.4ex)$) {SecureAU};
+
+\coordinate (c_init_ks) at ($(n_res_se.south-|n_initiator)+(0,-4.5ex)$);
 \coordinate (c_res_ks) at ($(c_init_ks-|n_responder)$);
 \draw[ARROW] (c_init_ks) -- (c_res_ks) node[midway,above=-0.3ex]{KeySize:16};
 

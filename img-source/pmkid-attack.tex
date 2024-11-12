@@ -21,9 +21,9 @@
 \begin{document}
 \begin{tikzpicture}
 
-\node[AGENT] (n_station) {Station};
+\node[AGENT] (n_station) {Supplicant};
 \node[AGENT, right=0.08\textwidth of n_station] (n_attacker) {\textcolor{xhs_red}{Attacker}};
-\node[AGENT, right=0.08\textwidth of n_attacker] (n_ap) {Access Point};
+\node[AGENT, right=0.08\textwidth of n_attacker] (n_ap) {Authenticator};
 
 \coordinate (end_station) at ($(n_station.south)+(0,-50ex)$);
 \draw[semithick] (n_station.south) -- (end_station);
