@@ -41,12 +41,17 @@ A lot of widely used protocols have low-entropy keys in them, such as WPA2-PSK, 
 
 \subsubsection{WPA2-PSK}
 % WPA与WPA2源于IEEE 802.11i标准，其中WPA作为过渡性解决方案，旨在修复WEP（Wired Equivalent Privacy）的安全漏洞，而WPA2则完整实现了IEEE 802.11i标准，提供更为完善的安全机制。WPA2-PSK（预共享密钥）是WPA2的一种简化模式，利用预共享密钥代替复杂的企业级认证过程，适用于不需要RADIUS服务器的小型网络。WPA2-PSK广泛应用于家庭、咖啡馆和中小型办公场所，因其配置简便且能够提供较高的安全性。
-Wi-Fi Protected Access (WPA) and WPA2 are both derived from the IEEE 802.11i standard \cite{80211i}.
-WPA2-PSK (Pre-Shared Key) uses a pre-shared key instead of a complex enterprise-level authentication process, making it suitable for small networks.
-WPA2-PSK is widely deployed in home environments, cafés, and small to medium-sized offices due to its ease of configuration and strong security.
+% Wi-Fi Protected Access (WPA) and WPA2 are both derived from the IEEE 802.11i standard \cite{80211i}.
+% WPA2-PSK (Pre-Shared Key) uses a pre-shared key instead of a complex enterprise-level authentication process, making it suitable for small networks.
+% WPA2-PSK is widely deployed in home environments, cafés, and small to medium-sized offices due to its ease of configuration and strong security.
 % WPA2的4-way Handshake是一种用于在无线网络中安全地生成和交换加密密钥的协议过程，确保客户端与接入点之间的通信安全。与企业级WPA2认证机制依赖于802.1X和RADIUS服务器进行动态密钥分配的方式有所不同，在WPA2-PSK（Pre-Shared Key）模式下，4-way Handshake利用预共享密钥进行身份验证，
-The 4-way handshake of WPA2-PSK is a protocol designed to securely generate and exchange encryption keys within wireless networks, thereby ensuring secure communication between clients and access points.
+% The 4-way handshake of WPA2-PSK is a protocol designed to securely generate and exchange encryption keys within wireless networks, thereby ensuring secure communication between clients and access points.
 % In contrast to WPA2-Enterprise, which utilizes 802.1X and RADIUS servers for dynamic key distribution, the WPA2-PSK (Pre-Shared Key) employs a pre-shared key for the purpose of authentication.
+% 
+Wi-Fi Protected Access 2-Pre-Shared Key (WPA2-PSK) is a protocol used to establish a secure connection between a device~(supplicant) and an access point~(authenticator) in a personal Wi-Fi network, such as home networks and cafés.
+Figure~\ref{fig:4-way-handshake} illustrates the complete process of this protocol, 
+    where the supplicant and authenticator negotiate a Pairwise Transient Key~$PTK$ from a Pairwise Master Key~$PMK$ that is derived from a pre-shared $Passphrase$ and the Wi-Fi network name~$SSID$.
+The authenticator then distributes the Group Temporal Key~$GTK$, protecting broadcast messages, to the supplicant.
 
 \begin{figure}[hbtp]
     \centering
@@ -69,7 +74,6 @@ The 4-way handshake of WPA2-PSK is a protocol designed to securely generate and 
 %     PMKID = HMAC-SHA1-128(PSK, "PMK Name" || MAC_authenticator || MAC_supplicant)
 % \]
 % PMKID允许设备在重新连接时迅速完成身份验证。然而，由于PMK（PSK）的强度直接受用户选择的Passphrase决定，如果用户选择了弱Passphrase，攻击者可以通过暴力破解PMKID来获取PSK，从而破坏通信的安全性，这种攻击方式被称为PMKID攻击{cite}。
-\autoref{fig:4-way-handshake} illustrates the complete process of negotiating the Pairwise Transient Key~$PTK$ and Group Temporal Key~$GTK$ from the Pairwise Master Key~$PMK$ between the user device (supplicant) and access point (authenticator) via the 4-way handshake.
 
 WPA2-PSK uses the key derivation function PBKDF2 to generate the Pre-Shared Key~$PSK$ from the $Passphrase$ and Service Set Identification~$SSID$, defined as follows:
 \begin{equation}
