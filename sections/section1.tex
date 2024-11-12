@@ -72,10 +72,10 @@ To automatically analyze protocols tolerating low-entropy keys, we face three ma
 
 % 我们如何解决这些挑战，我们是怎么做的
 This paper aims to bridge this gap by introducing a generalized and automated method for modeling low-entropy keys and the adversary's brute-force capabilities within symbolic analysis frameworks. 
-We focus on enhancing the TAMARIN Prover, to support the modeling of low-entropy keys and to describe generalized brute-force attacks by adversaries. 
-TAMARIN Prover is a state-of-the-art protocol verification tool widely used for formal analysis of many protocols, including Bluetooth\cite{shi2023blesc,claverie2023tamarin, jangid2023bluepe}, TLS\cite{cremers2017tls13}, 5G-AKA\cite{basin20185G, wang20215G}, EMV\cite{basin2021emv,radu2022emv}, etc.
-Our methodology involves extending the TAMARIN Prover's syntax with new keywords to explicitly mark low-entropy keys within protocols. 
-We develop a compilation tool that translates the extended syntax into formal models recognizable by the TAMARIN Prover. 
+We focus on enhancing the TAMARIN prover, to support the modeling of low-entropy keys and to describe generalized brute-force attacks by adversaries. 
+TAMARIN is a state-of-the-art protocol verification tool widely used for formal analysis of many protocols, including Bluetooth\cite{shi2023blesc,claverie2023tamarin, jangid2023bluepe}, TLS\cite{cremers2017tls13}, 5G-AKA\cite{basin20185G, wang20215G}, EMV\cite{basin2021emv,radu2022emv}, etc.
+Our methodology involves extending the TAMARIN prover's syntax with new keywords to explicitly mark low-entropy keys within protocols. 
+We develop a compilation tool that translates the extended syntax into formal models recognizable by the TAMARIN prover. 
 This tool automatically generates necessary facts and rules, including key-breaking oracles that simulate an adversary's ability to compromise low-entropy keys when certain conditions are met.
 Our methodology can be employed to identify and address security issues arising from low entropy within protocols.
 
@@ -83,7 +83,7 @@ Our methodology can be employed to identify and address security issues arising 
 \noindent\textbf{Contributions.}
 \begin{itemize}[leftmargin=*]
     \item  We propose a general method to model low-entropy keys and brute-force attacks in symbolic models, enabling automated identification of vulnerable keys within protocols.
-    \item We enhance the Tamarin Prover's modeling language by introducing new syntax and develop a compilation tool to facilitate the translation of extended models, improving usability and automation.
+    \item We enhance the Tamarin prover's modeling language by introducing new syntax and develop a compilation tool to facilitate the translation of extended models, improving usability and automation.
     \item Applying our method to real-world protocols such as 4-way-handshake protocol of WPA2-PSK, BLE pairing protocol and BC session establishment protocol, we re-discover known vulnerabilities in these protocols, including the PMKID and KNOB attacks.
     we demonstrate its effectiveness by re-discovering known vulnerabilities, including the PMKID and KNOB attacks, and previously undetected attacks, the unilateral multi-downgrade(UMD) attack against BR/EDR. 
     \item We discovered a novel attack against the BC session establishment protocol, the unilateral multi-downgrade(UMD) attack, which significantly reduces the difficulty for attackers to brute force the complete session keys. This attack induces one side of the devices to use keys of different downgraded-lengths multiple times, potentially reducing the computational complexity to as low as $\frac{1}{2^{116}}$ of the normal scenario.
@@ -93,7 +93,7 @@ Our methodology can be employed to identify and address security issues arising 
 \autoref{sec:2background} reviews related work and highlights existing gaps in symbolic modeling of low-entropy keys. 
 \autoref{sec:3symbolic-modeling} introduces our symbolic modeling approach for entropy-based security, detailing the key-breaking oracles. 
 % \autoref{sec:4automation-and-generalization} discusses the automation and universality of our method, including the extended syntax and compilation tool. 
-\autoref{sec:4extension-and-compilation} discusses our extension of the TAMARIN Prover's syntax and the compilation tool.
+\autoref{sec:4extension-and-compilation} discusses our extension of TAMARIN's syntax and the compilation tool.
 \autoref{sec:5case-study} presents case studies where we apply our method to analyze real-world protocols. 
 Finally, in \autoref{sec:6results}, we present the results of our case studies, where we discover known vulnerabilities and a novel attack. 
 We additionally  offer a review of related work in \autoref{sec:7related-work} and provide a conclusion and discussion of our work in \autoref{sec:8discussion-conclusion}.
