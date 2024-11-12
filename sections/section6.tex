@@ -18,7 +18,8 @@ This approach provides a comprehensive understanding of the potential risks asso
     \centering
     \caption{Results of 4-way handshake }
     \label{tab:4-way-handshake-result}
-    \begin{tabular}{lccc}
+    \begin{threeparttable}[b]
+        \begin{tabular}{lccc}
         \hline
         Model & Executability & PMKID Attack & Kracks \\
         \hline 
@@ -26,7 +27,12 @@ This approach provides a comprehensive understanding of the potential risks asso
         \cite{cremers2020wpa2}'s Model & \textcolor{xhs_green}{\ding{52}} & \textcolor{xhs_green}{\ding{52}} & \textcolor{xhs_red}{\ding{56}} \\
         Our Model & \textcolor{xhs_green}{\ding{52}} & \textcolor{xhs_red}{\ding{56}} & \textcolor{xhs_red}{\ding{56}} \\
         \hline
-    \end{tabular}
+        \end{tabular}
+        \begin{tablenotes}
+            \item[*] \textcolor{xhs_green}{\ding{52}}: the property is satisfied. \hspace{1em} 
+                    \textcolor{xhs_red}{\ding{56}}: the property is falsified.
+        \end{tablenotes}
+    \end{threeparttable}
 \end{table}
 
 As shown in \autoref{tab:4-way-handshake-result}, 
@@ -45,15 +51,16 @@ our model can discover not only Kracks same as the original one, but also the PM
             \hline  
         \end{tabular}
         \begin{tablenotes}
-            \item[*] \textbf{A1}: Method Confusion Attack\cite{von2021method} \hspace{2em}
-                     \textbf{A2}: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob}
+            \item[*] A1: Method Confusion Attack\cite{von2021method} \hspace{1em}
+                     A2: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob} \hspace{1em}
+                     \textcolor{xhs_green}{\ding{52}}: the property is satisfied. 
         \end{tablenotes}
     \end{threeparttable}
 \end{table*}
 
 \subsection{BLE's pairing}
-There are many formal analysis works\cite{shi2023blesc, claverie2023tamarin,jangid2023blepe} on BLE-SC pairing protocols using the TAMARIN prover.
-Among these, the model proposed in \cite{shi2023blesc} stands out as the most comprehensive one, which includes all association models during the pairing procedure of BLE devices.
+There are many formal analysis works\cite{ wu2022formal,shi2023blesc, claverie2023tamarin,jangid2023bluepe} on BLE-SC pairing protocols using the TAMARIN prover.
+Among these, the symbolic model proposed in \cite{shi2023blesc} stands out as the most comprehensive one, which includes all association models during the pairing procedure of BLE devices.
 This work introduced several security properties, including four authentication properties, man-in-the-middle~(MitM) protection, LTK confusion protection, and the secrecy of LTK.
 However, the approach taken in this work to model brute-force attacks is tricky and imprecise due to the oversimplification of the key transmission process within the pairing protocol.
 
@@ -101,11 +108,12 @@ This attack against BC devices isn't covered by the existing literature, and we 
     \end{tabularx}
     \begin{tablenotes}
         \item[*] 
-        \textbf{A1}: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob} 
-        \hspace{1em} \textbf{A2}: novel Unilateral Multi-Downgrade Attack \\
-        \textbf{ScLg}: support both secure and legacy connections.
-        \hspace{2.5em} \textbf{ScOn}: only support secure connections. \\
-        \textbf{Legacy, Enhanc, Secure}: key length ranges, see \autoref{sec:bc-devices} for details.
+        A1: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob} 
+        \hspace{1em} A2: novel Unilateral Multi-Downgrade Attack 
+        \hspace{1em} \textcolor{xhs_green}{\ding{52}}: the property is satisfied.  \\
+        ScLg: support both secure and legacy connections.
+        \hspace{2.5em} ScOn: only support secure connections. \\
+        Legacy, Enhanc, Secure: key length ranges, see \autoref{sec:bc-devices} for details.
     \end{tablenotes}
     \end{threeparttable}
 \end{table*}
@@ -130,9 +138,9 @@ The UMD attack encompasses several variations, allowing the attacker to freely c
  Assuming the attacker chooses $n$ downgrade steps, with each step having a consistent interval, the number of computations required by the attacker is $n \times 2^{\frac{128}{n}}$.
 When $n$ is 16, the complexity of brute-forcing a 16-byte session key is significantly reduced from $2^{128}$ to $2^{12}$.
 
-The discovery of the UMD attack implies that even if the central device only permits 16-byte session keys, an attacker can still compromise the session key by repeatedly downgrading the key length of peripheral devices. This attack highlights the inherent risks associated with compatibility with legacy devices, as it enables attackers to easily compromise session keys without actually downgrading them.
+The discovery of the UMD attack implies that even if the central device only permits 16-byte session keys, an attacker can still compromise the session key by repeatedly downgrading the key length of peripheral devices. This attack highlights the inherent risks associated with compatibility with legacy devices, as it enables attackers to easily compromise session keys without eventually downgrading them.
 
-\noindent\textbf{Disclosure.}
+\textbf{Disclosure.}
 To ensure responsible disclosure, we reported our findings to the Bluetooth Special Interest Group (SIG) security team.
 They gave us a positive response to our novel attack. 
 They stated that they are currently conducting a detailed analysis of the report and will provide further feedback and clarification once their analysis is complete.
