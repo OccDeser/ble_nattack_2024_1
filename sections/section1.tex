@@ -37,7 +37,7 @@ This introduces a security issue about recovering low-entropy keys in these prot
 % Using symbolic models to formally analyze protocols has become a mainstream research approach, and a great number of  works\cite{basin2021emv,basin20185G,cremers2017tls13} successfully confirmed this.
 The use of symbolic models to formally analyze protocol vulnerabilities, pioneered by Dolev et al.~\cite{dolev1983security}, has become a mainstream research approach.
 % Many symbolic model tools, such as~\cite{armando2005avispa,blanchet2018proverif,escobar2007maude,cremers2008scyther,meier2013tamarin,cspa}, have been developed to automatically analyze protocols and discover attacks.
-Numbers tools have been developed to automatically analyze protocols and identify potential attacks, including AVISPA\cite{armando2005avispa}, ProVerif~\cite{blanchet2018proverif}, Maude-NPA~\cite{escobar2007maude}, Scyther~\cite{cremers2008scyther}, TAMARIN~\cite{meier2013tamarin}, and others.
+Numerous tools have been developed to automatically analyze protocols and identify potential attacks, including AVISPA\cite{armando2005avispa}, ProVerif~\cite{blanchet2018proverif}, Maude-NPA~\cite{escobar2007maude}, Scyther~\cite{cremers2008scyther}, TAMARIN~\cite{meier2013tamarin}, and others.
 In symbolic models, messages and keys are abstracted as terms in term algebra rather than as concrete bit sequences, as used in computational models. 
 Consequentially, the entropy of keys is lost during this abstraction process, making it impossible for existing symbolic model tools to distinguish low-entropy keys or to analyze the brute-force capabilities of attackers.
 
@@ -61,9 +61,11 @@ To automatically analyze protocols tolerating low-entropy keys, we face three ma
     This abstraction significantly limits the ability of symbolic models to analyze the strength of keys. 
     Additional mechanisms are needed to describe the key's entropy in order to cover general brute-force attacks within the symbolic model.
     \item \textbf{Prerequisites for Brute-Force Attacks:}
-    Brute-force attacks typically require three essential prerequisites: knowledge of the algorithm, access to the ciphertext, and knowledge of additional values~(e.g., salt values, initialization vectors). 
-    These prerequisites are general and abstract, and the specific requirements that an attacker must meet vary significantly across different scenarios.
-    In symbolic models, it is a challenge to define a set of general rules that can accurately describe these prerequisites.
+    Brute-force attacks typically require three essential prerequisites: knowledge of algorithms, access to ciphertext, and knowledge of additional function inputs~(e.g., salt values, initialization vectors). 
+    % These prerequisites are general and abstract, and the specific requirements that an attacker must meet vary significantly across different scenarios.
+    % In symbolic models, it is a challenge to define a set of general rules that can accurately describe these prerequisites.
+    
+
     \item \textbf{Enhanced Adversarial Capabilities:}
     Existing models for certain protocols allow attackers to compromise specific keys, which strictly limits the attacker's ability to break the key. 
     In the real world, however, as long as the attacker satisfies the three prerequisites, they can launch a brute-force attack, even though success is not guaranteed. 
