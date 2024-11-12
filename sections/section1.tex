@@ -23,8 +23,6 @@
 % Lastly, in pursuit of user-friendliness, certain protocols permit the use of user-selected passwords as keys \cite{80211i}, which may result in the choice of easily predictable password combinations.
 
 Entropy is a fundamental concept which is directly correlated with the security of the cryptographic system, where a key with high entropy denotes difficulty for an attacker to recover the key from the ciphertext.
-% However, in practice, modern cryptographic protocols usually tolerate low-entropy keys to xxxxxxx.
-% such as WPA2-PSK, Bluetooth Low Energy and Bluetooth Classic. 将协议有机地引入到上面的这句话中
 However, in practice, modern cryptographic protocols, such as WPA2-PSK, Bluetooth Low Energy~(BLE) and Bluetooth Classic~(BC), usually tolerate low-entropy keys to accommodate user-friendly designs, backward compatibility, or resource-constrained devices.
 This introduces a security issue about recovering low-entropy keys in these protocols, such as PMKID~\cite{pmkidattack} and KNOB~\cite{antonioli2019knob} attacks.
 
@@ -37,22 +35,37 @@ This introduces a security issue about recovering low-entropy keys in these prot
 % 现有研究xxx，他们有xxx缺陷。
 % 或者，符号模型下分析协议密钥熵具有xxx挑战。
 % Using symbolic models to formally analyze protocols has become a mainstream research approach, and a great number of  works\cite{basin2021emv,basin20185G,cremers2017tls13} successfully confirmed this.
-Using symbolic models to formally analyze vulnerabilities of protocols, pioneered by Dolev et al.~\cite{dolev1983security}, has become a mainstream research approach.
-Many symbolic model tools, such as~\cite{armando2005avispa,blanchet2018proverif,escobar2007maude,cremers2008scyther,meier2013tamarin,cspa}, have been developed to automatically analyze protocols and discover attacks.
-Messages or keys in symbolic models are abstracted as terms in term algebra, instead of concrete bit sequences which are used in computational models. 
-Thus, the entropy of keys in symbolic models is lost during the abstraction process, making it impossible for existing symbolic model tools, e.g., TAMARIN\cite{meier2013tamarin}, to tell low-entropy keys or to analyze the brute-force capabilities of attackers.
+The use of symbolic models to formally analyze protocol vulnerabilities, pioneered by Dolev et al.~\cite{dolev1983security}, has become a mainstream research approach.
+% Many symbolic model tools, such as~\cite{armando2005avispa,blanchet2018proverif,escobar2007maude,cremers2008scyther,meier2013tamarin,cspa}, have been developed to automatically analyze protocols and discover attacks.
+Numbers tools have been developed to automatically analyze protocols and identify potential attacks, including AVISPA\cite{armando2005avispa}, ProVerif~\cite{blanchet2018proverif}, Maude-NPA~\cite{escobar2007maude}, Scyther~\cite{cremers2008scyther}, TAMARIN~\cite{meier2013tamarin}, and others.
+In symbolic models, messages and keys are abstracted as terms in term algebra rather than as concrete bit sequences, as used in computational models. 
+Consequentially, the entropy of keys is lost during this abstraction process, making it impossible for existing symbolic model tools to distinguish low-entropy keys or to analyze the brute-force capabilities of attackers.
 
-This raises a pivotal question: how can one capture the brute-force behaviors of attackers within the existing symbolic models?
-A few of studies\cite{shi2023blesc, claverie2023tamarin} have proposed their solutions by manually identifying keys that vulnerable to be compromised and defining specific rules that allow the direct revelation of these keys' values to attackers.
-However, these studies didn't provide a neither general nor automated method to analyze the impact of low-entropy keys on the whole protocol. 
-For one thing, this approach requires manual analysis of the vulnerabilities inherent in the protocol keys instead of automated analysis.
-For another, manual analysis is inherently constrained, as it can only provide attacker with limited ways to compromise low-entropy keys and fails to provide a comprehensive strategy for attackers to exploit low-entropy keys effectively.
+This raises a critical question: how can one capture the brute-force behaviors of attackers within symbolic models?
+Some studies\cite{shi2023blesc, claverie2023tamarin} have proposed solutions by manually identifying keys that are vulnerable to compromise and defining specific rules that allow these keys to be directly revealed to attackers.
+However, these studies do not provide a general or automated method for analyzing the impact of low-entropy keys on the whole protocol. 
+% For one thing, this approach requires manual analysis of the vulnerabilities inherent in the protocol keys instead of automated analysis.
+% For another, manual analysis is inherently constrained, as it can only provide attacker with limited ways to compromise low-entropy keys and fails to provide a comprehensive strategy for attackers to exploit low-entropy keys effectively.
+Firstly, this method relies on manual identification of key vulnerabilities, limiting the scalability and objectivity of the analysis.
+Secondly, manual analysis is inherently constrained, as it only offers attacks a limited set of predefined ways to compromise low-entropy keys.
+As a result, it fails to provide a comprehensive strategy for effectively exploiting such vulnerabilities.
 
-To automatically analyze protocols with low-entropy keys, we are facing three main challenges:
-First, the symbolic analysis tools only remain the logical structure of messages or keys, and the entropy of keys is hard to be expressed and analyzed. 
-Second, brute-force attacks require three prerequisites: known encryption algorithm, known ciphertext, and no additional values~(salt value, IV, etc.) required for calculating the ciphertext. 
-These prerequisites are ambiguous, and it is hard to capture different numbers of additional values  and cryptographic operators in a single rule.
-Third, adversaries' brute force ability needs to be improved, no longer targeting a specific key, but can be freely combined with other capabilities and applied to the attack.
+To automatically analyze protocols tolerating low-entropy keys, we face three main challenges:
+% First, the symbolic analysis tools only remain the logical structure of messages or keys, and the entropy of keys is hard to be expressed and analyzed. 
+% Second, brute-force attacks require three prerequisites: known encryption algorithm, known ciphertext, and no additional values~(salt value, IV, etc.) required for calculating the ciphertext. 
+% These prerequisites are ambiguous, and it is hard to capture different numbers of additional values  and cryptographic operators in a single rule.
+% Third, adversaries' brute force ability needs to be improved, no longer targeting a specific key, but can be freely combined with other capabilities and applied to the attack.
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Entropy Representation:}
+    Symbolic analysis tools only preserve the logical structure of messages or keys, making it impossible to deduce and analyze the entropy of keys.
+    This abstraction xxxxxxxxxx.
+    \item \textbf{Prerequisites for Brute-Force Attacks:}
+    Conducting brute-force attacks requires three main prerequisites: known encryption algorithms, access to the ciphertext, and the absence of additional values~(e.g., salt values, initialization vectors).
+    However, these prerequisites are often ambiguous, and it is challenging to define a single rule that captures varying numbers of additional values and cryptographic operations used in different scenarios.
+    \item \textbf{Enhanced Adversarial Capabilities:}
+    Current models limit adversaries to targeting specific keys, restricting their brute-force abilities.
+    To improve the analysis, adversaries need to have enhanced capabilities that allow them to freely combine brute-force attempts with other attack strategies, making their approach more dynamic and adaptable.
+\end{enumerate}
 
 % 我们如何解决这些挑战，我们是怎么做的
 This paper aims to bridge this gap by introducing a generalized and automated method for modeling low-entropy keys and the adversary's brute-force capabilities within symbolic analysis frameworks. 
