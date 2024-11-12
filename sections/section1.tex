@@ -58,37 +58,35 @@ To automatically analyze protocols tolerating low-entropy keys, we face three ma
 \begin{enumerate}[leftmargin=*]
     \item \textbf{Entropy Representation:}
     Symbolic analysis tools only preserve the logical structure of messages or keys, making it impossible to deduce and analyze the entropy of keys.
-    This abstraction significantly limits the ability of symbolic models to analyze the strength of keys. 
     Additional mechanisms are needed to describe the key's entropy in order to cover general brute-force attacks within the symbolic model.
     \item \textbf{Prerequisites for Brute-Force Attacks:}
-    Brute-force attacks typically require three essential prerequisites: knowledge of algorithms, access to ciphertext, and knowledge of additional function inputs~(e.g., salt values, initialization vectors). 
-    % These prerequisites are general and abstract, and the specific requirements that an attacker must meet vary significantly across different scenarios.
-    % In symbolic models, it is a challenge to define a set of general rules that can accurately describe these prerequisites.
-    
-
+    Brute-force attacks involve an attacker repeatedly attempting keys, contingent on prior knowledge of the algorithm, its outputs, and other relevant inputs beside targeted keys~(e.g., salt values, initialization vectors). 
+    Accurately and generally capturing these prerequisite conditions within a symbolic model presents a significant challenge, as these conditions vary across different protocols and the specific keys targeted.
     \item \textbf{Enhanced Adversarial Capabilities:}
-    Existing models for certain protocols allow attackers to compromise specific keys, which strictly limits the attacker's ability to break the key. 
-    In the real world, however, as long as the attacker satisfies the three prerequisites, they can launch a brute-force attack, even though success is not guaranteed. 
-    To better reflect realistic scenarios, it is necessary to grant attackers more flexibility in performing brute-force attacks, enabling them to freely select the keys to target and combine this with other attack capabilities.
+    In existing works, an attacker is typically limited to comprising specific keys. However, in practice, an attacker may attempt to brute-force any key as long as its entropy does not exceed their computational capacity. 
+    The attacker may also deconstruct complex keys into simpler sub-keys and brute-force them individually. 
+    A key challenge lies in how to model this flexible brute-forcing capability within a symbolic model.
 \end{enumerate}
 
-% 我们如何解决这些挑战，我们是怎么做的
-This paper aims to bridge this gap by introducing a generalized and automated method for modeling low-entropy keys and the adversary's brute-force capabilities within symbolic analysis frameworks. 
-We focus on enhancing the TAMARIN prover, to support the modeling of low-entropy keys and to describe generalized brute-force attacks by adversaries. 
-TAMARIN is a state-of-the-art protocol verification tool widely used for formal analysis of many protocols, including Bluetooth\cite{shi2023blesc,claverie2023tamarin, jangid2023bluepe}, TLS\cite{cremers2017tls13}, 5G-AKA\cite{basin20185G, wang20215G}, EMV\cite{basin2021emv,radu2022emv}, etc.
-Our methodology involves extending the TAMARIN prover's syntax with new keywords to explicitly mark low-entropy keys within protocols. 
-We develop a compilation tool that translates the extended syntax into formal models recognizable by the TAMARIN prover. 
-This tool automatically generates necessary facts and rules, including key-breaking oracles that simulate an adversary's ability to compromise low-entropy keys when certain conditions are met.
-Our methodology can be employed to identify and address security issues arising from low entropy within protocols.
-
+This paper aims to bridge this gap by introducing a general and automated method for modeling low-entropy keys and the adversarial brute-force capabilities within symbolic analysis frameworks. 
+We focus on enhancing the TAMARIN prover to describe general brute-force attacks conducted by adversaries. 
+TAMARIN is a state-of-the-art protocol verification tool widely used for formal analysis of many protocols, including TLS\cite{cremers2017tls13}, 5G-AKA\cite{basin20185G, wang20215G}, EMV\cite{basin2021emv,radu2022emv}, etc.
+We have designed a new syntax, which is a superset of the syntax of TAMARIN, allowing for precise annotation of low-entropy variables in symbolic models. 
+Meanwhile, we have developed an automated protocol analysis tool supporting such low-entropy annotated models, which we call EntropyVerif\cite{toolrepo}. 
+This tool supports an adversary model that goes beyond the Dolev-Yao model, capable of capturing all brute-force behaviors against security protocols, including complex attacks where an attacker synthesizes and utilizes various attack capabilities.
+Our approach can be used to identify security issues arising from low-entropy keys in protocols and to verify the security of protocols that tolerate low-entropy keys.
+shi2023blesc,claverie2023tamarin, jangid2023bluepe
 % 有什么效果，结论，发现。
 \noindent\textbf{Contributions.}
 \begin{itemize}[leftmargin=*]
-    \item  We propose a general method to model low-entropy keys and brute-force attacks in symbolic models, enabling automated identification of vulnerable keys within protocols.
-    \item We enhance the Tamarin prover's modeling language by introducing new syntax and develop a compilation tool to facilitate the translation of extended models, improving usability and automation.
-    \item Applying our method to real-world protocols such as 4-way-handshake protocol of WPA2-PSK, BLE pairing protocol and BC session establishment protocol, we re-discover known vulnerabilities in these protocols, including the PMKID and KNOB attacks.
-    we demonstrate its effectiveness by re-discovering known vulnerabilities, including the PMKID and KNOB attacks, and previously undetected attacks, the unilateral multi-downgrade(UMD) attack against BR/EDR. 
-    \item We discovered a novel attack against the BC session establishment protocol, the unilateral multi-downgrade(UMD) attack, which significantly reduces the difficulty for attackers to brute force the complete session keys. This attack induces one side of the devices to use keys of different downgraded-lengths multiple times, potentially reducing the computational complexity to as low as $\frac{1}{2^{116}}$ of the normal scenario.
+    \item  We loosen the \emph{perfect encryption assumption} in the symbolic model. 
+    Our methodology's adversary model surpasses the Dolev-Yao adversary. 
+    In addition to the ability to eavesdrop on, block, modify, inject, and replay messages transmitted over the network, the adversary can conduct brute-force attacks on all low-entropy keys.
+    \item  We applied our methodology to develop a protocol analysis tool that accepts models with low-entropy annotations. This tool can automatically analyze vulnerabilities associated with low-entropy keys in protocols and generally capture brute-force attacks.
+    \item Using our tool to analyze real-world protocols such as WPA2-PSK, BLE pairing protocol and BC session establishment protocol, we discovered several known low-entropy associated vulnerabilities in these protocols, like the PMKID attack and KNOB attacks.
+    We demonstrate its effectiveness by rediscovering these known vulnerabilities, and a novel attack, the unilateral multi-downgrade(UMD) attack. 
+    \item The UMD attack significantly weakens the strength of the session keys in BC devices. Even when the longest keys are used, an attacker can repeatedly downgrade one side of the two devices to obtain different segments of the session key and ultimately reconstruct the complete key.
+    This attack compromises the session key with a computational complexity that can be as low as $\frac{1}{2^{116}}$ of that required for a brute-force attack.
 \end{itemize}
 
 \noindent\textbf{Overview.} 
@@ -99,22 +97,5 @@ Our methodology can be employed to identify and address security issues arising 
 \autoref{sec:5case-study} presents case studies where we apply our method to analyze real-world protocols. 
 Finally, in \autoref{sec:6results}, we present the results of our case studies, where we discover known vulnerabilities and a novel attack. 
 We additionally  offer a review of related work in \autoref{sec:7related-work} and provide a conclusion and discussion of our work in \autoref{sec:8discussion-conclusion}.
-
-% In the realm of cryptographic protocols, ensuring security against various attack vectors is paramount. Traditional symbolic analysis tools often assume ideal conditions where cryptographic primitives are unbreakable and keys are of high entropy. However, in real-world scenarios, low-entropy keys, such as user-chosen passwords, are common and pose significant security risks due to their susceptibility to brute-force attacks. The challenge lies in effectively modeling and analyzing these low-entropy keys within cryptographic protocols to uncover potential vulnerabilities.
-
-% Existing symbolic modeling approaches lack mechanisms to represent the entropy of keys and the adversary's ability to perform brute-force attacks. This gap leads to incomplete security analyses, overlooking vulnerabilities that arise from low-entropy keys. Addressing this problem is crucial for accurately assessing the security of protocols and for designing systems resilient to such attacks.
-
-% Several studies have attempted to incorporate low-entropy key analysis into symbolic models. However, these efforts are often protocol-specific and do not provide a generalized or automated solution. They typically require manual adjustments to identify which low-entropy keys can be compromised, limiting their applicability across different protocols.
-
-% This paper aims to bridge this gap by introducing a generalized and automated method for modeling low-entropy keys and the adversary's brute-force capabilities within symbolic analysis frameworks. We focus on enhancing the Tamarin Prover, a tool widely used for security protocol verification, to support the modeling of low-entropy keys and to simulate generalized brute-force attacks by adversaries.
-
-% Our methodology involves extending the Tamarin Prover's syntax with new keywords to explicitly mark low-entropy keys within protocols. We develop a compilation tool that translates the extended syntax into formal models recognizable by the Tamarin Prover. This tool automatically generates necessary facts and rules, including key-breaking oracles that simulate an adversary's ability to compromise low-entropy keys when certain conditions are met.
-
-% The contributions of our work are threefold:
-% 1. Generalized Modeling Approach: We propose a unified method to model low-entropy keys and brute-force attacks in symbolic analysis, enabling automated identification of vulnerable keys within protocols.
-% 2. Extension of Tamarin Prover: We enhance the Tamarin Prover's modeling language by introducing new syntax and develop a compilation tool to facilitate the translation of extended models, improving usability and automation.
-% 3. Practical Application and Discovery: Applying our method to real-world protocols such as WPA2-PSK and BLE pairing, we demonstrate its effectiveness by uncovering known and previously undetected vulnerabilities, including the PMKID attack in WPA2-PSK.
-
-% The remainder of this paper is structured as follows: 
 
 \end{document}
