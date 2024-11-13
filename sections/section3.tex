@@ -4,7 +4,7 @@
 
 \section{Symbolic Modeling of Low Entropy} \label{sec:3symbolic-modeling}
 
-In the previous section, we introduced the verification tool, TAMARIN, in detail.
+In the previous section, we introduced the verification tool, \Tamarin{}, in detail.
 In this section, we will illustrate our methodology to model low entropy in protocols and general brute force behaviors.
 
 \subsection{Key Breaking Oracles}
@@ -34,7 +34,7 @@ The oracle is shown as follows:
 But to model this oracle, we are facing several challenges.
 First, as a general oracle, the first input should be able to match all kinds of calculation results, which means it only can be a \emph{variable}. 
 Therefore, the oracle will not be able to determine whether other inputs are necessary variables to calculate this result.
-Second, since there is no specific structure for the calculation result, the oracle cannot determine the number of other variables needed to calculate it, that is, the number of \TFact{In} facts on the left side of the rule is uncertain. TAMARIN obviously does not support such a rule.
+Second, since there is no specific structure for the calculation result, the oracle cannot determine the number of other variables needed to calculate it, that is, the number of \TFact{In} facts on the left side of the rule is uncertain. \Tamarin{} obviously does not support such a rule.
 Our methodology introduces two more fundamental oracles to solve these problems: a value-breaking oracle and a relationship-breaking oracle.
 
 % a value-breaking oracle and an algorithm-breaking oracle.
@@ -161,16 +161,16 @@ The set $ df_\mathcal{O} $ is inductively defined by the following rules:
 
 These rules, if written in the format of multiset rewriting rules, would look like this:
 \begin{flalign*}
-    \text{\ruleNameText{Orc}} & \text{\ruleNameText{aleMsgDerive1}} :                               &\\
-    \TFacts{ &\text{\TFact{MDerive}}(m_1, m_2), \text{\TFact{MDerive}}(m_2, m_3) } \TEmpActFact{ }  \\
+    \text{\ruleNameText{Rul}} & \text{\ruleNameText{e OracleMsgDerive1}} :                               &\\
+    \TFacts{ &\text{\TFact{MDerive}}(m_1, m_2), \text{\TFact{MDerive}}(m_2, m_3) } \TEmpActFact \\
     \TFacts{ &\text{\TFact{MDerive}}(m_1, m_3) }        
     \\
-    \text{\ruleNameText{Orc}} & \text{\ruleNameText{aleMsgDerive2}} :                               &\\
-    \TFacts{ &\text{\TFact{MDerive}}(\langle m_1, m_2 \rangle, m_3), \text{\TFact{In}}(m_1) } \TEmpActFact{ }  \\
+    \text{\ruleNameText{Rul}} & \text{\ruleNameText{e OracleMsgDerive2}} :                               &\\
+    \TFacts{ &\text{\TFact{MDerive}}(\langle m_1, m_2 \rangle, m_ 3), \text{\TFact{In}}(m_1) } \TEmpActFact \\
     \TFacts{ &\text{\TFact{MDerive}}(m_2, m_3) }
     \\
-    \text{\ruleNameText{Orc}} & \text{\ruleNameText{aleMsgDerive3}} :                               &\\
-    \TFacts{ &\text{\TFact{MDerive}}(\langle m_1, m_2 \rangle, m_3), \text{\TFact{In}}(m_2) } \TEmpActFact{ }  \\
+    \text{\ruleNameText{Rul}} & \text{\ruleNameText{e OracleMsgDerive3}} :                               &\\
+    \TFacts{ &\text{\TFact{MDerive}}(\langle m_1, m_2 \rangle, m_3), \text{\TFact{In}}(m_2) } \TEmpActFact \\
     \TFacts{ &\text{\TFact{MDerive}}(m_1, m_3) }
 \end{flalign*}
 In these rules, the attacker is required to continuously supply all known terms to assist the oracle in inferring all visible derivation facts.
@@ -182,7 +182,7 @@ In the concluding step of the oracle's key-breaking process, the oracle verifies
 If these prerequisites are satisfied, the oracle will return the value of the key.
 This rule can be stated as follows:
 \begin{flalign*}
-    \text{\ruleNameText{Orc}} & \text{\ruleNameText{aleKeyCrack}} :                               &\\
+    \text{\ruleNameText{Rul}} & \text{\ruleNameText{e OracleKeyCrack}} :                               &\\
     \TFacts{ &\text{\TFact{MDerive}}(k, m), \text{\TFact{LowEntropy}}(k), \text{\TFact{In}}(m) } \TEmpActFact{ }  \\
     \TFacts{ &\text{\TFact{Out}}(k) }        
 \end{flalign*}

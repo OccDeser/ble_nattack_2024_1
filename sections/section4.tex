@@ -7,15 +7,15 @@
 % 在上一小节中我们介绍了如何通过一组通用的rule建模攻击者的暴力破解能力，在这一小节中，我们将介绍如何将我们的方法应用于协议建模。为了尽可能方便建模地建模协议，我们拓展了Tamarin的语法，引入了新的关键词，以标明协议中需要重点关注的低熵密钥。同时，实现了一套编译工具 Tamarin-Compilation-Tool，将拓展的Tamarin语法编译为Tamarin prover可识别的形式化模型。此外，为了配合oracle的建模，我们的工具支持分析rule中的消息生成关系，自动化地为模型添加消息派生fact。然后，为了模型的自动化验证，我们的编译工具支持为oracle rule根据不同的协议情况，来定义搜索边界，以避免分析不终止。
 In the preceding section, we detailed our methodology for modeling the attacker's brute-force capabilities using a set of general rules.
 This section elucidates the application of our approach to protocol modeling.
-To streamline the modeling of protocols, we extended TAMARIN's syntax by introducing new keywords that explicitly identify low-entropy keys requiring special attention within the protocol.
+To streamline the modeling of protocols, we extended \Tamarin{}'s syntax by introducing new keywords that explicitly identify low-entropy keys requiring special attention within the protocol.
 
-We also developed a compilation tool which translates the extended TAMARIN's syntax into a TAMARIN recognizable model.
+We also developed a compilation tool which translates the extended \Tamarin{}'s syntax into a \Tamarin{} recognizable model.
 Besides this, our tool will automatically add message derivation facts by analyzing the derivation relationships between variables in the model. 
 
 % To facilitate automated model verification, our Tamarin-Compilation-Tool supports the definition of search boundaries for oracle rules tailored to different protocol scenarios.
 % This feature is crucial for preventing non-terminating analysis, ensuring that the verification process completes efficiently and reliably.
 
-\subsection{ TAMARIN Syntax Extension }
+\subsection{ \Tamarin{} Syntax Extension }
 
 \begin{figure}[htb]
     \centering
@@ -25,7 +25,7 @@ Besides this, our tool will automatically add message derivation facts by analyz
 \end{figure}
 
 % Tamarin 模型通常被定义在spthy文件中（.spthy 代表 security protocol theory）。图一展示了security protocol theory的语法的核心子集，我们的工具专门设计用于解析和分析其中的rule部分。 Tamarin 使用多多重集重写规则来规定协议的执行和敌手的行为。
-The models TAMARIN supported are typically defined within ``spthy'' files (spthy, representing security protocol theory).
+The models \Tamarin{} supported are typically defined within ``spthy'' files (spthy, representing security protocol theory).
 \autoref{fig:tamarin-syntax} presents the core subset of the security protocol theory syntax.
 Our tool is specifically designed to parse and analyze the rule part of these models.
 
@@ -36,25 +36,21 @@ Our tool is specifically designed to parse and analyze the rule part of these mo
 %     \label{fig:rule-demo}
 % \end{figure}
 
-TAMARIN utilizes multiset rewriting rules to define both protocol execution and adversarial behavior.
+\Tamarin{} utilizes multiset rewriting rules to define both protocol execution and adversarial behavior.
 For instance, consider the following rule demo:
 \begin{flalign*}
-\text{\Tterm{Se}}   & \text{\Tterm{ndHello}} :                                      & \\
-                    & \text{\Tterm{let}}                                            \\  
-                    & \hspace{2em} \text{\Tterm{ciphertext = senc("hello", key)}}   \\  
-                    & \text{\Tterm{in}}                                             \\  
-                    & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFactSL{} \TFacts{ \text{\TFactTerm{Out}{ciphertext}} }
+\text{\Tterm{Rule S}}  & \text{\Tterm{endHello}} :                                      & \\
+    \text{\Tterm{\emph{let}}} \hspace{0.5em} & \text{\Tterm{ciphertext = senc("hello", key)}}   \\  
+    \text{\Tterm{\emph{in}}} \hspace{0.5em} & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFact{} \TFacts{ \text{\TFactTerm{Out}{ciphertext}} }
 \end{flalign*}
-A TAMARIN multiset rewriting rule comprises declarations of the rule's left-hand side, action facts that label the state transition represented by the rule, and the right-hand side of the rule.
-TAMARIN also supports local macro definitions in a rule which are defined within the $let \ldots in$ area called as the let-block, where each line specifies a substitution.
+A \Tamarin{} multiset rewriting rule comprises declarations of the rule's left-hand side, action facts that label the state transition represented by the rule, and the right-hand side of the rule.
+\Tamarin{} also supports local macro definitions in a rule which are defined within the $let \ldots in$ area called as the let-block, where each line specifies a substitution.
 In the above demo, \Tterm{ciphertext} in this rule will be replaced by \Tterm{senc("hello", key)} during execution.
 \begin{flalign*}
-    \text{\Tterm{Se}}   & \text{\Tterm{ndHello}} :                                      & \\
-                        & \text{\Tterm{let}}                                            \\  
-                        & \hspace{2em} \text{\Tterm{key := `L`}}                        \\  
-                        & \hspace{2em} \text{\Tterm{ciphertext = senc("hello", key)}}   \\  
-                        & \text{\Tterm{in}}                                             \\  
-                        & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFactSL{} \TFacts{ \text{ \TFactTerm{Out}{ciphertext}} }
+    \text{\Tterm{Rule S}}                           & \text{\Tterm{endHello}} :                         & \\
+        \text{\Tterm{\emph{let}}} \hspace{0.5em}    & \text{\Tterm{key := `L`}}                         \\  
+                                                    & \text{\Tterm{ciphertext = senc("hello", key)}}    \\  
+        \text{\Tterm{\emph{in}}} \hspace{0.5em}     & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFact{} \TFacts{ \text{ \TFactTerm{Out}{ciphertext}} }
 \end{flalign*}
 To apply our methodology, we introduced a new operator ``:='' and a keyword ``\verb|`L`|''.
 These syntax elements streamline the marking of low-entropy variables.
@@ -63,7 +59,7 @@ Here, the operator ``:='' replaces ``='', and the label ``\verb|`L`|'' on the ri
 This annotation will be translated by our compilation tool into a fact $\text{\TFact{EntropyLow}}(key)$ and added to the right-hand side of the rule.
 
 \subsection{ Design of the Compilation Tool}
-Our compilation tool is developed to create formal models that are compatible with the TAMARIN prover.
+Our compilation tool is developed to create formal models that are compatible with \Tamarin{}.
 To implement the model specified in \autoref{sec:oracle-modeling}, it is necessary to supply the \TFact{EntropyLow} and \TFact{MDerive} facts.
 These facts are generated by our compilation tool.
 As shown in \autoref{fig:design-of-compilation-tool}, our compilation tool contains 4 modules:

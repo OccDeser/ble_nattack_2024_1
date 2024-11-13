@@ -6,7 +6,7 @@
 
 In this section, we provide an overview of the concepts of entropy and brute-force attacks.
 Then we discuss some wide-known protocols and the low-entropy keys involved in them.
-We introduce the TAMARIN prover\cite{meier2013tamarin}, one of state-of-the-art symbolic tools for cryptographic protocol verification.
+We introduce \Tamarin{}\cite{meier2013tamarin}, one of state-of-the-art symbolic tools for cryptographic protocol verification.
 
 \subsection{Entropy and brute force attacks}
 
@@ -169,11 +169,11 @@ This truncating operation is the same as the one in BLE pairing protocol.
 The peripheral device then encrypts an \Tfunction{ACCEPT} message using $SK$ and sends it to the central device.
 The successful decryption of this message by the central device signifies the establishment of the encrypted session.
 
-\subsection{TAMARIN prover}
-The TAMARIN prover provides a powerful and expressive language for modeling protocols and properties, allowing researchers to analyze the security of their designs rigorously.
-TAMARIN supports a wide range of cryptographic primitives and protocols, making it a versatile tool for formal analysis.
-In TAMARIN, we use terms to represent messages and the behaviors of protocols and adversaries are captured through multiset rewriting rules. 
-TAMARIN allows using logic formulas to specific security properties of protocols as well.
+\subsection{\Tamarin{}}
+The \Tamarin{} prover provides a powerful and expressive language for modeling protocols and properties, allowing researchers to analyze the security of their designs rigorously.
+\Tamarin{} supports a wide range of cryptographic primitives and protocols, making it a versatile tool for formal analysis.
+In \Tamarin{}, we use terms to represent messages and the behaviors of protocols and adversaries are captured through multiset rewriting rules. 
+\Tamarin{} allows using logic formulas to specific security properties of protocols as well.
 
 \subsubsection{Term algebra}
 Messages in symbolic models are typically represented as terms in a term algebra. 
@@ -190,7 +190,7 @@ An equation is a pair of terms, denoted as~$t_1 = t_2$, which specifies that the
 For instance, the equation~$\text{sdec}(\text{senc}(m, k), k) = m$ models the property that the decryption of an encryption with the same key yields the original message.
 
 \subsubsection{Multiset rewriting rules}
-Multiset rewriting system are used to model protocols and adversaries in TAMARIN. 
+Multiset rewriting system are used to model protocols and adversaries in \Tamarin{}. 
 Every state of the transition system is a multiset of facts. 
 A \emph{fact} is defined as~$F(t_1, \ldots, t_n)$, for~$t_i \in T_\Sigma(\mathcal{V}, \mathcal{N})$.
 The transitions of states are defined by labeled multiset rewriting rules, which is denoted as~$F_l \xrightarrow{F_a} F_r$.
@@ -202,7 +202,7 @@ Action facts in~$F_a$ represent the label of the rule and can be used to restric
 
 \subsubsection{Logic formulas}
 Trace properties are usually expressed as first-order logic formulas which are evaluated over the traces (states sequences) of the protocol.
-The trace properties in TAMARIN are defined as first-order logic formulas with time points using action facts.
+The trace properties in \Tamarin{} are defined as first-order logic formulas with time points using action facts.
 When it comes to cryptographic protocols, secrecy or authentication are usually included in the trace properties to be verified.
 For example, the secrecy requires that an installed key~$k$ cannot be known by adversaries in any trace of the protocol.
 This property can be encoded in the following lemma:

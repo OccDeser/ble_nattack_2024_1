@@ -67,7 +67,7 @@ In the BLE pairing protocol, there is a KNOB attack\cite{antonioli2019knob}.
 Through this attack, an attacker can downgrade the negotiated key length between the pairing parties, thereby enabling the attacker to compromise the long-term key through brute force.
 As illustrated in \autoref{fig:ble-knob}, the attacker manipulates the $LTK$ length field within the pairing features exchanged between the Initiator and Responder, leading to the negotiation of a shorter $LTK$.
 This alteration substantially reduces the complexity of brute-forcing $LTK$.
-\begin{figure}[hbtp]
+\begin{figure}[t  ]
     \centering
     \includegraphics[width=\columnwidth]{img/ble-knob} 
     \caption{BLE KNOB}
@@ -93,7 +93,7 @@ Existing research defines a rule that provides the attacker with the ability to 
                                 & \text{\Tterm{let}}                                                \\
                                 & \hspace{1em} \text{\Tterm{LTK = resize(\_, "Low Entropy")}}       \\
                                 & \text{\Tterm{in}}                                                 \\
-    \TFacts{                    & \text{\TFactTerm{In}{senc(m, LTK)}}} \TEmpActFactSL{} \TFacts{ \text{\TFactTerm{Out}{LTK}}}             
+    \TFacts{                    & \text{\TFactTerm{In}{senc(m, LTK)}}} \TEmpActFact{} \TFacts{ \text{\TFactTerm{Out}{LTK}}}             
 \end{flalign*}
 % 其中，resize函数代表了LTK的截断操作，第一个参数是待截断的密钥，第二个参数是截断后的密钥长度。虽然这条规则虽然赋予了攻击者获取低熵的LTK的能力，但是这条规则并没有还原真实的攻击行为。事实上，配对的蓝牙设备在使用LTK保护通信时，会首先使用LTK派生出SK，然后使用SK加密发往公开信道的数据。delov-yao模型中的攻击者无法获取到使用LTK加密的密文，也就无法使用这条规则来妥协低熵的LTK。这样的模型可以发现KNOB攻击，是因为这个模型简化了SK的参与，直接使用了LTK来保护通信数据。我们希望更加还原协议的行为，因此补充了LTK参与派生SK，以及SK用于保护通信。
 The \funcText{resize} function is designed to model the truncation operation of $LTK$, with the first parameter being the key to be truncated and the second parameter specifying the desired length of the truncated key.
@@ -154,7 +154,7 @@ Similarly, the attacker cannot know the $SK$ while the initiator or responder ha
 
 \subsection{Case 3: The Session Establishment of BC} \label{sec:bc-devices}
 
-\begin{figure}[hbtp]
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.962747\columnwidth]{img/bc-knob} 
     \caption{BC KNOB}

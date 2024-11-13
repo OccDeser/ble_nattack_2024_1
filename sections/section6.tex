@@ -60,7 +60,7 @@ our model can discover not only Kracks same as the original one, but also the PM
 \end{table*}
 
 \subsection{BLE's pairing}
-There are many formal analysis works\cite{ wu2022formal,shi2023blesc, claverie2023tamarin,jangid2023bluepe} on BLE-SC pairing protocols using the TAMARIN prover.
+There are many formal analysis works\cite{ wu2022formal,shi2023blesc, claverie2023tamarin,jangid2023bluepe} on BLE-SC pairing protocols using \Tamarin{}.
 Among these, the symbolic model proposed in \cite{shi2023blesc} stands out as the most comprehensive one, which includes all association models during the pairing procedure of BLE devices.
 This work introduced several security properties, including four authentication properties, man-in-the-middle~(MitM) protection, LTK confusion protection, and the secrecy of LTK.
 However, the approach taken in this work to model brute-force attacks is tricky and imprecise due to the oversimplification of the key transmission process within the pairing protocol.
@@ -125,7 +125,7 @@ This reduction allows the attacker to brute-force the 8-byte session key.
 Following this, the session is re-established with the peripheral device, upgrading the session key to 16 bytes.
 This upgrade enables the attacker to brute-force the remaining 8 bytes of the session key.
 The complete process is depicted in \autoref{fig:bc-umd}.
-\begin{figure}[hbtp]
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.945285\columnwidth]{img/umd-attack} 
     \caption{Unilateral Multi-Downgrade Attack}

@@ -376,7 +376,7 @@
 \newcommand{\TLemma}[1]{{\ttfamily #1}}
 \newcommand{\TEmpFact}[1]{\lbrack \  #1 \rbrack}
 \newcommand{\TFacts}[1]{\lbrack\ #1 \ \rbrack}
-\newcommand{\TEmpActFact}[1]{- \hspace{-4.5pt} \TEmpFact{#1} \hspace{-4.8pt} \rightarrow}
+\newcommand{\TEmpActFact}[0]{-\hspace{-0.45em}\rightarrow}
 \newcommand{\TEmpActFactSL}[1]{- \hspace{-2.3pt} \TEmpFact{#1} \hspace{-4.8pt} \rightarrow} % single line
 \newcommand{\TActFacts}[1]{- \hspace{-4.5pt} \TFacts{#1} \hspace{-4.8pt} \rightarrow}
 \newcommand{\TActFactsSL}[1]{- \hspace{-2.3pt} \TFacts{#1} \hspace{-4.8pt} \rightarrow}
@@ -390,7 +390,7 @@
 \newcommand{\Tterm}[1]{{\ttfamily #1}}
 \newcommand{\Tequation}[1]{{\ttfamily #1}}
 \newcommand{\Tfunction}[1]{{\ttfamily #1}}
-\newcommand{\Tamarin}[0]{Tamarin }
+\newcommand{\Tamarin}[0]{T\textsc{amarin}}
 
 \newcommand{\TFrTerm}[1]{{\Tterm{$\sim$#1}}}
 \newcommand{\TFactTerm}[2]{{\ttfamily #1}$(\,$\Tterm{#2}$\,)$}
@@ -483,8 +483,8 @@ Entropy is crucial for cryptographic security preventing adversaries from brute-
 However, modern protocols like WPA2-PSK and Bluetooth seem to be tolerant of low-entropy keys for user-friendliness or compatibility.
 This tolerance can lead to vulnerabilities that have been exploited in practice.
 Existing symbolic analysis tools do not effectively model low-entropy keys or consider adversaries' computational capabilities. 
-This paper introduces a general and automated method for modeling low-entropy keys and brute-force attacks in TAMARIN prover.
-We enhance TAMARIN by introducing new syntax to explicitly mark low-entropy keys and develop a compilation tool to translate these models for analysis. 
+This paper introduces a general and automated method for modeling low-entropy keys and brute-force attacks in \Tamarin{}.
+We enhance \Tamarin{} by introducing new syntax to explicitly mark low-entropy keys and develop a compilation tool to translate these models for analysis. 
 Our method identifies vulnerabilities in real-world protocols, rediscovering known attacks and uncovering a novel one, 
 the unilateral multi-downgrade (UMD) attack in Bluetooth, which significantly reduces the difficulty for the attacker to compromise the session key, increasing the attack efficiency by up to $2^{116}$ times.
 \end{abstract}     
