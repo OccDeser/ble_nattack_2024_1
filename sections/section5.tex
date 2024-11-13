@@ -20,7 +20,7 @@ However, if the user chooses a simple passphrase, the entropy of the PMK will be
 In this case, the attacker can compromise the $PTK$ and $GTK$ through the $PMK$, thereby compromising the security of the entire session. 
 This attack is known as the PMKID attack\cite{pmkidattack} and is shown in \autoref{fig:pmkid-attack}. 
 
-\begin{figure}[hbtp]
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.925495\columnwidth]{img/pmkid-attack} 
     \caption{PMKID Attack}
@@ -139,6 +139,7 @@ Both segments are annotated as low-entropy keys.
 Our focus is on analyzing whether an attacker can leverage computational capabilities to compromise keys, thus we emphasize the study of key confidentiality within the protocol.
 We define two facts, \TFact{LtkNegotiated} and \TFact{SkDistributed}, representing the successful negotiation of $LTK$ and the successful distribution of the SK, respectively.
 The secrecy of $LTK$ and SK for the Initiator and Responder is defined as follows:
+% ![注意，这里的式子有点复杂，需要分解
 \begin{flalign*}
     & \hspace{0em} \TAll \;\, \text{\Tterm{Addr LTK \#i.}} \;\, &\\
     & \hspace{1em} \text{\TFact{LtkNegotiated(Role, Addr, LTK)@\#i}} \\
@@ -147,9 +148,9 @@ The secrecy of $LTK$ and SK for the Initiator and Responder is defined as follow
     & \hspace{1em} \text{\TFact{SkDistributed(Role, Addr, SK)@\#i}} \\
     & \hspace{0em} \implies \TNot (\TEx \;\, \text{\TLemma{\#j.}} \;\, \text{\TFact{K(SK)@\#j}} ) 
 \end{flalign*}
-where \TFact{Role} could be either "Initiator" or "Responder".
-This formula indicates that it is impossible for the attacker to know the $LTK$ while the Initiator or Responder has successfully negotiated it.
-Similarly, the attacker cannot know the SK while the Initiator or Responder has successfully distributed it.
+where \TFact{Role} could be ``Initiator'' or ``Responder''.
+This formula indicates that it is impossible for the attacker to know the $LTK$ once the initiator or responder has successfully negotiated it.
+Similarly, the attacker cannot know the $SK$ while the initiator or responder has successfully negotiated it.
 
 \subsection{Case 3: The Session Establishment of BC} \label{sec:bc-devices}
 
@@ -209,6 +210,7 @@ By integrating the SC feature with key support characteristics, six distinct dev
 % 这两类攻击者分别代表了计算能力较强的攻击者（可以暴力破解8字节的密钥）与计算能力较弱的攻击者（可以暴力破解4字节的密钥）。
 % 我们将在模型中分别考虑SA与QA两种攻击者，以验证BC设备在不同的安全假设下的安全性。
 Considering that the minimum key length can be as low as 1 byte, we assume the existence of two types of attackers:
+% !
 \begin{itemize}
     \item \textbf{SA:} An attacker capable of cracking a key that is half the maximum length.
     \item \textbf{QA:} An attacker capable of cracking a key that is a quarter of the maximum length.

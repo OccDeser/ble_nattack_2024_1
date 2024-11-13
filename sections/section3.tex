@@ -15,7 +15,7 @@ In this section, we will illustrate our methodology to model low entropy in prot
 These rules model the behaviors of attackers accessing an oracle, thereby allowing them to obtain certain keys.
 An example of such a rule is as follows:
 \begin{flalign*}
-    \text{\ruleNameText{Orc}} & \text{\ruleNameText{ale}} :                                        &\\
+    \text{\ruleNameText{Rul}} & \text{\ruleNameText{e Oracle}} :                                        &\\
     \TFacts{ &\text{\TFact{In}}(senc(m, sk)), \text{\TFact{In}}(m)} \TEmpActFact{ } \\
     \TFacts{ &\text{\TFact{Out}}(sk)}    
 \end{flalign*}
@@ -75,25 +75,17 @@ Building on this foundation, we will present our approach to modeling the value-
 
 \subsubsection{Message Derivation Fact} In the formalization of the relationship-breaking oracle, key computation is abstracted into derivation relationships, represented by message derivation facts.
 Each derivation fact maps one message to another.
-Specifically, for a one-arity function $f$ and an argument $x$, $f$ can be abstracted as the following fact:
-\[
-    \text{\TFact{MDerive}}(x, f(x))
-\]
+Specifically, for a one-arity function $f$ and an argument $x$, $f$ can be abstracted as the fact $\text{\TFact{MDerive}}(x, f(x))$.
 For the sake of consistency, multi-arity functions are modeled as:
 \[
-    \text{\TFact{MDerive}}(\langle x_1, x_2, ..., x_n \rangle, f(\langle x_1, x_2, ..., x_n \rangle))
+    \text{\TFact{MDerive}}(\langle x_1, x_2, ..., x_n \rangle, f(\langle x_1, x_2, ..., x_n \rangle)),
 \]
 where $\langle \cdot \rangle$ denotes a function of $n$ arguments, representing the concatenation of $n$ function arguments.
-Similarly, a composite function $f \circ g$ can be modeled as the following message derivation fact:
-\[
-\text{\TFact{MDerive}}(x, f(g(x)))
-\]
+Similarly, a composite function $f \circ g$ can be modeled as the message derivation fact $\text{\TFact{MDerive}}(x, f(g(x)))$.
+
 The relationship-breaking oracle maintains a collection of all functions.
 Once a derivation relationship between two messages is identified, the oracle can directly locate the specific mapping function.
-If the oracle needs to identify a function where a certain key $k$ is the sole argument, it suffices to find the following fact:
-\[
-\text{\TFact{MDerive}}(k, m)
-\]
+If the oracle needs to identify a function where a certain key $k$ is the sole argument, it suffices to find the fact $\text{\TFact{MDerive}}(k, m)$,
 where $m$ is a message derived from $k$.
 
 % 消息派生规则 给定oracle $O$和敌手$A$，$df_O$代表oracle拥有的所有消息派生关系事实的集合，$dm_A$代表敌手所有可推断消息的集合。 在敌手$A$ 开始访问 $O$ 时，$O$ 会获取协议当前执行过程中所有的消息派生事实$\mathcal{P}(MessageDeriveFact)$，初始化$df_O$。$df_O$被如下规则被inductively定义：
