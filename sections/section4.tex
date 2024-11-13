@@ -3,14 +3,18 @@
 \begin{document}
 
 \section{Syntax Extension and Compilation} \label{sec:4extension-and-compilation}
+% In the preceding section, we detailed our methodology for modeling the attacker's brute-force capabilities using a set of general rules.
+% This section elucidates the application of our approach to protocol modeling.
+% To streamline the modeling of protocols, we extended TAMARIN's syntax by introducing new keywords that explicitly identify low-entropy keys requiring special attention within the protocol.
+% 
+% We also developed a compilation tool which translates the extended TAMARIN's syntax into a TAMARIN recognizable model.
+% Besides this, our tool will automatically add message derivation facts by analyzing the derivation relationships between variables in the model. 
 
-% 在上一小节中我们介绍了如何通过一组通用的rule建模攻击者的暴力破解能力，在这一小节中，我们将介绍如何将我们的方法应用于协议建模。为了尽可能方便建模地建模协议，我们拓展了Tamarin的语法，引入了新的关键词，以标明协议中需要重点关注的低熵密钥。同时，实现了一套编译工具 Tamarin-Compilation-Tool，将拓展的Tamarin语法编译为Tamarin prover可识别的形式化模型。此外，为了配合oracle的建模，我们的工具支持分析rule中的消息生成关系，自动化地为模型添加消息派生fact。然后，为了模型的自动化验证，我们的编译工具支持为oracle rule根据不同的协议情况，来定义搜索边界，以避免分析不终止。
-In the preceding section, we detailed our methodology for modeling the attacker's brute-force capabilities using a set of general rules.
-This section elucidates the application of our approach to protocol modeling.
-To streamline the modeling of protocols, we extended \Tamarin{}'s syntax by introducing new keywords that explicitly identify low-entropy keys requiring special attention within the protocol.
-
-We also developed a compilation tool which translates the extended \Tamarin{}'s syntax into a \Tamarin{} recognizable model.
-Besides this, our tool will automatically add message derivation facts by analyzing the derivation relationships between variables in the model. 
+In this section, we explain how to apply our approach to protocol modeling.
+To facilitate the modeling of protocols, we have extended \Tamarin{}'s syntax by introducing new keywords that explicitly identify low-entropy keys, which require special attention within the protocol.
+% 
+Additionally, we developed a compilation tool that translates the extended \Tamarin{} syntax into a model recognizable by \Tamarin{}.
+Furthermore, our tool automatically adds message derivation facts by analyzing the derivation relationships between variables in the model.
 
 % To facilitate automated model verification, our Tamarin-Compilation-Tool supports the definition of search boundaries for oracle rules tailored to different protocol scenarios.
 % This feature is crucial for preventing non-terminating analysis, ensuring that the verification process completes efficiently and reliably.
