@@ -40,17 +40,17 @@ Our tool is specifically designed to parse and analyze the rule part of these mo
 For instance, consider the following rule demo:
 \begin{flalign*}
 \text{\Tterm{Rule S}}  & \text{\Tterm{endHello}} :                                      & \\
-    \text{\Tterm{\emph{let}}} \hspace{0.5em} & \text{\Tterm{ciphertext = senc("hello", key)}}   \\  
-    \text{\Tterm{\emph{in}}} \hspace{0.5em} & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFact{} \TFacts{ \text{\TFactTerm{Out}{ciphertext}} }
+    \TLetS & \text{\Tterm{ciphertext = senc("hello", key)}}   \\  
+    \TInS & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFact{} \TFacts{ \text{\TFactTerm{Out}{ciphertext}} }
 \end{flalign*}
 A \Tamarin{} multiset rewriting rule comprises declarations of the rule's left-hand side, action facts that label the state transition represented by the rule, and the right-hand side of the rule.
 \Tamarin{} also supports local macro definitions in a rule which are defined within the $let \ldots in$ area called as the let-block, where each line specifies a substitution.
 In the above demo, \Tterm{ciphertext} in this rule will be replaced by \Tterm{senc("hello", key)} during execution.
 \begin{flalign*}
-    \text{\Tterm{Rule S}}                           & \text{\Tterm{endHello}} :                         & \\
-        \text{\Tterm{\emph{let}}} \hspace{0.5em}    & \text{\Tterm{key := `L`}}                         \\  
-                                                    & \text{\Tterm{ciphertext = senc("hello", key)}}    \\  
-        \text{\Tterm{\emph{in}}} \hspace{0.5em}     & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFact{} \TFacts{ \text{ \TFactTerm{Out}{ciphertext}} }
+    \text{\Tterm{Rule S}}   & \text{\Tterm{endHello}} :                         & \\
+    \TLetS                  & \text{\Tterm{key := `L`}}                         \\  
+                            & \text{\Tterm{ciphertext = senc("hello", key)}}    \\  
+    \TInS                   & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFact{} \TFacts{ \text{ \TFactTerm{Out}{ciphertext}} }
 \end{flalign*}
 To apply our methodology, we introduced a new operator ``:='' and a keyword ``\verb|`L`|''.
 These syntax elements streamline the marking of low-entropy variables.
