@@ -7,16 +7,16 @@ This section presents the analysis results of the previous three cases and compa
 Our experiment was conducted on a server running Ubuntu 22.04 with an AMD 7950X3D CPU and 192GB RAM.
 We will provide a detailed description of the process for the novel attack discovered from the BC analysis results.
 
-\subsection{WPA2-PSK's 4-way handshake}
+\subsection{WPA2-PSK}
 
-\cite{cremers2020wpa2}'s formal analysis of the WPA2 4-way handshake protocol revealed its vulnerability to Kracks~(Key Reinstallation Attacks)\cite{vanhoef2017krack}.
+\cite{cremers2020wpa2}'s formal analysis of the WPA2 protocol revealed its vulnerability to Kracks~(Key Reinstallation Attacks)\cite{vanhoef2017krack}.
 While the original study primarily focus on the impact of nonce reuse on protocols, we made slight modifications to their formal model to apply our methodology proposed in this paper.
 These modifications enable the attacker to compromise low-entropy keys, allowing us to investigate the security vulnerabilities arising from the misuse of common passwords.
 This approach provides a comprehensive understanding of the potential risks associated with low-entropy key exploitation.
 
 \begin{table}[ht]
     \centering
-    \caption{Results of 4-way handshake } \label{tab:4-way-handshake-result}
+    \caption{Results of WPA2-PSK } \label{tab:4-way-handshake-result}
     \renewcommand{\arraystretch}{1.2} \setlength{\tabcolsep}{8pt}
     \begin{threeparttable}[b]
         \begin{tabular}{lccc}
@@ -70,9 +70,8 @@ All the analysis results of the two models are shown in \autoref{tab:ble-pairing
 Our model can discover both the  KNOB attack and Method Confusion Attack\cite{von2021method} which is ignored by the complemented version of \cite{shi2023blesc}'s model.
 
 \subsection{BC's session establishment}
-We performed a full-scale study of the session establishment protocol of BC by analyzing common scenarios under the QA and SA attack models and the results of our analysis are summarized in \autoref{tab:bc-session-result}.
+We performed a study of the session establishment protocol of BC by analyzing several scenarios under the QA and SA attack models and the results of our analysis are summarized in \autoref{tab:bc-session-result}.
 % 我们发现，BC会话的安全性主要取决于边缘设备最低支持的密钥长度，只要边缘设备支持的最低密钥长度在攻击者妥协的长度范围之内，边缘设备的会话密钥就一定会被妥协。当边缘设备兼容legacy设备时，情况会更加糟糕：即使双方协商出了最长的会话密钥，攻击者也可以通过多次降级边缘设备的密钥，来恢复出完整的会话密钥，即使该密钥的长度远超攻击者的计算能力。
-
 
 We have found that the security of BC sessions largely depends on the minimum key length supported by peripheral devices. 
 As long as this minimum key length falls within the range that an attacker can compromise, the session key of the peripheral device will inevitably be compromised. 
@@ -143,5 +142,12 @@ To ensure responsible disclosure, we reported our findings to the Bluetooth Spec
 They gave us a positive response to our novel attack. 
 They stated that they are currently conducting a detailed analysis of the report and will provide further feedback and clarification once their analysis is complete.
 We will keep communicating with the Bluetooth SIG to ensure that our findings are addressed in a timely manner.
+
+\subsection{Summary}
+
+We demonstrated the effectiveness of our proposed methodology through case studies on WPA2-PSK, BLE pairing protocols, and BC session establishment. 
+Our methodology successfully rediscovered known attacks such as the Kracks attack on WPA2 and the KNOB attack on BLE and BC.
+Additionally, we discovered a novel Unilateral Multi-Downgrade (UMD) attack on BC session establishment that previous models failed to detect. 
+This is because previous work did not model general brute-force attacks, which our approach addresses, enabling the identification of these overlooked security threats.
 
 \end{document}

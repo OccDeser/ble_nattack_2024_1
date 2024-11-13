@@ -13,10 +13,9 @@ The source code of our tool and models can be found in our repository~\cite{tool
 \subsection{Case 1: The 4-way Handshake of WPA2-PSK} \label{sec:wpa2-psk}
 
 % \textbf{PMKID attack:} 
-In WPA2-PSK, the 4-way handshake is used to distribute $PTK$ and $GTK$ between Authenticator and Supplicant. 
-The security of the entire protocol is ensured by the $PMK$~($PSK$). 
-The first message of the handshake includes $PMKID$ which is calculated from the user chosen $passphrase$, see~\autoref{eq:pmkid}. 
-However, if the user chooses a simple passphrase, the entropy of the PMK will be reduced, allowing an attacker to brute-force $PMK$ from $PMKID$. 
+The security of WPA2-PSK is ensured by the $PMK$. 
+The first message of the 4-way-handshake includes $PMKID$ which is calculated from the user chosen $Passphrase$, see~\autoref{eq:pmkid}. 
+However, if the user chooses a simple $Passphrase$, the entropy of the PMK will be reduced, allowing an attacker to brute-force $PMK$ from $PMKID$. 
 In this case, the attacker can compromise the $PTK$ and $GTK$ through the $PMK$, thereby compromising the security of the entire session. 
 This attack is known as the PMKID attack\cite{pmkidattack} and is shown in \autoref{fig:pmkid-attack}. 
 
@@ -29,12 +28,12 @@ This attack is known as the PMKID attack\cite{pmkidattack} and is shown in \auto
 
 % 此外在WPA2-PSK中，PMK(PSK)仅需要用户选择的passphrase便可以计算，因此PMK的熵取决于Passphrase的熵。我们假设存在一个缺乏安全意识的用户，总是选择短且简单的passphrase，这样就导致了PMK的熵较低，我们在模型中添加了这一假设，将PMK标记为低熵的密钥。
 \textbf{Security assumption:} 
-in WPA2-PSK, the PMK (PSK) can be calculated from the user-selected passphrase, resulting in the PMK's entropy being contingent on the passphrase's entropy.
-We assume the existence of a security-unaware user who consistently selects short and simple passphrases, thereby leading to low entropy in the PMK.
+in WPA2-PSK, the $PMK$ is calculated from the user-selected $Passphrase$, resulting in the $PMK$'s entropy being contingent on the $Passphrase$'s entropy.
+We assume the existence of a security-conscious user who always configures weak $Passphrase$ on the authenticator and the supplicant.
 
 % cremers_wpa2 提出了WPA2的 4-way handshake协议的形式化模型，该模型包括从PMK派生PTK和GTK的过程。由于该模型主要为了验证密钥重装攻击，因此在第一条握手消息中省略了PMKID，我们补全了这一部分：
 \textbf{Protocol modeling:}  
-\cite{cremers2020wpa2} proposed a formal model of the WPA2 4-way handshake protocol, including the process of distributing the $PTK$ and $GTK$ with $PMK$.
+\cite{cremers2020wpa2} proposed a formal model of the WPA2, including the process of distributing the $PTK$ and $GTK$ with $PMK$.
 As the model primarily focuses on verifying key reinstallation attacks, the $PMKID$ is omitted in the first handshake message.
 We added $PMKID$ to the first message of the handshake as follows:
 \begin{flalign*}
@@ -50,8 +49,8 @@ Here, we incorporate our security assumption into the model, marking the $PMK$ a
 
 % 我们将验证PTK的保密性来探究低熵的PMK是否会被攻击者利用来妥协4-way handshake的安全性。我们引入一个事实 SupplicantInstalledPTK，表示supplicant已经安装了PTK。PTK的保密性形式化定义如下：
 % 这个公式表示supplicant安装某个PTK且攻击者得知此PTK是不可能的。
-\textbf{Property specification:} We will verify the secrecy of $PTK$ to analysis whether attackers can exploit a low-entropy $PMK$ to compromise the security of the 4-way handshake.
-We introduce a fact, \TFact{SuppInsPTK}, indicating that the supplicant has installed a PTK.
+\textbf{Property specification:} We will verify the secrecy of $PTK$ to analysis whether attackers can exploit a low-entropy $PMK$ to compromise the security of WPA2-PSK.
+We introduce a fact, \TFact{SuppInsPTK}, indicating that the supplicant has installed a $PTK$.
 The formal definition of the secrecy of the $PTK$ is as follows:
 \begin{flalign*}
     & \hspace{0em} \TNot \, (\TEx \;\, \text{\Tterm{suppID  PTK \#i \#j.}} \;\, &\\
@@ -99,7 +98,7 @@ The model's ability to discover the KNOB attack arises from its simplification o
 In our efforts to more faithfully model the protocol's execution, we have incorporated the derivation of the SK from the $LTK$ and the use of the SK in securing communications.
 
 % 此外，我们还以更细的粒度建模了reszie函数。定义两种种密钥长度$N_1$与$N_2$，其中$N_1$表示攻击者可以破解的密钥长度，$N_2$表示攻击者无法破解的密钥长度。为了详细地建模出LTK的截取操作，我们定义两个函数 left/1 与 right/1，分别代表了截取密钥的左侧一半与右侧一半。在此基础上，resize函数满足以下等式：
-Furthermore, we have refined the modeling of the \funcText{resize} function for increased granularity.
+Furthermore, we modeled the \funcText{resize} function with a finer granularity.
 From the attacker's perspective, we define two critical key lengths, $N_1$ and $N_2$, where $N_1$ denotes the key lengths susceptible to attack, and $N_2$ denotes those remaining secure.
 To provide a detailed model of the $LTK$ truncation process, we introduce two functions, \funcText{left} and \funcText{right}, which respectively denote the left and right halves of the key.
 The \funcText{resize} function adheres to the following equation:
@@ -114,17 +113,15 @@ Therefore, in our model, both of these $LTK$ parts are marked as low-entropy key
 The $LTK$ truncation process is modeled as follows:
 \begin{flalign*}
     \text{\ruleNameText{Rule R}}    & \text{\ruleNameText{esizeLTK}} :                                   & \\
-        \TLetS                  & \text{\Tterm{LSEG, RSEG := `L`}}                     \\
+        \TLetS                  & \text{\Tterm{LHalf, RHalf := `L`}}                     \\
                                 & \text{\Tterm{LTK = resize(LTK', KS)}}             \\
-                                & \text{\Tterm{LSEG = left(LTK')}}                  \\
-                                & \text{\Tterm{RSEG = right(LTK')}}                 \\
+                                & \text{\Tterm{LHalf = left(LTK')}}                  \\
+                                & \text{\Tterm{RHalf = right(LTK')}}                 \\
         \TInS \TFacts{          & \text{\TFactTerm{InitState}{"CALCING", \TPairN{LTK', KS}}}}   \\
         \TEmpActFact{ } \hspace{0.5em} \TFacts{ & \text{\TFactTerm{InitState}{"CALCED", LTK}}}                  
 \end{flalign*}
-% 为了简洁，我们这里省略了具体计算LTK'的过程，只展示了LTK的截断操作。在这个规则中，KS是协商的密钥长度，LLTK与RLTK分别代表了LTK的左边部分与右边部分，这两个部分都被标记为低熵密钥。
-For brevity, the detailed computation process for the \Tterm{left(LTK')} is not included here; instead, we only focus on the truncation operation of $LTK$.
-In this rule, \Tterm{KS} denotes the negotiated key length, while \Tterm{LSEG} and \Tterm{RSEG} represent the left and right segments of \Tterm{LTK'} respectively.
-Both segments are annotated as low-entropy keys.
+In this rule, \Tterm{KS} denotes the negotiated key length, while \Tterm{LHalf} and \Tterm{RHalf} represent the left and right halves of \Tterm{LTK'} respectively.
+Both halves are labeled as low-entropy keys.
 
 % 我们聚焦于分析攻击者能否利用计算能力破解密钥，因此我们着重研究协议中密钥的保密性。我们定义了两个事实，\TFact{LTKNegotiated} 与 \TFact{SKDistributed}，分别代表了LTK成功被协商出来，SK被成功分发。LTK与SK的保密性分别定义如下：
 \textbf{Property specification:}
@@ -178,7 +175,7 @@ L\_min\_c and L\_min\_p \emph{should} be set to at least 7 octets.
 In the Bluetooth specification, the term \emph{shall} denotes a mandatory requirement, whereas \emph{should} indicates a recommended practice.
 So BC devices that support a maximum key size of less than 7 bytes are deemed non-compliant with the specification.
 Nonetheless, in the same specification, we have identified an alternative statement pertaining to the permissible maximum key length for BC devices, which is detailed as follows:
-\BlueQuote{[Vol 2, Part H, 4.1]}{ \\
+\BlueQuote{[Vol 2, Part H, 4.1]}{ 
 Each device implementing the Baseband specification shall have a parameter defining the maximal allowed key length, L\_max, $1 \leq \text{L\_max} \leq 16$ (number of octets in the key).}
 % 这里表述BC设备支持的最大密钥长度可以是1字节到16字节，与之前的表述明显存在矛盾。
 It is indicated that the maximum key length accepted by BC devices ranges from 1 byte to 16 bytes, which clearly contradicts the previous statement.
@@ -206,8 +203,8 @@ By integrating the SC feature with key support characteristics, six distinct dev
 Considering that the minimum key length can be as low as 1 byte, we assume the existence of two types of attackers:
 % !
 \begin{itemize}
-    \item \textbf{SA:} An attacker capable of cracking a key that is half the maximum length.
-    \item \textbf{QA:} An attacker capable of cracking a key that is a quarter of the maximum length.
+    \item \textbf{Semi-Attacker(SA):} An attacker capable of cracking a key that is half the maximum length.
+    \item \textbf{Quart-Attacker(QA):} An attacker capable of cracking a key that is a quarter of the maximum length.
 \end{itemize}
 These two types of attackers represent different levels of computational power: a stronger attacker who can brute-force an 8-byte key and a weaker attacker who can brute-force a 4-byte key.
 So the attacker model we consider in BLE is the SA attacker.
@@ -248,11 +245,12 @@ The resize function is defined to satisfy the following equations:
 This modeling strategy involves partitioning the key into $2^n$ segments, continuing until the shortest segment is susceptible to compromise by an attacker.
 Within the QA attacker model, the key is divided into four segments, with each segment being vulnerable to be compromised by the QA attacker.
 In the rules of the model, these segments are categorized as low-entropy keys.
-
 \begin{flalign*}
     \text{\ruleNameText{Rule R}}    & \text{\ruleNameText{esizeSKQA}}:                                      & \\
     \TLetS                          & \text{\Tterm{l(l(SK')),r(l(SK')) := `L`}} \\
                                     & \text{\Tterm{l(r(SK')),r(r(SK')) := `L`}} \\
+                                    & \text{\TPairN{l(l(SK')),r(l(SK'))} := \Tterm{`L`}} \\
+                                    & \text{\TPairN{l(r(SK')),r(r(SK'))} := \Tterm{`L`}} \\
                                     & \text{\Tterm{SK = resize(SK', KS)}}   \\
     \TInS \TFacts{              & \text{\TFactTerm{State}{"SK CALC", \TPairN{SK', KS}}}}             \\
     \TEmpActFact{} \TFacts{     & \text{\TFactTerm{State}{"SK CALCED", SK}}}                 
