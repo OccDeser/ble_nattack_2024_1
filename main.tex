@@ -348,6 +348,10 @@
 \definecolor{xhs_red}{HTML}{c13c33}
 \definecolor{xhs_green}{HTML}{3c5840}
 
+\definecolor{xhs_all}{HTML}{9f1f31}
+\definecolor{xhs_ex}{HTML}{2885a9}
+
+
 
 \NewTotalTColorBox{\BlueQuote}{ +m +m }{ 
     notitle,
@@ -379,6 +383,9 @@
 \newcommand{\TPair}[1]{\langle #1 \rangle}
 \newcommand{\TPairN}[1]{$\langle$\text{\ttfamily #1}$\rangle$}
 
+\newcommand{\TAll}[0]{\text{\textcolor{xhs_all}{\TLemma{All}}}}
+\newcommand{\TEx}[0]{\text{\textcolor{xhs_ex}{\TLemma{Ex}}}}
+\newcommand{\TNot}[0]{\text{\TLemma{not}}}
 
 \newcommand{\Tterm}[1]{{\ttfamily #1}}
 \newcommand{\Tequation}[1]{{\ttfamily #1}}
