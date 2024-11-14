@@ -488,7 +488,8 @@
 Entropy is crucial for cryptographic security as it prevents adversaries from brute-forcing keys.
 However, modern protocols like WPA2-PSK and Bluetooth usually tolerate low-entropy keys for user-friendliness or compatibility.
 % ! Rewrite following
-This tolerance can lead to vulnerabilities that have been exploited in practice.
+The protocol's tolerance for using keys susceptible to brute force attacks by adversaries introduces significant potential security risks. 
+Indeed, several real-world attacks have successfully exploited these vulnerabilities.
 Current symbolic model analysis tools do not emphasize the strength of keys within protocols, resulting in a limitation where these tools are unable to generally identify attacks associated with low-entropy keys.
 This paper introduced a general and automated methodology for modeling low-entropy keys and capturing brute-force attacks.
 We developed EntropyVerif, an extension of the symbolic analysis tool \Tamarin{}, which allows users to specify the entropy of keys and automatically detect brute-force attacks.
