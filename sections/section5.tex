@@ -9,7 +9,7 @@ In our case studies, we consider an adversary model that builds upon the classic
 In addition to the standard abilities of a Dolev-Yao attacker, our adversary is equipped with the capability to execute brute-force attacks on all low-entropy keys.
 The source code of our tool and models can be found in our repository~\cite{toolrepo}.
 
-\subsection{Case 1: The 4-way Handshake of WPA2-PSK} \label{sec:wpa2-psk}
+\subsection{Case 1: WPA2-PSK} \label{sec:wpa2-psk}
 
 % \textbf{PMKID attack:} 
 The security of WPA2-PSK is ensured by the $PMK$. 
@@ -18,12 +18,6 @@ However, if the user chooses a simple $Passphrase$, the entropy of the PMK will 
 In this case, the attacker can compromise the $PTK$ and $GTK$ through the $PMK$, thereby compromising the security of the entire session. 
 This attack is known as the PMKID attack\cite{pmkidattack} and is shown in \autoref{fig:pmkid-attack}. 
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.925495\columnwidth]{img/pmkid-attack} 
-    \caption{PMKID Attack}
-    \label{fig:pmkid-attack}
-\end{figure}
 
 % 此外在WPA2-PSK中，PMK(PSK)仅需要用户选择的passphrase便可以计算，因此PMK的熵取决于Passphrase的熵。我们假设存在一个缺乏安全意识的用户，总是选择短且简单的passphrase，这样就导致了PMK的熵较低，我们在模型中添加了这一假设，将PMK标记为低熵的密钥。
 \textbf{Security assumption:} 
@@ -46,6 +40,14 @@ We added $PMKID$ to the first message of the handshake as follows:
 Here, we incorporate our security assumption into the model, marking the $PMK$ as a low-entropy key.
 
 
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.925495\columnwidth]{img/pmkid-attack} 
+    \caption{PMKID Attack}
+    \label{fig:pmkid-attack}
+\end{figure}
+
+
 % 我们将验证PTK的保密性来探究低熵的PMK是否会被攻击者利用来妥协4-way handshake的安全性。我们引入一个事实 SupplicantInstalledPTK，表示supplicant已经安装了PTK。PTK的保密性形式化定义如下：
 % 这个公式表示supplicant安装某个PTK且攻击者得知此PTK是不可能的。
 \textbf{Property specification:} We will verify the secrecy of $PTK$ to analyze whether attackers can exploit a low-entropy $PMK$ to compromise the security of WPA2-PSK.
@@ -62,19 +64,19 @@ In the BLE pairing protocol, there is a KNOB attack\cite{antonioli2019knob}.
 Through this attack, an attacker can downgrade the negotiated key length between the pairing parties, thereby enabling the attacker to compromise the long-term key through brute force.
 As illustrated in \autoref{fig:ble-knob}, the attacker manipulates the $LTK$ length field within the pairing features exchanged between the Initiator and Responder, leading to the negotiation of a shorter $LTK$.
 This alteration substantially reduces the complexity of brute-forcing $LTK$.
-\begin{figure}[t  ]
-    \centering
-    \includegraphics[width=\columnwidth]{img/ble-knob} 
-    \caption{BLE KNOB}
-    \label{fig:ble-knob}
-\end{figure}
-
 
 \textbf{Security assumption:} 
 The Bluetooth core specification\cite{bluetooth6} states that Bluetooth Low Energy devices can support key lengths of 7 to 16 bytes. For convenience, we assume that the devices involved in pairing support key lengths of 8 to 16 bytes. In this scenario, without the involvement of an attacker, these devices will negotiate a full-length LTK.
 Additionally, we assume that the attacker can brute-force an 8-byte key, meaning the attacker can quickly traverse the key space of 8 bytes or fewer.
 \BlueQuote{[Vol 3, Part H, 2.3.4]}{ 
 The maximum and minimum encryption key length parameters shall be between 7 octets (56 bits) and 16 octets (128 bits), in 1 octet (8~bit) steps.}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{img/ble-knob} 
+    \caption{BLE KNOB}
+    \label{fig:ble-knob}
+\end{figure}
 
 % \cite{shi2023formal} 开发了BLE-SC配对协议的的全面的形式化模型，涵盖了规范中所有的关联模型。根据蓝牙标准，计算LTK的最后一步是根据协商的密钥长度对LTK进行截取，例如，协商的密钥长度为7字节，那么LTK只会保留7字节的有效数据。考虑到攻击者的计算能力，长度较短的LTK是可以被攻击者获取的，而完整长度的LTK无法被攻击者直接破解。现有的工作直接定义了如下的rule，给攻击者得到低熵密钥的能力：
 \textbf{Protocol modeling:}
@@ -98,9 +100,10 @@ In our efforts to more faithfully model the protocol's execution, we have incorp
 
 % 此外，我们还以更细的粒度建模了reszie函数。定义两种种密钥长度$N_1$与$N_2$，其中$N_1$表示攻击者可以破解的密钥长度，$N_2$表示攻击者无法破解的密钥长度。为了详细地建模出LTK的截取操作，我们定义两个函数 left/1 与 right/1，分别代表了截取密钥的左侧一半与右侧一半。在此基础上，resize函数满足以下等式：
 Furthermore, we modeled the \funcText{resize} function with a finer granularity.
-From the attacker's perspective, we define two critical key lengths, $N_1$ and $N_2$, where $N_1$ denotes the key lengths susceptible to attack, and $N_2$ denotes those remaining secure.
+From the attacker's perspective, we define two key lengths, $N_1$ and $N_2$, where $N_1$ denotes the key lengths susceptible to attack, and $N_2$ denotes those remaining secure.
 To provide a detailed model of the $LTK$ truncation process, we introduce two functions, \funcText{left} and \funcText{right}, which respectively denote the left and right halves of the key.
-The \funcText{resize} function adheres to the following equation:
+The \funcText{resize} function satisfies the following equations:
+
 \begin{flalign*}
     \text{\Tterm{resize(k, $N_1$)}} & \text{ = \Tterm{left(k)}}    & \\
     \text{\Tterm{resize(k, $N_2$)}} & \text{ = \TPairN{left(k), right(k)}}    
@@ -120,7 +123,7 @@ The $LTK$ truncation process is modeled as follows:
         \TEmpActFact{ } \hspace{0.5em} \TFacts{ & \text{\TFactTerm{InitState}{"CALCED", $LTK$}}}                  
 \end{flalign*}
 In this rule, \Tterm{KS} denotes the negotiated key length, while \Tterm{LHalf} and \Tterm{RHalf} represent the left and right halves of \Tterm{LTK'} respectively.
-Both halves are labeled as low-entropy keys.
+They are labeled as low-entropy keys.
 
 % 我们聚焦于分析攻击者能否利用计算能力破解密钥，因此我们着重研究协议中密钥的保密性。我们定义了两个事实，\TFact{LTKNegotiated} 与 \TFact{SKDistributed}，分别代表了LTK成功被协商出来，SK被成功分发。LTK与SK的保密性分别定义如下：
 \textbf{Property specification:}
@@ -212,24 +215,14 @@ We will consider both SA and QA attackers in our model to evaluate the security 
 % 我们建模了BC-SC与BC-Legacy进行了全面的形式化建模，以支持我们安全假设中不同的设备类型的验证。我们通过如下的equations来建模协议中设备交换双方的认证需求，来选择会话建立方法的过程：
 \textbf{Protocol modeling:}
 We have developed a comprehensive formal model for BC's SC and Legacy session establishment protocols to facilitate the verification of various device types under our specified security assumptions.
-% The procedure for selecting a session establishment method according to the two devices' SC feature are represented by the following equations:
-% \begin{flalign*}
-%     \text{\Tterm{Select(FALSE, \_)}} &= \text{\Tterm{LegacyMethod}} & \\
-%     \text{\Tterm{Select(\_, FALSE)}} &= \text{\Tterm{LegacyMethod}} \\
-%     \text{\Tterm{Select(TRUE, TRUE)}} &= \text{\Tterm{SecureMethod}} 
-% \end{flalign*}
-% % 其中SCY 、 SCN、ScMethod 和 LyMethod 是0 arity function，代表了设备是否支持SC，ScMethod 与 LyMethod 代表了设备选择SC与Legacy建立会话的方法。
-% In this context, \Tterm{TRUE}, \Tterm{FALSE}, \Tterm{SecureMethod}, and \Tterm{LegacyMethod} are 0-arity functions.
-% The functions \Tterm{TRUE} and \Tterm{FALSE} denote whether a device supports SC.
-% Meanwhile, \Tterm{ScMethod} and \Tterm{LyMethod} specify the methods selected by the device for session establishment, respectively.
-% The \Tterm{ScMethod} will be chosen only if both devices support secure connections.
 
+% 由于BC设备支持的密钥长度更短，我们引入更多的密钥长度，$N_1$、$N_2$、$N_3$、$N_4$，并且resize函数满足以下等式：
+Due to the shorter key length supported by BC devices, we introduce more key lengths, $N_1$, $N_2$, $N_3$, $N_4$, and the resize function satisfies the following equation:
 % 在建模攻击者时,我们还需要建模出QA.
 % 与在BLE模型中类似，我们使用l与r函数分别表示密钥的两半,不过此时需要引入更多的密钥长度$N_1$, $N_2$, $N_3$, $N_4$,并且resize函数满足以下等式：
-In modeling the attacker, it is essential to incorporate the \text{QA} model.
-Analogous to the BLE model, the functions \Tterm{l} and \Tterm{r} are employed to represent the left and right half of the key.
-In this scenario, additional key lengths $N_1$, $N_2$, $N_3$, and $N_4$ are introduced.
-The resize function is defined to satisfy the following equations:
+% We employ the functions \Tterm{l} and \Tterm{r} to represent the left and the right half of the key, respectively.
+% In this scenario, additional key lengths $N_1$, $N_2$, $N_3$, and $N_4$ are introduced.
+% The resize function is defined to satisfy the following equations:
 \begin{flalign*}
     \text{\Tterm{resize(k, $N_1$)}} &= \text{\Tterm{l(l(k))}}                   & \\
     \text{\Tterm{resize(k, $N_2$)}} &= \text{\TPairN{l(l(k)),r(l(k))}}          \\
@@ -238,22 +231,21 @@ The resize function is defined to satisfy the following equations:
                                     &\hspace{6.5em} \text{\Tterm{l(r(k)),r(r(k))}}\rangle
     % \text{\Tterm{resize(k, $N_4$)}} & \text{ = \TPairN{l(l(k)),r(l(k)),l(r(k)),r(r(k))}}         
 \end{flalign*}
-
-% 这种建模方法，将密钥等分为$2^n$个部分，直至最短的密钥部分可以被攻击者破解。在QA攻击者模型中,我们将密钥分为四个部分,每个部分都是QA攻击者可以破解的.
-% 在模型的规则中将其标注为低熵密钥。
+Here, \Tterm{l} and \Tterm{r} to represent the left and the right half of the key, respectively.
 This modeling strategy involves partitioning the key into $2^n$ segments, continuing until the shortest segment is susceptible to compromise by an attacker.
-Within the QA attacker model, the key is divided into four segments, with each segment being vulnerable to being compromised by the QA attacker.
-In the rules of the model, these segments are categorized as low-entropy keys.
 \begin{flalign*}
     \text{\ruleNameText{Rule R}}    & \text{\ruleNameText{esizeSKQA}}:                                      & \\
     \TLetS                          & \text{\Tterm{l(l(SK')),r(l(SK')) := `L`}} \\
                                     & \text{\Tterm{l(r(SK')),r(r(SK')) := `L`}} \\
-                                    & \text{\TPairN{l(l(SK')),r(l(SK'))} := \Tterm{`L`}} \\
-                                    & \text{\TPairN{l(r(SK')),r(r(SK'))} := \Tterm{`L`}} \\
+                                    % & \text{\TPairN{l(l(SK')),r(l(SK'))} := \Tterm{`L`}} \\
+                                    % & \text{\TPairN{l(r(SK')),r(r(SK'))} := \Tterm{`L`}} \\
                                     & \text{\Tterm{$SK$ = resize(SK', KS)}}   \\
     \TInS \TFacts{              & \text{\TFactTerm{State}{"SK CALC", \TPairN{SK', KS}}}}             \\
     \TEmpActFact{} \TFacts{     & \text{\TFactTerm{State}{"SK CALCED", $SK$}}}                 
 \end{flalign*}
+Within the attacker model for SA, we consider keys shorter than half the length to be vulnerable by attackers, with corresponding model rules consistent with those in BLE. 
+In contrast, under the QA model, only keys shorter than a quarter of the length are considered vulnerable. 
+In our rules, we labeled low-entropy keys like the rule above.
 
 % 在BC模型中我们同样考虑了会话密钥的保密性，我们定义了 \TFact{SKDistributed} 事实，分别代表了会话密钥成功被分发。我们定义了如下的规则来验证会话密钥的保密性：
 \textbf{Property specification:}

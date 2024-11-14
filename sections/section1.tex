@@ -67,9 +67,9 @@ To automatically analyze protocols tolerating low-entropy keys, we encounter thr
     Accurately and generally capturing these prerequisite conditions within a symbolic model presents a significant challenge, as these conditions vary across different protocols and the specific keys targeted.
     \item \textbf{Enhanced Adversarial Capabilities:}
     In existing works, an attacker is typically limited to compromising specific keys. 
-    However, in practice, an attacker may attempt to brute-force any key as long as its entropy does not exceed its computational capacity. 
-    The attacker may also deconstruct complex keys into simpler sub-keys and brute-force them individually. 
-    A key challenge lies in modeling this flexible brute-forcing capability within the symbolic model.
+    However, an attacker can attempt to brute-force any key as long as its entropy doesn't exceed its computational capacity. 
+    The attacker can also deconstruct complex keys into simpler sub-keys and brute-force them individually. 
+    A challenge lies in modeling this flexible brute-forcing capability within the symbolic model.
 \end{enumerate}
 
 This paper aims to bridge the existing gap by introducing a general and automated method for modeling low-entropy keys and the adversarial brute-force capabilities within symbolic analysis frameworks. 
@@ -90,7 +90,7 @@ Our approach can be used to identify security issues arising from low-entropy ke
     % \item We applied our methodology to develop a protocol analysis tool that accepts models with low-entropy labels. 
     % This tool can automatically analyze vulnerabilities associated with low-entropy keys in protocols and generally capture brute-force attacks.
     \item We developed EntropyVerif, an extension of \Tamarin{}, to introduce low-entropy keys to protocol models. 
-    Our tool allows us to analyze vulnerabilities associated with low-entropy keys in protocols and generally capture brute-force attacks.
+    Our tool allows us to discover vulnerabilities associated with low-entropy keys and generally capture brute-force attacks.
     \item By using our tool to analyze real-world protocols, we identified several known vulnerabilities related to low-entropy keys, including the PMKID attack and KNOB attacks.
     Our tool not only successfully rediscovered these existing vulnerabilities but also uncovered a novel attack, the unilateral multi-downgrade(UMD) attack.
     % We demonstrate its effectiveness by rediscovering these known vulnerabilities, and a novel attack, the unilateral multi-downgrade(UMD) attack. 
