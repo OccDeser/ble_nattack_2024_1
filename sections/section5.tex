@@ -48,14 +48,14 @@ Here, we incorporate our security assumption into the model, marking the $PMK$ a
 
 % 我们将验证PTK的保密性来探究低熵的PMK是否会被攻击者利用来妥协4-way handshake的安全性。我们引入一个事实 SupplicantInstalledPTK，表示supplicant已经安装了PTK。PTK的保密性形式化定义如下：
 % 这个公式表示supplicant安装某个PTK且攻击者得知此PTK是不可能的。
-\textbf{Property specification:} We will verify the secrecy of $PTK$ to analysis whether attackers can exploit a low-entropy $PMK$ to compromise the security of WPA2-PSK.
+\textbf{Property specification:} We will verify the secrecy of $PTK$ to analyze whether attackers can exploit a low-entropy $PMK$ to compromise the security of WPA2-PSK.
 We introduce a fact, \TFact{SuppInsPTK}, indicating that the supplicant has installed a $PTK$.
 The formal definition of the secrecy of the $PTK$ is as follows:
 \begin{flalign*}
     & \hspace{0em} \TNot \, (\TEx \;\, \text{\Tterm{suppID  PTK \#i \#j.}} \;\, &\\
     & \hspace{1em} \text{\TFact{K(PTK)@\#i}} \; \land \; \text{\TFact{SuppInsPTK(suppID, PTK)@\#j}})
 \end{flalign*}
-This formula indicates that it is impossible for the attacker to know a $PTK$ while the supplicant has installed it.
+This formula indicates that the attacker can't know a $PTK$ while the supplicant has installed it.
 
 \subsection{Case 2: The Paring Protocol of BLE}
 In the BLE pairing protocol, there is a KNOB attack\cite{antonioli2019knob}. 
@@ -72,7 +72,7 @@ This alteration substantially reduces the complexity of brute-forcing $LTK$.
 
 \textbf{Security assumption:} 
 The Bluetooth core specification\cite{bluetooth6} states that Bluetooth Low Energy devices can support key lengths of 7 to 16 bytes. For convenience, we assume that the devices involved in pairing support key lengths of 8 to 16 bytes. In this scenario, without the involvement of an attacker, these devices will negotiate a full-length LTK.
-Additionally, we assume that the attacker has the capability to brute-force an 8-byte key, meaning the attacker can quickly traverse the key space of 8 bytes or fewer.
+Additionally, we assume that the attacker can brute-force an 8-byte key, meaning the attacker can quickly traverse the key space of 8 bytes or fewer.
 \BlueQuote{[Vol 3, Part H, 2.3.4]}{ 
 The maximum and minimum encryption key length parameters shall be between 7 octets (56 bits) and 16 octets (128 bits), in 1 octet (8~bit) steps.}
 
@@ -107,7 +107,7 @@ The \funcText{resize} function adheres to the following equation:
 \end{flalign*}
 
 % LTK派生的过程建模如下：
-Taking into account the computational capabilities of an adversary, both \Tterm{left(LTK')} and \Tterm{right(LTK')} are considered vulnerable from the attacker's viewpoint, where \Tterm{LTK'} is a $LTK$ with the full length.
+Taking into account the computational capabilities of an adversary, both \Tterm{left(LTK')} and \Tterm{right(LTK')} are vulnerable from the attacker's perspective
 Therefore, in our model, both of these $LTK$ parts are marked as low-entropy keys.
 The $LTK$ truncation process is modeled as follows:
 \begin{flalign*}
@@ -163,7 +163,7 @@ Under certain circumstances, an attacker can effectively implement a KNOB attack
 % 在蓝牙specification中，BC设备支持的会话密钥长度从1字节到16字节。在BLE的case中我们提到的两个攻击者SA与QA都可能对BC设备的会话密钥产生威胁，因此我们将在BC的case中考虑这两种攻击者。
 \textbf{Security assumption:} 
 % 在蓝牙Core Specification v5.1以及之前的版本中，BC设备支持的最短密钥长度可以是1字节。在蓝牙v5.2及之后的规范中建议BC设备支持的最短密钥长度至少为7字节。以下是在最新的蓝牙v6.0标准文件中相关内容的表述：
-In the Bluetooth Core Specification version 5.1\cite{bluetooth51} and preceding versions, the minimum key size can be allowed by BC devices is 1 byte.
+In the Bluetooth Core Specification version 5.1\cite{bluetooth51} and preceding versions, the minimum key size allowed by BC devices is 1 byte.
 However, starting from Bluetooth version 5.2\cite{bluetooth52}, it is advised that BC devices support the minimum key size should not be less than 7 bytes.
 The subsequent text is extracted from the most recent Bluetooth Core Specification version 6.0\cite{bluetooth6}, which elaborates on this recommendation.
 \BlueQuote{[Vol 2, Part C, 4.2.5.2]}{ 
@@ -173,11 +173,11 @@ L\_min\_c and L\_min\_p \emph{should} be set to at least 7 octets.
 % 在蓝牙specification中，\textbf{shall} 代表了强制要求，\textbf{should} 代表了建议。因此，支持最大的密钥长度低于7字节的BC设备是不符合规范的。然而，我们在最新的规范中找到了有关BC设备允许的最大密钥长度的另一处表述，如下所示：
 In the Bluetooth specification, the term \emph{shall} denotes a mandatory requirement, whereas \emph{should} indicates a recommended practice.
 So BC devices that support a maximum key size of less than 7 bytes are deemed non-compliant with the specification.
-Nonetheless, in the same specification, we have identified an alternative statement pertaining to the permissible maximum key length for BC devices, which is detailed as follows:
+Nonetheless, in the same specification, we have identified an alternative statement about the permissible maximum key length for BC devices, which is detailed as follows:
 \BlueQuote{[Vol 2, Part H, 4.1]}{ 
 Each device implementing the Baseband specification shall have a parameter defining the maximal allowed key length, L\_max, $1 \leq \text{L\_max} \leq 16$ (number of octets in the key).}
 % 这里表述BC设备支持的最大密钥长度可以是1字节到16字节，与之前的表述明显存在矛盾。
-It is indicated that the maximum key length accepted by BC devices ranges from 1 byte to 16 bytes, which clearly contradicts the previous statement.
+It is indicated that the maximum key length accepted by BC devices ranges from 1 byte to 16 bytes, which contradicts the previous statement.
 
 % 鉴于the specification 对最短的密钥长度并没有严格的要求，而且表述前后混乱，我们假定BC设备支持的密钥长度范围存在三种类型：
 Since there is no strict requirement regarding the minimum key length in the specification, and the statements are inconsistent, we assume that there are three types of key length ranges accepted by BC devices:
@@ -242,7 +242,7 @@ The resize function is defined to satisfy the following equations:
 % 这种建模方法，将密钥等分为$2^n$个部分，直至最短的密钥部分可以被攻击者破解。在QA攻击者模型中,我们将密钥分为四个部分,每个部分都是QA攻击者可以破解的.
 % 在模型的规则中将其标注为低熵密钥。
 This modeling strategy involves partitioning the key into $2^n$ segments, continuing until the shortest segment is susceptible to compromise by an attacker.
-Within the QA attacker model, the key is divided into four segments, with each segment being vulnerable to be compromised by the QA attacker.
+Within the QA attacker model, the key is divided into four segments, with each segment being vulnerable to being compromised by the QA attacker.
 In the rules of the model, these segments are categorized as low-entropy keys.
 \begin{flalign*}
     \text{\ruleNameText{Rule R}}    & \text{\ruleNameText{esizeSKQA}}:                                      & \\
@@ -266,6 +266,6 @@ The property is specified as follows:
     & \hspace{0em} \implies \TNot (\TEx \;\, \text{\TLemma{\#j.}} \;\, \text{\TFact{K(SK)@\#j}} ) 
 \end{flalign*}
 where \TFact{Role} could be either "Central" or "Peripheral".
-This formula indicates that it is impossible for the attacker to know the session key while the central or peripheral device has successfully distributed it.
+This formula indicates that the attacker can't the session key while the central or peripheral device has successfully distributed it.
 
 \end{document}

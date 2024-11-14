@@ -10,7 +10,7 @@ We will provide a detailed description of the process for the novel attack disco
 \subsection{WPA2-PSK}
 
 \cite{cremers2020wpa2}'s formal analysis of the WPA2 protocol revealed its vulnerability to Kracks~(Key Reinstallation Attacks)\cite{vanhoef2017krack}.
-While the original study primarily focus on the impact of nonce reuse on protocols, we made slight modifications to their formal model to apply our methodology proposed in this paper.
+While the original study primarily focused on the impact of nonce reuse on protocols, we made slight modifications to their formal model to apply our methodology proposed in this paper.
 These modifications enable the attacker to compromise low-entropy keys, allowing us to investigate the security vulnerabilities arising from the misuse of common passwords.
 This approach provides a comprehensive understanding of the potential risks associated with low-entropy key exploitation.
 
@@ -36,7 +36,7 @@ This approach provides a comprehensive understanding of the potential risks asso
 \end{table}
 
 As shown in \autoref{tab:4-way-handshake-result}, 
-our model can discover not only Kracks same as the original one, but also the PMKID attack, which was not apparent in original analysis results.
+our model can discover not only Kracks same as the original one but also the PMKID attack, which was not apparent in the original analysis results.
 
 \begin{table*}[t]
     \centering
@@ -65,7 +65,7 @@ Among these, the symbolic model proposed in \cite{shi2023blesc} stands out as th
 This work introduced several security properties, including four authentication properties, man-in-the-middle~(MitM) protection, LTK confusion protection, and the secrecy of LTK.
 However, the approach taken in this work to model brute-force attacks is tricky and imprecise due to the oversimplification of the key transmission process within the pairing protocol.
 
-We corrected their work by modeling the establishment of encrypted sessions and the transmission of keys and then applied our methodology in the complemented model. 
+We corrected their work by modeling the establishment of encrypted sessions and the transmission of keys and then applied our methodology to the complemented model. 
 All the analysis results of the two models are shown in \autoref{tab:ble-pairing-result}.
 Our model can discover both the  KNOB attack and Method Confusion Attack\cite{von2021method} which is ignored by the complemented version of \cite{shi2023blesc}'s model.
 
@@ -77,7 +77,7 @@ We have found that the security of BC sessions largely depends on the minimum ke
 As long as this minimum key length falls within the range that an attacker can compromise, the session key of the peripheral device will inevitably be compromised. 
 The situation worsens when the peripheral device is compatible with legacy devices: 
 an attacker can repeatedly downgrade the peripheral device's key, ultimately recovering the longest session key, even if the key length far exceeds the attacker’s computational capacity.
-This attack against BC devices isn't covered by the existing literature, and we term it as the Unilateral Multi-Downgrade(UMD) attack.
+This attack against BC devices isn't covered by the existing literature, and we term it the Unilateral Multi-Downgrade(UMD) attack.
 
 \begin{table*}[t]
     \centering
@@ -117,7 +117,7 @@ This attack against BC devices isn't covered by the existing literature, and we 
 
 \subsubsection{Unilateral Multi-Downgrade Attack} 
 % 我们的模型发现了这个新攻击，其中，攻击者多次降级一侧设备的密钥长度，以分段地恢复出完整的会话密钥。在一个理想的BC会话建立协议中，一个仅接受16字节密钥的中心设备和接受1-16字节的边缘设备协商的会话密钥长度为16字节，攻击者很难通过暴力手段破解。但是，攻击者首先将双方降级到Legacy会话，然后将边缘设备的密钥降级到8字节，暴力破解出8字节的会话密钥。然后，重新与边缘设备建立会话，将会话密钥升级到16字节，这样，攻击者就可以通过暴力破解的方式破解出剩余的8字节会话密钥。整个过程如图\autoref{fig:bc-umd}所示。
-We discover this novel attack where an attacker incrementally downgrades the key length of a device on one side to incrementally recover the complete session key.
+We discover this novel attack where an attacker incrementally downgrades the key length of a device on one side to recover the complete session key.
 In an ideal BC session establishment procedure, a central device that only accepts a 16-byte key and a peripheral device that accommodates key lengths from 1 to 16 bytes negotiate a session key length of 16 bytes, rendering brute-force attacks impractical.
 Nevertheless, the attacker initiates the attack by downgrading both devices to a Legacy session, subsequently reducing the peripheral device's key length to 8 bytes.
 This reduction allows the attacker to brute-force the 8-byte session key.
@@ -141,7 +141,7 @@ The discovery of the UMD attack implies that even if the central device only per
 To ensure responsible disclosure, we reported our findings to the Bluetooth Special Interest Group (SIG) security team.
 They gave us a positive response to our novel attack. 
 They stated that they are currently conducting a detailed analysis of the report and will provide further feedback and clarification once their analysis is complete.
-We will keep communicating with the Bluetooth SIG to ensure that our findings are addressed in a timely manner.
+We will keep communicating with the Bluetooth SIG to ensure that our findings are addressed promptly.
 
 \subsection{Summary}
 

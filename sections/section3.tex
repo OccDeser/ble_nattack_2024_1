@@ -47,8 +47,8 @@ This oracle accepts any function and is capable of returning the value of the lo
 % \end{enumerate}
 
 \noindent
-To model this oracle, three are two challenges.
-\begin{enumerate}
+To model this oracle, there are two challenges.
+\begin{enumerate}[leftmargin=*]
     \item \textbf{Uncertainty of the received function:} As a general oracle, it should accept any function. 
     But in symbolic models, function symbol matching is precise, prohibiting using a single function symbol to generally match all functions.
     \item \textbf{Uncertainty of additional inputs:} Given the uncertainty regarding which function will be received, the oracle must dynamically accommodate additional inputs contingent upon the specific function it encounters.
@@ -160,7 +160,7 @@ In these rules, the attacker is required to continuously supply all known terms 
 \subsubsection{Value Breaking Oracle} 
 % oracle 破解密钥的最后一步，检查目标的key是否是低熵，且攻击者掌握其作为唯一变量的函数输出，如果是，oracle会返回该密钥的数值。这个规则如下：
 % 其中，k是攻击者的目标密钥，m是密钥的计算结果，$\text{\TFact{LowEntropy}}(k)$表示k是低熵密钥，在建模具体协议时被手动指定。
-In the concluding step of the oracle's key-breaking process, the oracle verifies whether the target key possess a low entropy and whether the attacker has knowledge of a calculation result where the key is the only variable.
+In the concluding step of the oracle's key-breaking process, the oracle verifies whether the target key possesses a low entropy and whether the attacker has knowledge of a calculation result where the key is the only variable.
 If these prerequisites are satisfied, the oracle will return the value of the key.
 This rule can be stated as follows:
 \begin{flalign*}

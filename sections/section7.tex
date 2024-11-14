@@ -10,9 +10,9 @@ Our methodology can be applied to discover such vulnerabilities in other cryptog
 
 Inspired by real-world attacks, several works enhance attackers' capabilities in symbolic models to achieve automated attack finding.
 These works focus on attacks due to the weaknesses of specific cryptographic primitives, like hash~\cite{cheval2023hash}, Diffie-Hellman groups~\cite{cremers2019prime}, data signature~\cite{jackson2019sign}, or AEAD schemes~\cite{cremers2023aead}. 
-Brute-force attack automatically finding we consider in this work are not covered by these works, and have not been systematically studied in symbolic models. 
+The brute-force attack automatically finding we consider in this work are not covered by these works, and have not been systematically studied in symbolic models. 
 
-Shi et al.~\cite{shi2023blesc} proposed an ad-hoc approach to discover brute-force associated attacks in BLE.
+Shi et al.~\cite{shi2023blesc} proposed an ad-hoc approach to discover brute-force-associated attacks in BLE.
 In their analysis, a fixed brute force attack was modeled, where the attacker can compromise a specific key. 
 Claverie et al.~\cite{claverie2023tamarin,jangid2023bluepe} utilized a similar approach to enable attackers to compromise a certain cryptographic variable in the BLE pairing protocol.
 These modeling approaches are tailored to known attacks and can only be used to analyze those specific attacks, making it challenging for them to be effective in discovering potential vulnerabilities.
