@@ -106,7 +106,7 @@ where, for brevity, we use $\text{\textsf{LE}}(T_{Low})$ to represent the sequen
 
 % 我们以\autoref{sec:syntax-extension}中低熵标记的规则为例，该规则中在Label Interpretation模块中会被翻译为如下的rule：
 We take the rule labeled with low entropy in \autoref{sec:syntax-extension} as an example. 
-Within the Label Interpretation module, it will be translated into the following rule:
+In the Label Interpretation, it will be translated into the following rule:
 \begin{flalign*}
     \text{\Tterm{Rule S}}   & \text{\Tterm{endHello}} :                         & \\
     \TLetS                  & \text{\Tterm{ciphertext = senc("hello", key)}}    \\  
@@ -132,7 +132,7 @@ Hence $\text{\textsf{MD}}(T)$ can be defined as
 $\llbracket \text{\TFact{MDerive}}(\langle \rho(t_i) \setminus c(\rho(t_i)) \rangle, t_i) \rrbracket$, where $t_i \in T$.
 
 We take the rule in \autoref{sec:syntax-extension} as an example as well. 
-The message derivation facts will be added to the rule as follows:
+A message derivation fact will be added to the right-hand side of the rule as follows:
 \begin{flalign*}
     \text{\Tterm{Rule S}}   & \text{\Tterm{endHello}} :                         & \\
     \TLetS                  & \text{\Tterm{ciphertext = senc("hello", key)}}    \\  
