@@ -488,11 +488,14 @@
 Entropy is crucial for cryptographic security preventing adversaries from brute-forcing keys.
 However, modern protocols like WPA2-PSK and Bluetooth seem to be tolerant of low-entropy keys for user-friendliness or compatibility.
 This tolerance can lead to vulnerabilities that have been exploited in practice.
-Existing symbolic analysis tools do not effectively model low-entropy keys or consider adversaries' computational capabilities. 
-This paper introduces a general and automated method for modeling low-entropy keys and brute-force attacks in \Tamarin{}.
-We enhance \Tamarin{} by introducing new syntax to explicitly mark low-entropy keys and develop a compilation tool to translate these models for analysis. 
-Our method identifies vulnerabilities in real-world protocols, rediscovering known attacks and uncovering a novel one, 
-the unilateral multi-downgrade (UMD) attack in Bluetooth, which significantly reduces the difficulty for the attacker to compromise the session key, increasing the attack efficiency by up to $2^{116}$ times.
+Current symbolic model analysis tools do not emphasize the strength of keys within protocols. 
+This oversight results in a limitation where existing tools are unable to generally find attacks associated with low-entropy keys.
+This paper introduced a general and automated methodology for modeling low-entropy keys and capturing brute-force attacks.
+We developed EntropyVerif, an extension of the symbolic analysis tool \Tamarin{}, which allows users to specify the entropy of keys and automatically find brute-force attacks.
+Comprehensive case studies were conducted using our EntropyVerif tool to analyze real-world protocols that are tolerant to low-entropy keys. 
+Through these studies, we not only rediscovered known attacks but also uncovered a novel attack on Bluetooth Classic devices, which we have termed the Unilateral Multi-Downgrade (UMD) attack. 
+This newly identified attack significantly reduces the complexity for adversaries attempting to compromise session keys, thereby enhancing the efficiency of such attacks by a factor of $2^{116}$. 
+The results from our case studies highlight the effectiveness of our approach in identifying potential vulnerabilities in protocols that tolerate low-entropy keys.
 \end{abstract}     
 
 % no keywords
