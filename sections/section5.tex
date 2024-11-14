@@ -4,10 +4,9 @@
 
 \section{ Case studies } \label{sec:5case-study}
 
-% 在之前的章节中，我们详细介绍了我们的建模方法以及翻译方案。To explain the overall methodology we use to 分析低熵密钥对协议安全性的影响，在本节中，我们将会对几个存在低熵密钥存在的真实协议进行全面分析，我们实现的源代码可以在我们的仓库{cite}中找到。
-
-In the previous sections, we discussed our modeling approach and compilation design. 
 In this section, to demonstrate the effectiveness of our methodology, we will conduct case studies of several real-world protocols that have issues with low-entropy keys. 
+In our case studies, we consider an adversary model that builds upon the classical Dolev-Yao model. 
+In addition to the standard abilities of a Dolev-Yao attacker, our adversary is equipped with the capability to execute brute-force attacks on all low-entropy keys.
 The source code of our tool and models can be found in our repository~\cite{toolrepo}.
 
 \subsection{Case 1: The 4-way Handshake of WPA2-PSK} \label{sec:wpa2-psk}
