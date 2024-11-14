@@ -49,9 +49,9 @@ This oracle accepts any function and is capable of returning the value of the lo
 \noindent
 To model this oracle, there are two challenges.
 \begin{enumerate}[leftmargin=*]
-    \item \textbf{Uncertainty of the received function:} As a general oracle, it should accept any function. 
+    \item \textbf{Uncertainty of Received Functions:} As a general oracle, it should accept any function. 
     But in symbolic models, function symbol matching is precise, prohibiting using a single function symbol to generally match all functions.
-    \item \textbf{Uncertainty of additional inputs:} Given the uncertainty regarding which function will be received, the oracle must dynamically accommodate additional inputs contingent upon the specific function it encounters.
+    \item \textbf{Uncertainty of Additional Inputs:} Given the uncertainty regarding which function will be received, the oracle must dynamically accommodate additional inputs contingent upon the specific function it encounters.
 \end{enumerate}
 To address the first challenge, we introduce the concept of message derivation relationships as a substitute for specific function symbols. 
 This concept will be explained in detail in \autoref{sec:oracle-modeling}.
@@ -80,6 +80,7 @@ The execution process of the relationship-breaking oracle is shown as follows:
 % \noindent Given that an attacker can provide a function $f$ that incorporates a key $k$ and another input variable $x_i$, the oracle can identify another function $f'$ that excludes $x_i$.
 % 给定一个函数f，攻击者获得了一个函数输出f(X, k), 其中k是目标密钥，X是除了k之外的所有其他变量的集合。
 % 如果攻击者得知X中的某个变量x_i的值，和f(X, k)一起提供给RO，RO会找到一个函数f', 使得f'(k) = f(X, k)，并返回.
+\noindent
 Given a function $f$ where an attacker acquires the function output $f(X, k)$, in which $k$ represents the target key and $X$ denotes the set of all other input variables excluding $k$. 
 If the attacker knows the value of $x_i$, $x_i \in X$ and submits it together with $f(X, k)$ to the relationship-breaking oracle, the oracle will return a new function $f'$ where $f'(X \backslash \{x_i\}, k) = f(X, k)$.
 Attackers can access this oracle multiple times until all other input variables are eliminated, except for the target key.
@@ -155,6 +156,7 @@ The set $ df_\mathcal{O} $ is inductively defined by the following rules:
 %     \TFacts{ &\text{\TFact{MDerive}}(\langle m_1, m_2 \rangle, m_3), \text{\TFact{In}}(m_2) } \TEmpActFact \\
 %     \TFacts{ &\text{\TFact{MDerive}}(m_1, m_3) }
 % \end{flalign*}
+\noindent
 In these rules, the attacker is required to continuously supply all known terms to assist the oracle in inferring all visible derivation facts.
 
 \subsubsection{Value-Breaking Oracle} 

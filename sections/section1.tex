@@ -26,7 +26,7 @@ Entropy is a fundamental concept that is directly correlated with the security o
 A key with high entropy indicates a high level of difficulty for an attacker attempting to recover the key from the ciphertext.
 However, in practice, modern cryptographic protocols, such as WPA2-PSK, Bluetooth Low Energy~(BLE), and Bluetooth Classic~(BC), usually tolerate low-entropy keys to accommodate user-friendly designs, maintain backward compatibility, or support resource-constrained devices.
 % This introduces a security issue about recovering low-entropy keys in these protocols, such as PMKID~\cite{pmkidattack} and KNOB~\cite{antonioli2019knob} attacks.
-This introduces a security issue concerning the recovery of low-entropy keys in these protocols, as demonstrated by attacks like PMKID~\cite{pmkidattack} and KNOB~\cite{antonioli2019knob}.
+This raises a security issue concerning the recovery of low-entropy keys in these protocols, as demonstrated by attacks like PMKID~\cite{pmkidattack} and KNOB~\cite{antonioli2019knob}.
 
 
 % Entropy is a fundamental concept directly correlated with the security of cryptographic systems, where a high-entropy key typically makes it challenging for an attacker to deduce the key from ciphertext.
@@ -103,10 +103,10 @@ Our primary contributions are as follows:
 \noindent\textbf{Overview.} 
 % Section \ref{sec:2background} reviews protocols that tolerate low-entropy keys and the protocol analysis tool \Tamarin{}.
 Section \ref{sec:2background} reviews the definition of entropy and brute-force attacks, protocols that tolerate low-entropy keys, and the protocol analysis tool \Tamarin{}.
-Section \ref{sec:3symbolic-modeling} introduces our modeling approach for entropy-based security, detailing the key-breaking oracles. 
+Section \ref{sec:3symbolic-modeling} introduces our modeling approach for low-entropy analysis, detailing the key-breaking oracles. 
 Section \ref{sec:4extension-and-compilation} discusses EntropyVerif, our extension of \Tamarin{}.
 Section \ref{sec:5case-study} presents case studies where we apply our method to analyze real-world protocols. 
 Finally, in Section \ref{sec:6results}, we present the results of our case studies, where we discover known vulnerabilities and a novel attack. 
-We additionally  offer a review of related work in Section \ref{sec:7related-work} and provide a conclusion and discussion of our work in Section \ref{sec:8discussion-conclusion}.
+We additionally offer a review of related work in Section \ref{sec:7related-work} and provide a conclusion and discussion of our work in Section \ref{sec:8discussion-conclusion}.
 
 \end{document}

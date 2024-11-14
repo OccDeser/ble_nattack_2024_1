@@ -2,7 +2,7 @@
 
 \begin{document}
 
-\section{ Case studies } \label{sec:5case-study}
+\section{ Case Studies } \label{sec:5case-study}
 
 In this section, to demonstrate the effectiveness of our methodology, we will conduct case studies of several real-world protocols that have issues with low-entropy keys. 
 In our case studies, we consider an adversary model that builds upon the classical Dolev-Yao model. 
@@ -21,13 +21,13 @@ This attack is known as the PMKID attack\cite{pmkidattack} and is shown in \auto
 
 % 此外在WPA2-PSK中，PMK(PSK)仅需要用户选择的passphrase便可以计算，因此PMK的熵取决于Passphrase的熵。我们假设存在一个缺乏安全意识的用户，总是选择短且简单的passphrase，这样就导致了PMK的熵较低，我们在模型中添加了这一假设，将PMK标记为低熵的密钥。
 \noindent
-\textbf{Security assumption:} 
+\textbf{Security Assumption:} 
 % in WPA2-PSK, the $PMK$ is calculated from the user-selected $Passphrase$, resulting in the $PMK$'s entropy being contingent on the $Passphrase$'s entropy.
 We assume the existence of a security-conscious user who always configures weak $Passphrase$ on the authenticator and the supplicant.
 
 % cremers_wpa2 提出了WPA2的 4-way handshake协议的形式化模型，该模型包括从PMK派生PTK和GTK的过程。由于该模型主要为了验证密钥重装攻击，因此在第一条握手消息中省略了PMKID，我们补全了这一部分：
 \noindent
-\textbf{Protocol modeling:}  
+\textbf{Protocol Modeling:}  
 \cite{cremers2020wpa2} proposed a formal model of the WPA2, including the process of distributing the $PTK$ and $GTK$ with $PMK$.
 As the model primarily focuses on verifying key reinstallation attacks, the $PMKID$ is omitted in the first handshake message.
 We added $PMKID$ to the first message of the handshake as follows:
@@ -53,7 +53,7 @@ Here, we incorporate our security assumption into the model, marking the $PMK$ a
 % 我们将验证PTK的保密性来探究低熵的PMK是否会被攻击者利用来妥协4-way handshake的安全性。我们引入一个事实 SupplicantInstalledPTK，表示supplicant已经安装了PTK。PTK的保密性形式化定义如下：
 % 这个公式表示supplicant安装某个PTK且攻击者得知此PTK是不可能的。
 \noindent
-\textbf{Property specification:} We will verify the secrecy of $PTK$ to analyze whether attackers can exploit a low-entropy $PMK$ to compromise the security of WPA2-PSK.
+\textbf{Property Specification:} We will verify the secrecy of $PTK$ to analyze whether attackers can exploit a low-entropy $PMK$ to compromise the security of WPA2-PSK.
 We introduce a fact, \TFact{SuppInsPTK}, indicating that the supplicant has installed a $PTK$.
 The formal definition of the secrecy of the $PTK$ is as follows:
 \begin{flalign*}
@@ -69,7 +69,7 @@ As illustrated in \autoref{fig:ble-knob}, the attacker manipulates the $LTK$ len
 This alteration substantially reduces the complexity of brute-forcing $LTK$.
 
 \noindent
-\textbf{Security assumption:} 
+\textbf{Security Assumption:} 
 The Bluetooth core specification\cite{bluetooth6} states that Bluetooth Low Energy devices can support key lengths of 7 to 16 bytes. For convenience, we assume that the devices involved in pairing support key lengths of 8 to 16 bytes. In this scenario, without the involvement of an attacker, these devices will negotiate a full-length LTK.
 Additionally, we assume that the attacker can brute-force an 8-byte key, meaning the attacker can quickly traverse the key space of 8 bytes or fewer.
 \BlueQuote{[Vol 3, Part H, 2.3.4]}{ 
@@ -84,7 +84,7 @@ The maximum and minimum encryption key length parameters shall be between 7 octe
 
 % \cite{shi2023formal} 开发了BLE-SC配对协议的的全面的形式化模型，涵盖了规范中所有的关联模型。根据蓝牙标准，计算LTK的最后一步是根据协商的密钥长度对LTK进行截取，例如，协商的密钥长度为7字节，那么LTK只会保留7字节的有效数据。考虑到攻击者的计算能力，长度较短的LTK是可以被攻击者获取的，而完整长度的LTK无法被攻击者直接破解。现有的工作直接定义了如下的rule，给攻击者得到低熵密钥的能力：
 \noindent
-\textbf{Protocol modeling:}
+\textbf{Protocol Modeling:}
 \cite{shi2023blesc} has developed a comprehensive formal model for the BLE-SC pairing protocol, which includes all related models specified in the standards.
 According to the Bluetooth Specification, the final process in $LTK$ derivation involves truncating the $LTK$ to the negotiated key length.
 For instance, if the negotiated key length is 7 bytes, only 7 bytes of the $LTK$ will remain as valid data.
@@ -132,7 +132,7 @@ They are labeled as low-entropy keys.
 
 % 我们聚焦于分析攻击者能否利用计算能力破解密钥，因此我们着重研究协议中密钥的保密性。我们定义了两个事实，\TFact{LTKNegotiated} 与 \TFact{SKDistributed}，分别代表了LTK成功被协商出来，SK被成功分发。LTK与SK的保密性分别定义如下：
 \noindent
-\textbf{Property specification:}
+\textbf{Property Specification:}
 Our focus is on analyzing whether an attacker can leverage computational capabilities to compromise keys, thus we emphasize the study of key confidentiality within the protocol.
 We define two facts, \TFact{LtkNegotiated} and \TFact{SkDistributed}, representing the successful negotiation of $LTK$ and the successful distribution of the SK, respectively.
 The secrecy of $LTK$ for the Initiator and Responder is defined as follows:
@@ -162,15 +162,16 @@ Similarly, the Secrecy of $SK$ means the attacker cannot know the $SK$ while the
 
 % BC设备同样会受到KNOB攻击，因为在建立加密会话时，BC会协商会话密钥的长度。 在\autoref{fig:bc-knob}中展示了KNOB攻击的过程，攻击者通过篡改中心设备与边缘设备协商的会话密钥长度，使得会话密钥长度较短，从而降低了攻击者通过暴力破解会话密钥的难度。在蓝牙规范中，BC设备支持的会话密钥长度可以是1-16字节，在一些情况下，攻击者事实KNOB攻击，可以最短将会话密钥长度降级到1字节。
 BC devices are  also vulnerable to KNOB attacks due to their negotiation of session key lengths during the establishment of sessions.
-The mechanism of the KNOB attack is depicted in \autoref{fig:bc-knob}.
-An adversary can alter the negotiated session key length between the central and peripheral devices, which results in a shortened session key.
-This significantly reduces the difficulty of brute-forcing the session key for the attacker.
-As per the Bluetooth specification, BC devices support session key lengths in the range of 1 to 16 bytes.
-Under certain circumstances, an attacker can effectively implement a KNOB attack, reducing the session key length to 1 byte.
+The attacker compromises the security by altering the negotiated session key length between the central device and the edge device, resulting in a shorter session key. This reduction in key length significantly eases the difficulty for the attacker to brute-force the session key.
+\autoref{fig:bc-knob} illustrates the process of a KNOB attack in BC devices.
+
+% This significantly reduces the difficulty of brute-forcing the session key for the attacker.
+% As per the Bluetooth specification, BC devices support session key lengths in the range of 1 to 16 bytes.
+% Under certain circumstances, an attacker can effectively implement a KNOB attack, reducing the session key length to 1 byte.
 
 % 在蓝牙specification中，BC设备支持的会话密钥长度从1字节到16字节。在BLE的case中我们提到的两个攻击者SA与QA都可能对BC设备的会话密钥产生威胁，因此我们将在BC的case中考虑这两种攻击者。
 \noindent
-\textbf{Security assumption:} 
+\textbf{Security Assumption:} 
 % 在蓝牙Core Specification v5.1以及之前的版本中，BC设备支持的最短密钥长度可以是1字节。在蓝牙v5.2及之后的规范中建议BC设备支持的最短密钥长度至少为7字节。以下是在最新的蓝牙v6.0标准文件中相关内容的表述：
 In the Bluetooth Core Specification version 5.1\cite{bluetooth51} and preceding versions, the minimum key size allowed by BC devices is 1 byte.
 However, starting from Bluetooth version 5.2\cite{bluetooth52}, it is advised that BC devices support the minimum key size should not be less than 7 bytes.
@@ -220,7 +221,7 @@ We will consider both SA and QA attackers in our model to evaluate the security 
 
 % 我们建模了BC-SC与BC-Legacy进行了全面的形式化建模，以支持我们安全假设中不同的设备类型的验证。我们通过如下的equations来建模协议中设备交换双方的认证需求，来选择会话建立方法的过程：
 \noindent
-\textbf{Protocol modeling:}
+\textbf{Protocol Modeling:}
 We have developed a comprehensive formal model for BC's SC and Legacy session establishment protocols to facilitate the verification of various device types under our specified security assumptions.
 
 % 由于BC设备支持的密钥长度更短，我们引入更多的密钥长度，$N_1$、$N_2$、$N_3$、$N_4$，并且resize函数满足以下等式：
@@ -256,7 +257,7 @@ In our rules, we labeled low-entropy keys like the rule above.
 
 % 在BC模型中我们同样考虑了会话密钥的保密性，我们定义了 \TFact{SKDistributed} 事实，分别代表了会话密钥成功被分发。我们定义了如下的规则来验证会话密钥的保密性：
 \noindent
-\textbf{Property specification:}
+\textbf{Property Specification:}
 In the BC model, the secrecy of the session key is also a critical consideration.
 We define the \TFact{SKDistributed} fact to represent the successful distribution of the session key.
 The property is specified as follows:

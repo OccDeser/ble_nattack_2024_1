@@ -106,10 +106,10 @@ During the authentication phase, both devices select an appropriate pairing meth
 After this phase, they successfully negotiate an intermediate key $LTK'$.
 The $LTK'$ is truncated based on the previously negotiated $KeySize$, forming the $LTK$.
 For example, if $KeySize$ is 16, $LTK'[1:16]$ will be the $LTK$, where $LTK'[1:16]$ denotes the first 16 bytes of $LTK'$.
-After the $LTK$ is generated, the initiator and the responder exchange four random values, $IV_I$, $IV_R$, $SKD_I$, and $SKD_R$.
+After the $LTK$ is generated, the initiator and the responder exchange two random values, $SKD_I$ and $SKD_R$.
 These values, along with the $LTK$, are used to calculate a session key~$SK$, as shown in \autoref{eq:sk}.
 \begin{equation} \label{eq:sk}
-    SK = \text{AES-CCM}_{LTK}(IV_I\|IV_R, SKD_I\|SKD_R)
+    SK = \text{AES-ECB}_{LTK}(SKD_I\|SKD_R)
 \end{equation}
 Ultimately, $SK$ is utilized by both devices to encrypt the session, thereby ensuring the secrecy and integrity of subsequent communications.
 
@@ -150,6 +150,7 @@ Both the central and peripheral devices will exchange two random values $AuR_C$ 
 \begin{equation} \label{eq:secure-aco}
     SERS_C, SERS_P, ACO = \text{h5}(LK, AuR_C\|AuR_P)
 \end{equation}
+Here, E1 and h5 are the authentication functions defined in the protocol.
 In the following phase, the central and peripheral devices engage in the negotiation of the session key's length.
 In the final phase, the central device sends a random value~$EnRand$, to the peripheral device.
 The two devices then utilize the $LK$, $EnRand$ and $ACO$ to derive the session key~$SK'$.
@@ -161,10 +162,11 @@ But in \emph{Secure Connections}, $EnRand$ will be ignored and the $SK'$ will be
 \begin{equation} \label{eq:secure-sk}
     SK' = \text{h3}(LK, ACO)
 \end{equation}
+Here, E3 is the encryption key generation function used in \emph{Legacy Connections} and h3 is the AES encryption key generation function used in \emph{Secure Connections}.
 After that, the central device and peripheral device will take a few bytes of $SK'$ as the session key~$SK$ based on the negotiated key length.
 This truncating operation is the same as the one in the BLE pairing protocol.
 The peripheral device then encrypts an \Tfunction{ACCEPT} message using $SK$ and sends it to the central device.
-The successful decryption of this message by the central device signifies the establishment of the encrypted session.
+% The successful decryption of this message by the central device signifies the establishment of the encrypted session.
 
 \subsection{\Tamarin{}}
 \Tamarin{} provides a powerful and expressive language for modeling protocols and properties, allowing researchers to analyze the security of their designs rigorously.

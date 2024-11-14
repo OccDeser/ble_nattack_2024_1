@@ -30,16 +30,16 @@ Finally, to ensure the automation and efficiency of the verification process, we
 
 \subsection{ Labeled Rule Syntax } \label{sec:syntax-extension}
 
-\Tamarin{} utilizes multiset rewriting rules to define both protocol execution and adversarial behavior.
+\Tamarin{} utilizes multiset rewriting rules to define protocol execution and adversarial behaviors.
 For instance, consider the following rule demo:
 \begin{flalign*}
 \text{\Tterm{Rule S}}  & \text{\Tterm{endHello}} :                                      & \\
-    \TLetS & \text{\Tterm{ciphertext = senc("hello", key)}}   \\  
-    \TInS & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFact{} \TFacts{ \text{\TFactTerm{Out}{ciphertext}} }
+    \TLetS & \text{\Tterm{$ciphertext$ = senc("hello", $key$)}}   \\  
+    \TInS & \TFacts{ \text{\TFactTerm{Share}{$key$}} }  \TEmpActFact{} \TFacts{ \text{\TFactTerm{Out}{$ciphertext$}} }
 \end{flalign*}
-This rule delineates a simple behavior for sending encrypted data: an entity encrypts the message "hello" using a shared $key$ and sends the ciphertext to a public network.
+This rule delineates a simple behavior for sending encrypted data: an entity encrypts the message "hello" using a shared $key$ and sends the $ciphertext$ to a public network.
 \Tamarin{} supports local macro definitions in a rule which are defined within the \TFact{let}$ \ldots $\TFact{in} area called the let-block, where each line specifies a substitution.
-In the above demo, \Tterm{ciphertext} in this rule will be replaced by \Tterm{senc("hello", key)} when the rule is executed.
+In the above demo, \Tterm{$ciphertext$} in this rule will be replaced by \Tterm{senc("hello", $key$)} when the rule is executed.
 
 To apply our methodology, we introduced a new operator ``:='' and a keyword ``\verb|`L`|''.
 These syntax elements facilitate the identification and labeling of low-entropy variables.
