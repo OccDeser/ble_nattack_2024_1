@@ -16,7 +16,7 @@ This approach provides a comprehensive understanding of the potential risks asso
 
 \begin{table}[ht]
     \centering
-    \caption{Results of WPA2-PSK } \label{tab:4-way-handshake-result}
+    \caption{ Analysis Results of WPA2-PSK } \label{tab:4-way-handshake-result}
     \renewcommand{\arraystretch}{1.2} \setlength{\tabcolsep}{8pt}
     \begin{threeparttable}[b]
         \begin{tabular}{lccc}
@@ -40,7 +40,7 @@ our model can discover not only Kracks same as the original one but also the PMK
 
 \begin{table*}[t]
     \centering
-    \caption{Results of BLE Pairing} \label{tab:ble-pairing-result}
+    \caption{Analysis Results of BLE Pairing} \label{tab:ble-pairing-result}
     \renewcommand{\arraystretch}{1.2} \setlength{\tabcolsep}{8pt}
     \begin{threeparttable}[b]
         \begin{tabular}{lccccccc}
@@ -52,16 +52,16 @@ our model can discover not only Kracks same as the original one but also the PMK
             \hline  
         \end{tabular}
         \begin{tablenotes}
-            \item[] A1: Method Confusion Attack\cite{von2021method} \hspace{1em}
-                     A2: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob} \hspace{1em}
-                     \textcolor{xhs_green}{\ding{52}}: the property is satisfied. 
+            \item[] \textcolor{xhs_red}{A1}: Method Confusion Attack\cite{von2021method} \hspace{1em}
+                    \textcolor{xhs_red}{A2}: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob} \hspace{1em}
+                    \textcolor{xhs_green}{\ding{52}}: the property is satisfied. 
         \end{tablenotes}
     \end{threeparttable}
 \end{table*}
 
-\subsection{BLE's pairing}
+\subsection{Pairing of BLE}
 There are many formal analysis works\cite{ wu2022formal,shi2023blesc, claverie2023tamarin,jangid2023bluepe} on BLE-SC pairing protocols using \Tamarin{}.
-Among these, the symbolic model proposed in \cite{shi2023blesc} stands out as the most comprehensive one, which includes all association models during the pairing procedure of BLE devices.
+Among these, the symbolic model proposed in \cite{shi2023blesc} stands out as the most comprehensive one.
 This work introduced several security properties, including four authentication properties, man-in-the-middle~(MitM) protection, LTK confusion protection, and the secrecy of LTK.
 However, the approach taken in this work to model brute-force attacks is tricky and imprecise due to the oversimplification of the key transmission process within the pairing protocol.
 
@@ -69,7 +69,7 @@ We corrected their work by modeling the establishment of encrypted sessions and 
 All the analysis results of the two models are shown in \autoref{tab:ble-pairing-result}.
 Our model can discover both the  KNOB attack and Method Confusion Attack\cite{von2021method} which is ignored by the complemented version of \cite{shi2023blesc}'s model.
 
-\subsection{BC's session establishment}
+\subsection{Session Establishment of BC}
 We performed a study of the session establishment protocol of BC by analyzing several scenarios under the QA and SA models and the results of our analysis are summarized in \autoref{tab:bc-session-result}.
 % 我们发现，BC会话的安全性主要取决于边缘设备最低支持的密钥长度，只要边缘设备支持的最低密钥长度在攻击者妥协的长度范围之内，边缘设备的会话密钥就一定会被妥协。当边缘设备兼容legacy设备时，情况会更加糟糕：即使双方协商出了最长的会话密钥，攻击者也可以通过多次降级边缘设备的密钥，来恢复出完整的会话密钥，即使该密钥的长度远超攻击者的计算能力。
 
@@ -81,7 +81,7 @@ This attack against BC devices isn't covered by the existing literature, and we 
 
 \begin{table*}[t]
     \centering
-    \caption{RESULTS OF BC SESSION ESTABLISHMENT} \label{tab:bc-session-result}
+    \caption{Analysis Results of BC Session Establishment Protocol} \label{tab:bc-session-result}
     \renewcommand{\arraystretch}{1.2} \setlength{\tabcolsep}{8pt}
     \begin{threeparttable}[b]
     \begin{tabularx}{\textwidth}{c>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X}
@@ -104,13 +104,22 @@ This attack against BC devices isn't covered by the existing literature, and we 
     \end{tabularx}
     \begin{tablenotes}
         \item[] 
-        A1: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob} 
-        \hspace{1em} A2: novel Unilateral Multi-Downgrade Attack 
-        \hspace{1em} \textcolor{xhs_green}{\ding{52}}: the property is satisfied.  \\
-        ScLg: support both secure and legacy connections.
-        \hspace{1em} ScOn: only support secure connections.
-        \hspace{1em} LgOn: only support legacy connections. \\
-        Legacy, Enhanc, Secure: key length ranges, see \autoref{sec:bc-devices} for details.
+        \begin{itemize}[leftmargin=*]
+            \item   \hspace{0.25em} A1: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob} 
+                    \hspace{1em} A2: novel Unilateral Multi-Downgrade Attack 
+                    \hspace{1em} \textcolor{xhs_green}{\ding{52}}: the property is satisfied. 
+            \item   \hspace{0.25em} ScLg: support both secure and legacy connections.
+                    \hspace{1em} ScOn: only support secure connections.
+                    \hspace{1em} LgOn: only support legacy connections.
+            \item   \hspace{0.25em} Legacy, Enhanc, Secure: key length ranges, see \autoref{sec:bc-devices} for details.
+        \end{itemize}
+        % A1: Key Negotiation of Bluetooth~(KNOB) Attack\cite{antonioli2019knob} 
+        % \hspace{1em} A2: novel Unilateral Multi-Downgrade Attack 
+        % \hspace{1em} \textcolor{xhs_green}{\ding{52}}: the property is satisfied.  \\
+        % ScLg: support both secure and legacy connections.
+        % \hspace{1em} ScOn: only support secure connections.
+        % \hspace{1em} LgOn: only support legacy connections. \\
+        % Legacy, Enhanc, Secure: key length ranges, see \autoref{sec:bc-devices} for details.
     \end{tablenotes}
     \end{threeparttable}
 \end{table*}
@@ -118,25 +127,28 @@ This attack against BC devices isn't covered by the existing literature, and we 
 \subsubsection{Unilateral Multi-Downgrade Attack} 
 % 我们的模型发现了这个新攻击，其中，攻击者多次降级一侧设备的密钥长度，以分段地恢复出完整的会话密钥。在一个理想的BC会话建立协议中，一个仅接受16字节密钥的中心设备和接受1-16字节的边缘设备协商的会话密钥长度为16字节，攻击者很难通过暴力手段破解。但是，攻击者首先将双方降级到Legacy会话，然后将边缘设备的密钥降级到8字节，暴力破解出8字节的会话密钥。然后，重新与边缘设备建立会话，将会话密钥升级到16字节，这样，攻击者就可以通过暴力破解的方式破解出剩余的8字节会话密钥。整个过程如图\autoref{fig:bc-umd}所示。
 We discover this novel attack where an attacker incrementally downgrades the key length of a device on one side to recover the complete session key.
-In an ideal BC session establishment procedure, a central device that only accepts a 16-byte key and a peripheral device that accommodates key lengths from 1 to 16 bytes negotiate a session key length of 16 bytes, rendering brute-force attacks impractical.
-Nevertheless, the attacker initiates the attack by downgrading both devices to a Legacy session, subsequently reducing the peripheral device's key length to 8 bytes.
-This reduction allows the attacker to brute-force the 8-byte session key.
-Following this, the session is re-established with the peripheral device, upgrading the session key to 16 bytes.
-This upgrade enables the attacker to brute-force the remaining 8 bytes of the session key.
+% In an ideal BC session establishment procedure, a central device that only accepts a 16-byte key and a peripheral device that accommodates key lengths from 1 to 16 bytes negotiate a session key length of 16 bytes, rendering brute-force attacks impractical.
+Given a central device that only accepts 16-byte keys and a peripheral device that supports key lengths from 1 to 16 bytes, their negotiated session key can only be 16 bytes long, making brute-force attacks infeasible.  
+Nevertheless, the attacker initiates the attack by downgrading both devices to a Legacy session.
+The attacker then induces the peripheral device to use a 4-byte session key, allowing the attacker to brute-force the first 4 bytes of the session key. 
+Subsequently, the attacker repeats this process three times, ultimately recovering the complete session key. 
 The complete process is depicted in \autoref{fig:bc-umd}.
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.945285\columnwidth]{img/umd-attack} 
-    \caption{Unilateral Multi-Downgrade Attack}
+    \caption{Attack flow of UMD attack on BC session establishment}
     \label{fig:bc-umd}
 \end{figure}
+
 % the UMD attack 有很多变体，攻击者可以根据自己的计算能力和受害设备最低支持的密钥长度，自由选择逐步降级的次数。假设攻击者选择的降级次数为$n$，每次降级的大小间隔一致，那么攻击者的计算次数为$2^{\frac{128}{n}}n$，当n为16时，攻击者暴力破解16字节的会话密钥的难度从$2^{128}$次降到$2^{12}$次。
 The UMD attack encompasses several variations, allowing the attacker to freely choose the number of downgrade steps based on their computational resources and the minimum key length supported by the victim device.
- Assuming the attacker chooses $n$ downgrade steps, with each step having a consistent interval, the number of computations required by the attacker is $n \times 2^{\frac{128}{n}}$.
+If the attacker chooses $n$ downgrade steps, with each step having a consistent interval, the number of computations required by the attacker is $n \times 2^{\frac{128}{n}}$.
 When $n$ is 16, the complexity of brute-forcing a 16-byte session key is significantly reduced from $2^{128}$ to $2^{12}$.
 
-The discovery of the UMD attack implies that even if the central device only permits 16-byte session keys, an attacker can still compromise the session key by repeatedly downgrading the key length of peripheral devices. This attack highlights the inherent risks associated with compatibility with legacy devices, as it enables attackers to easily compromise session keys without eventually downgrading them.
+The discovery of the UMD attack implies that even if the central device only accepts 16-byte session keys, an attacker can still compromise the session key.
+This attack highlights the inherent risks associated with compatibility with legacy devices, as it enables attackers to compromise session keys without eventually downgrading them.
 
+\noindent
 \textbf{Disclosure.}
 To ensure responsible disclosure, we reported our findings to the Bluetooth Special Interest Group (SIG) security team.
 They gave us a positive response to our novel attack. 
@@ -145,9 +157,7 @@ We will keep communicating with the Bluetooth SIG to ensure that our findings ar
 
 \subsection{Summary}
 
-We demonstrated the effectiveness of our proposed methodology through case studies on WPA2-PSK, BLE pairing protocols, and BC session establishment. 
-Our methodology successfully rediscovered known attacks such as the Kracks attack on WPA2 and the KNOB attack on BLE and BC.
-Additionally, we discovered a novel Unilateral Multi-Downgrade (UMD) attack on BC session establishment that previous models failed to detect. 
-This is because previous work did not model general brute-force attacks, which our approach addresses, enabling the identification of these overlooked security threats.
+We demonstrated the effectiveness of our proposed methodology through case studies on WPA2-PSK, the BLE pairing protocol, and the BC session establishment protocol. 
+Our methodology discovered known attacks and the novel UMD attack that is overlooked by former model, successfully introducing low-entropy keys to protocol analysis in symbolic models. 
 
 \end{document}

@@ -2,7 +2,7 @@
 
 \begin{document}
 
-\section{Modeling of General Brute Force Attacks} \label{sec:3symbolic-modeling}
+\section{General Brute-Force Attack Modeling} \label{sec:3symbolic-modeling}
 
 % In the previous section, we introduced the verification tool, \Tamarin{}, in detail.
 In this section, we will discuss the limitations of existing models and introduce our methodology for capturing brute force behaviors in a general manner.
@@ -58,7 +58,7 @@ This concept will be explained in detail in \autoref{sec:oracle-modeling}.
 To overcome the second, we introduce two more fundamental oracles: the value-breaking oracle and the relationship-breaking oracle. 
 
 % a value-breaking oracle and an algorithm-breaking oracle.
-\subsubsection{Value-breaking Oracle}
+\subsubsection{Value-Breaking Oracle}
 The value-breaking oracle grants attackers the capability to break low-entropy keys, assuming the attacker can identify a computation result of a function in which a low-entropy key is the only input.
 The execution process of the value-breaking oracle is delineated as follows:
 \begin{figure}[h]
@@ -69,7 +69,7 @@ The execution process of the value-breaking oracle is delineated as follows:
 \noindent An attacker submits to the value-breaking oracle the output of a function that uses a low-entropy key as its sole input.
 The only thing the value-breaking oracle needs to do is to verify whether the key possesses a low entropy and return the key's value if it does.
 
-\subsubsection{Relationship-breaking Oracle}
+\subsubsection{Relationship-Breaking Oracle}
 The relationship-breaking oracle is designed to eliminate the attacker's known variables from the key's computation.
 The execution process of the relationship-breaking oracle is shown as follows:
 \begin{figure}[h]
@@ -157,7 +157,7 @@ The set $ df_\mathcal{O} $ is inductively defined by the following rules:
 % \end{flalign*}
 In these rules, the attacker is required to continuously supply all known terms to assist the oracle in inferring all visible derivation facts.
 
-\subsubsection{Value Breaking Oracle} 
+\subsubsection{Value-Breaking Oracle} 
 % oracle 破解密钥的最后一步，检查目标的key是否是低熵，且攻击者掌握其作为唯一变量的函数输出，如果是，oracle会返回该密钥的数值。这个规则如下：
 % 其中，k是攻击者的目标密钥，m是密钥的计算结果，$\text{\TFact{LowEntropy}}(k)$表示k是低熵密钥，在建模具体协议时被手动指定。
 In the concluding step of the oracle's key-breaking process, the oracle verifies whether the target key possesses a low entropy and whether the attacker has knowledge of a calculation result where the key is the only variable.

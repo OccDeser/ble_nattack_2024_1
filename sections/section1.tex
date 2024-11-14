@@ -64,7 +64,7 @@ To automatically analyze protocols tolerating low-entropy keys, we encounter thr
     Additional mechanisms are needed to describe a key's entropy in order to cover general brute-force attacks within the symbolic model.
     \item \textbf{Prerequisites for Brute-Force Attacks:}
     Brute-force attacks involve an attacker repeatedly attempting keys, relying on prior knowledge of the algorithm, its outputs, and other relevant inputs beside targeted keys~(e.g., salt values, initialization vectors). 
-    Accurately and generally capturing these prerequisite conditions within a symbolic model presents a significant challenge, as these conditions vary across different protocols and the specific keys targeted.
+    Accurately and generally capturing these prerequisite conditions within a symbolic model presents a significant challenge, as these conditions vary across different protocols and keys.
     \item \textbf{Enhanced Adversarial Capabilities:}
     In existing works, an attacker is typically limited to compromising specific keys. 
     However, an attacker can attempt to brute-force any key as long as its entropy doesn't exceed its computational capacity. 
@@ -83,6 +83,7 @@ Our approach can be used to identify security issues arising from low-entropy ke
 % 有什么效果，结论，发现。
 
 \noindent\textbf{Contributions.}
+Our primary contributions are as follows:
 \begin{itemize}[leftmargin=*]
     \item We relax the \emph{perfect encryption assumption} in the symbolic model. 
     Our methodology's adversary model surpasses the Dolev-Yao adversary by allowing the attacker to conduct brute-force attacks on all low-entropy keys.

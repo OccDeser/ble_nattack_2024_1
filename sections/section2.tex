@@ -8,7 +8,7 @@ In this section, we provide an overview of the concepts of entropy and brute-for
 Then we discuss some widely-known protocols and the low-entropy keys involved in them.
 We introduce \Tamarin{}\cite{meier2013tamarin}, one of the state-of-the-art symbolic tools for cryptographic protocol verification.
 
-\subsection{Entropy and brute force attacks}
+\subsection{Entropy and Brute-Force Attacks}
 
 Entropy was introduced by Shannon \cite{shannon1948communicationtheory}, to quantify the randomness and uncertainty within a system.
 In the domain of cryptography, the entropy of a key serves as a crucial metric for assessing its strength.
@@ -30,7 +30,7 @@ Since online attacks require continuous interaction with the target system, they
 In this paper, we primarily focus on the offline brute-force attacks.
 Throughout the subsequent sections, any reference to brute-force attacks, unless explicitly stated otherwise, pertains to offline brute-force attacks.
 
-\subsection{Protocols tolerating low-entropy keys}  
+\subsection{Protocols Tolerating Low-Entropy Keys}  
 Low-entropy keys applied in cryptographic protocols are not rare in practice. 
 Just as we mentioned before, the compatibility for old devices, the power consumption for low-power devices, and the user experience prevent protocols from guaranteeing their all keys possess high entropy.
 The use of low-entropy keys is a trade-off between security and practicality. 
@@ -46,7 +46,7 @@ The authenticator then distributes the Group Temporal Key~$GTK$, protecting broa
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.870780\columnwidth]{img/4-way-handshake} 
-    \caption{WPA2-PSK}
+    \caption{Overview of WPA2-PSK}
     \label{fig:4-way-handshake}
 \end{figure}
 
@@ -84,9 +84,9 @@ $PMKID$ is calculated as \autoref{eq:pmkid}.
     \end{split} 
 \end{equation}
 
-\subsubsection{Bluetooth Low Energy}
+\subsubsection{Bluetooth Low Energy~(BLE)}
 
-Bluetooth Low Energy~(BLE), introduced in 2010~\cite{bluetooth4}, is a protocol used for short-range wireless communication with low power consumption.
+This protocol, introduced in 2010~\cite{bluetooth4}, is used for short-range wireless communication with low power consumption.
 % It was introduced in Bluetooth Core Version 4.0\cite{bluetooth4}. 
 The BLE pairing protocol shares a long-term key between two BLE devices~(initiator and responder), to ensure the confidentiality and integrity of subsequent data transmissions.
 \autoref{fig:ble-pairing} shows the BLE pairing process, where the two devices negotiate a long-term key~$LTK$, which is used to derive a session key~$SK$ to establish an encrypted session for transmitting specific keys. 
@@ -95,7 +95,7 @@ The BLE pairing protocol shares a long-term key between two BLE devices~(initiat
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.912689\columnwidth]{img/ble-pairing} 
-    \caption{BLE pairing}
+    \caption{Overview of BLE pairing protocol}
     \label{fig:ble-pairing}
 \end{figure}
 
@@ -113,8 +113,8 @@ These values, along with the $LTK$, are used to calculate a session key~$SK$, as
 \end{equation}
 Ultimately, $SK$ is utilized by both devices to encrypt the session, thereby ensuring the secrecy and integrity of subsequent communications.
 
-\subsubsection{Bluetooth Classic}
-Bluetooth Classic~(BC), also referred to as Basic Rate/Enhanced Date Rate~(BR/EDR), is the initial Bluetooth standard, 
+\subsubsection{Bluetooth Classic~(BC)}
+Bluetooth Classic, also referred to as Basic Rate/Enhanced Date Rate~(BR/EDR), is the initial Bluetooth standard, 
 predominantly designed for applications requiring high data transfer rates such as audio streaming, file transfer, and serial communication.
 \autoref{fig:bc-session} illustrates the session establishment protocol between paired BC devices.
 Similarly, BC devices use the BC pairing protocol to negotiate a long-term link key~$LK$ between the central device and the peripheral device.
@@ -124,7 +124,7 @@ The central and peripheral devices then use the $ACO$ and $LK$ to derive the ses
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.902212\columnwidth]{img/bc-session} 
-    \caption{BC Session}
+    \caption{Overview of BC session establishment protocol}
     \label{fig:bc-session}
 \end{figure}
 
@@ -172,7 +172,7 @@ The successful decryption of this message by the central device signifies the es
 In \Tamarin{}, we use terms to represent messages, and the behaviors of protocols and adversaries are captured through multiset rewriting rules. 
 \Tamarin{} allows using logic formulas to specific security properties of protocols as well.
 
-\subsubsection{Term algebra}
+\subsubsection{Term Algebra}
 Messages in symbolic models are typically represented as terms in a term algebra. 
 A term is an expression built from symbols that encode the data exchanged in the protocol. 
 The symbolic model abstracts away the concrete cryptographic operations, representing them through algebraic terms that capture their logical structure.
@@ -186,7 +186,7 @@ We use equations to specify the algebraic properties of cryptographic functions.
 An equation is a pair of terms, denoted as~$t_1 = t_2$, which specifies that the~$t_1$ can be substituted by~$t_2$, for~$t_1,t_2 \in T_\Sigma(\mathcal{V})$.
 For instance, the equation~$\text{sdec}(\text{senc}(m, k), k) = m$ models the property that the decryption of an encryption with the same key yields the original message.
 
-\subsubsection{Multiset rewriting rules}
+\subsubsection{Multiset Rewriting Rules}
 Multiset rewriting systems are used to model protocols and adversaries in \Tamarin{}. 
 Every state of the transition system is a multiset of facts. 
 A \emph{fact} is defined as $F(t_1, \ldots, t_n)$, for $t_i \in T_\Sigma(\mathcal{V}, \mathcal{N})$.
@@ -203,7 +203,7 @@ Similarly, \TFact{Out} represents sending a message.
 \TFact{Fr} is used to model the generation of a random value.
 \TFact{In} and \TFact{Fr} can only be used on the \emph{left-hand side} of a multiset rewriting rule, while \TFact{Out} can only be used on the \emph{right-hand side}.
 
-\subsubsection{Logic formulas}
+\subsubsection{First-Order Logic Formulas}
 Trace properties are usually expressed as first-order logic formulas which are evaluated over the traces (states sequences) of the protocol.
 The trace properties in \Tamarin{} are defined as first-order logic formulas with time points using action facts.
 When it comes to cryptographic protocols, secrecy or authentication are usually included in the trace properties to be verified.

@@ -2,7 +2,7 @@
 
 \begin{document}
 
-\section{Low-entropy analysis methodology} \label{sec:4extension-and-compilation}
+\section{Low-Entropy Analysis Methodology} \label{sec:4extension-and-compilation}
 % In the preceding section, we detailed our methodology for modeling the attacker's brute-force capabilities using a set of general rules.
 % This section elucidates the application of our approach to protocol modeling.
 % To streamline the modeling of protocols, we extended TAMARIN's syntax by introducing new keywords that explicitly identify low-entropy keys requiring special attention within the protocol.
@@ -19,7 +19,8 @@
 % To facilitate automated model verification, our Tamarin-Compilation-Tool supports the definition of search boundaries for oracle rules tailored to different protocol scenarios.
 % This feature is crucial for preventing non-terminating analysis, ensuring that the verification process completes efficiently and reliably.
 
-In this section, we elucidate the application of our modeling approach to protocol analysis. 
+% In this section, we elucidate the application of our modeling approach to protocol analysis. 
+In this section we describe how to apply our oracle modeling approach to analyze low-entropy keys in protocols.
 To enhance the modeling of protocols using our methodology, we have devised an innovative rule syntax that serves as a superset of \Tamarin{}'s syntax. 
 This new syntax incorporates several new keywords designed to identify low-entropy keys that require special attention. 
 Additionally, to facilitate our new syntax, we have developed an automated low-entropy analysis tool, EntropyVerif. 
@@ -27,7 +28,7 @@ This tool integrates the key-breaking oracle discussed in the previous section, 
 To support the operation of the key-breaking oracle, our tool automatically analyzes the derivation relationships among variables within the model and generates message derivation facts. 
 Finally, to ensure the automation and efficiency of the verification process, we have introduced restrictions on the oracle rules and explained these restrictions.
 
-\subsection{ Rule syntax's extension } \label{sec:syntax-extension}
+\subsection{ Labeled Rule Syntax } \label{sec:syntax-extension}
 
 \Tamarin{} utilizes multiset rewriting rules to define both protocol execution and adversarial behavior.
 For instance, consider the following rule demo:
@@ -68,12 +69,12 @@ We successfully implemented Label Interpretation, Derivation Generation, and Ora
 \begin{figure}[t]
     \centering
     \includegraphics[width=\columnwidth]{img/tool}
-    \caption{Design of EntropyVerif}
+    \caption{Architecture of EntropyVerif}
     \label{fig:design-of-compilation-tool}
 \end{figure}
 
 
-\subsection{ Verification Details }
+\subsection{ Analysis Details }
 
 % All terms in the translated multiset rewriting rules remain consistent with their original form.
 To aid in the description, we define the following operations.
@@ -94,6 +95,7 @@ Based on the aforementioned notations, we will explain how our EntropyVerif veri
 
 % 标签翻译 给低熵term的标记，准确来说并不属于多重集重写系统，引入它是为了方便在现有的规则中标注出低熵term。对于规则$F_L \rightarrow F_R$，我们使用$T_{Low}$代表这条规则中被标记的低熵term，$T_{Low} \subseteq \varepsilon(\tau(F_L)) \circ \varepsilon(\tau(F_R))$。我们定义低熵标签被翻译的规则如下：
 % 其中，为了简洁，我们使用$\text{LE}(T_{Low})$来代表一个序列，that consists of fact $\text{\TFact{EntropyLow}}(t)$ for each term $t$ in $T_{Low}$.
+\noindent
 \textbf{Label Interpretation:} 
 Labels of low-entropy terms are not inherently part of the multiset rewriting system. 
 It is introduced to facilitate the identification of such terms within existing rules.
@@ -117,6 +119,7 @@ In the Label Interpretation, it will be translated into the following rule:
 % 派生生成 对于规则$[F_L] \rightarrow [F_R]$，$\tau(F_R)$代表了这条规则执行之后存在的term，而$\varepsilon(\tau(F_L))$则代表了这条规则所有的已知term。因此，我们可以使用$\tau(F_R) \setminus \varepsilon(\tau(F_L))$来表示规则执行所派生出的新term。我们定义添加消息派生事实之后的规则如下：
 % 这里我们使用$\text{\textsf{MD}}(T)$来表示消息派生事实序列，其中序列T的每个元素都是一个term的消息派生事实。对于单个term $t$，$\rho(t) \setminus c(\rho(t)) $ 包含了构建$t$所需的所有变量term。
 % 这里我们使用$\text{\textsf{MD}}(T)$来表示来表示使用序列T中每个term作为计算结果的消息派生事实。对于单个term $t$，$\rho(t) \setminus c(\rho(t)) $ 包含了构建$t$所需的所有变量term。那么$\text{\textsf{MD}}(T)$可以被定义为$\text{\TFact{MDerive}(\langle \rho(t) \setminus c(\rho(t)) \rangle, t)}$ for each term $t$ in $T$。
+\noindent
 \textbf{Derivation Generation:} 
 Given the rule $[F_L] \rightarrow [F_R]$, $\tau(F_R)$ denotes the terms present within the rule after executing, whereas $\varepsilon(\tau(F_L))$ represents all possibly accessible terms before the execution.
 
@@ -158,7 +161,7 @@ A message derivation fact will be added to the right-hand side of the rule as fo
 
 % 尽管上述的工作使得oracle具备了运行的条件，然而，为了验证工作的自动化和效率，避免系统进入无法终止的状态，我们需要为oracle的rule添加一些限制。前文我们使用$\rho(t) \setminus c(\rho(t))$来表示参与$t$ 构造的所有变量。通过考虑$\rho(t) \setminus c(\rho(t))$，我们可以给出一个定义：
 % 如果t可以被Oracle破解，那么oracle rule的执行次数一定小于等于$\rho(t) \setminus c(\rho(t))$的中的元素个数。
-
+\noindent
 \textbf{Oracle Complement:} 
 The Oracle Complement module adds the key-breaking oracle to protocol models and generates appropriate restrictions.
 Despite the aforementioned work enabling the oracle to operate, additional restrictions on the oracle's rules are necessary to ensure automation, and efficiency, and to prevent the system from entering a non-terminating state.
@@ -169,6 +172,7 @@ Since the number of elements in $\rho(t) \setminus c(\rho(t))$ is finite and eac
 if $t$ can be compromised by the oracle, the number of times the oracle rule can be executed must be less than the number of elements in $\rho(t) \setminus c(\rho(t))$.
 So in the Oracle Complement module, we reserved a verification option to dynamically restrict the number of times the oracle rule can be executed.
 
+\noindent
 \textbf{Verifier:} 
 In EntropyVerif, \Tamarin{} is employed as the Verifier to analyze the model generated by the aforementioned modules.
 The last module, Oracle Complement, outputs the generated model to the Verifier module in a format compatible with \Tamarin{}. 
