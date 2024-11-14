@@ -100,27 +100,24 @@ The BLE pairing protocol shares a long-term key between two BLE devices~(initiat
 \end{figure}
 
 % In the BLE pairing protocol, the device initiating the pairing is referred to as the Initiator, while the device responding to the pairing is referred to as the Responder.
-At the beginning of the BLE pairing process, both devices exchange their pairing features, including the IO capabilities and the key lengths.
-% ! Rewrite following sentence.
-They select the shorter of the two key lengths as the valid data length $KeySize$ for the subsequently negotiated $LTK$.
-During the authentication phase, both devices select an appropriate pairing method based on their IO capabilities.
+At the beginning of the BLE pairing process, two devices exchange their pairing features, including the IO capabilities and the key sizes.
+They choose the smaller of the two key sizes as the $KeySize$ of the $LTK$ negotiated thereafter.
+During the authentication phase, both devices select an appropriate pairing method in accordance with their IO capabilities.
 After this phase, they successfully negotiate an intermediate key $LTK'$.
 The $LTK'$ is truncated based on the previously negotiated $KeySize$, forming the $LTK$.
-% For brevity, we consider only the truncated portion of the $LTK$, ignoring the zero-padding portion.
 For example, if $KeySize$ is 16, $LTK'[1:16]$ will be the $LTK$, where $LTK'[1:16]$ denotes the first 16 bytes of $LTK'$.
-After the LTK is generated, the initiator and the responder exchange four random values, $IV_I$, $IV_R$, $SKD_I$ and $SKD_R$.
-These values, along with the LTK, are used to calculate the session key~$SK$, as shown in \autoref{eq:sk}.
+After the $LTK$ is generated, the initiator and the responder exchange four random values, $IV_I$, $IV_R$, $SKD_I$ and $SKD_R$.
+These values, along with the $LTK$, are used to calculate a session key~$SK$, as shown in \autoref{eq:sk}.
 \begin{equation} \label{eq:sk}
     SK = \text{AES-CCM}_{LTK}(IV_I\|IV_R, SKD_I\|SKD_R)
 \end{equation}
-Then, the two devices use the $SK$ to encrypt the session, safeguarding subsequent communication data.
+Ultimately, $SK$ is utilized by both devices to encrypt the session, thereby ensuring the secrecy and integrity of subsequent communications.
 
 \subsubsection{Bluetooth Classic}
 Bluetooth Classic~(BC), also referred to as Basic Rate/Enhanced Date Rate~(BR/EDR), is the initial Bluetooth standard, 
 predominantly designed for applications requiring high data transfer rates such as audio streaming, file transfer and serial communication.
 \autoref{fig:bc-session} illustrates the session establishment protocol between paired BC devices.
 Similarly, BC devices use the BC pairing protocol to negotiate a long-term link key~$LK$ between the central device and the peripheral device.
-After the pairing procedure, the session establishment protocol use the $LK$ to derive a session key~$SK$ to ensure the session security.
 After the pairing procedure, the session establishment protocol uses the $LK$ to perform authentication and generate an Authenticated Channel Offset~($ACO$). 
 The central and peripheral devices then use the $ACO$ and $LK$ to derive the session key~($SK$).
 
@@ -132,7 +129,7 @@ The central and peripheral devices then use the $ACO$ and $LK$ to derive the ses
 \end{figure}
 
 % Prior to the establishment of the session, both devices share~$LK$.
-In the very beginning of the session establishment procedure, the central device and peripheral build a link connection first. 
+At the very beginning of the session establishment procedure, the central device and peripheral build a link connection first. 
 In this phase, the devices exchange features supported by them, like $FeatSC$ which means whether the device supports \emph{Secure Connections}.
 After the link connection is established, the two devices start the authentication phase. 
 There are two methods to authenticate the devices:
@@ -170,7 +167,7 @@ The peripheral device then encrypts an \Tfunction{ACCEPT} message using $SK$ and
 The successful decryption of this message by the central device signifies the establishment of the encrypted session.
 
 \subsection{\Tamarin{}}
-The \Tamarin{} prover provides a powerful and expressive language for modeling protocols and properties, allowing researchers to analyze the security of their designs rigorously.
+\Tamarin{} provides a powerful and expressive language for modeling protocols and properties, allowing researchers to analyze the security of their designs rigorously.
 \Tamarin{} supports a wide range of cryptographic primitives and protocols, making it a versatile tool for formal analysis.
 In \Tamarin{}, we use terms to represent messages and the behaviors of protocols and adversaries are captured through multiset rewriting rules. 
 \Tamarin{} allows using logic formulas to specific security properties of protocols as well.
@@ -181,7 +178,7 @@ A term is an expression built from symbols that encode the data exchanged in the
 The symbolic model abstracts away the concrete cryptographic operations, representing them through algebraic terms that capture their logical structure.
 For example, the encryption of a message~$m$ with a key~$k$ can be represented as a term:~$\text{senc}(m, k)$. 
 Here,~$\text{senc}$ is a function symbol representing symmetric encryption operation.
-Formally, we assume a signature~$\Sigma$ defining the set of such function or operator symbols and their arity and a countably infinite set of variables~$\mathcal{V}$. 
+Formally, we assume a signature~$\Sigma$ defining the set of such function or operator symbols and their arities and a countably infinite set of variables~$\mathcal{V}$. 
 Similarly, a countable set~$\mathcal{N}$ is defined as the set of names (like keys, nonces, public identifiers etc.). 
 The set of terms is the closure of~$\mathcal{V}$ and~$\mathcal{N}$ under the operators in~$\Sigma$ and donated as~$T_\Sigma(\mathcal{V}, \mathcal{N})$.
 A \emph{message} is a special \emph{term} which doesn't contain any variables.
@@ -199,7 +196,12 @@ When all of the facts in~$F_l$ are present in the current state, the rule can be
 There are two sorts of facts: linear facts and persistent facts.
 Linear facts can only be consumed once after their creation, while persistent facts can be consumed an unlimited number of times.
 Action facts in~$F_a$ represent the label of the rule and can be used to restrict executions of the rule or to verify properties of the protocol.
-% ! 介绍TAMARIN 内置 的几个fact In Out Fr
+
+\TFact{In($\cdot$)}, \TFact{Out($\cdot$)}, \TFact{Fr($\cdot$)} are three built-in facts in \Tamarin{}. 
+\TFact{In($\cdot$)} is used to model a party receiving a message from the public channel.
+Similarly, \TFact{Out($\cdot$)} represents sending a message.
+\TFact{Fr($\cdot$)} is used to model the generation of a random value.
+\TFact{In($\cdot$)} and \TFact{Fr($\cdot$)} can only be used in the \emph{left-hand side} of a multiset rewriting rule, while \TFact{Out($\cdot$)} can only be used in the \emph{right-hand side}.
 
 \subsubsection{Logic formulas}
 Trace properties are usually expressed as first-order logic formulas which are evaluated over the traces (states sequences) of the protocol.

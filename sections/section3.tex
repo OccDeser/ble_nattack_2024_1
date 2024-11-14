@@ -2,69 +2,89 @@
 
 \begin{document}
 
-\section{Symbolic Modeling of Low Entropy} \label{sec:3symbolic-modeling}
+\section{Modeling of General Brute Force Attacks} \label{sec:3symbolic-modeling}
 
-In the previous section, we introduced the verification tool, \Tamarin{}, in detail.
-In this section, we will illustrate our methodology to model low entropy in protocols and general brute force behaviors.
+% In the previous section, we introduced the verification tool, \Tamarin{}, in detail.
+In this section, we will discuss the limitations of existing models and introduce our methodology for capturing brute force behaviors in a general manner.
 
-\subsection{Key Breaking Oracles}
+\subsection{Key-Breaking Oracles}
 
 \emph{Perfect encryption assumption} adopted by current symbolic models prevent adversaries from obtaining any information from the ciphertext.
-% However, researchers such as Cas{cite}, Min{cite}, and xxx{cite} have advanced the modeling of certain protocols by introducing a special rule.
-\cite{cremers2023aead,shi2023blesc,claverie2023tamarin} proposed their methods to loosen this assumption by introducing a special kind of rules.
+\cite{cremers2023aead,shi2023blesc,claverie2023tamarin} proposed their methods to loosen this assumption by introducing a set of special rules.
 These rules model the behaviors of attackers accessing an oracle, thereby allowing them to obtain certain keys.
-An example of such a rule is as follows:
+% An example of such a rule is as follows:
+Such a rule of \cite{claverie2023tamarin} is as follows:
 \begin{flalign*}
-    \text{\ruleNameText{Rul}} & \text{\ruleNameText{e Oracle}} :                                        &\\
-    \TFacts{ &\text{\TFact{In}}(senc(m, sk)), \text{\TFact{In}}(m)} \TEmpActFact{ } \\
-    \TFacts{ &\text{\TFact{Out}}(sk)}    
+    \text{\ruleNameText{Rul}} & \text{\ruleNameText{e Oracle}} :                    &\\
+    \TFacts{ &\text{\TFact{LowEntropyf4}}(pk1, pk2, n, s), \\
+    &\text{\TFact{In}}(pk1), \text{\TFact{In}}(pk2), \text{\TFact{In}}(n), \text{\TFact{In}}(f4(pk1, pk2, n, s))} \TEmpActFact{ } \\
+    \TFacts{ &\text{\TFact{Out}}(s)}    
 \end{flalign*}
-Employing these rules can enable attackers to compromise specific keys.
-% Nonetheless, this approach is not general for low-entropy keys, as it necessitates a manual evaluation to identify which low-entropy key is susceptible to brute force attacks.
-Although such methods are not general or automated due to manual evaluation to identify which key is susceptible to be compromised, they inspire us to design a general and automated oracle to model the process of brute force attacks.
+In this rule, the fact \TFact{LowEntropyf4} indicates that the last input $s$ of the function $f4$ possesses a low entropy.
+Attackers can obtain the value of $s$ by providing all other inputs of $f4$ and its output.
+This rule is highly intuitive and checks the three essential prerequisites we have summarized for a brute-force attack: knowledge of the function, knowledge of all inputs except the key, and knowledge of the computation result. 
+It can effectively capture brute-force attacks targeting the $f4$ function.
 
-In a similar vein, we assume the attacker has access to a key-breaking oracle, which serves to model the attacker's exhaustive search capabilities.
-The oracle is shown as follows:
+However, this is not a general modeling method.
+The design of this rule implicitly relies on a critical hypothesis: an attacker is capable of, and restricted to, exploiting the function $f4$ to execute a brute force attack on the low-entropy variable $s$.
+This hypothesis is confirmed manually, rather than automatically.
+This presents a challenge, as the inability to ascertain which function an attacker might utilize to brute force the key renders the application of such a rule infeasible.
+
+To generally capture all brute force attacks, we designed a key-breaking oracle.
+This oracle accepts any function and is capable of returning the value of the low-entropy key, provided that the attacker can furnish the function output along with the values of all other relevant variables, as shown below:
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.7755\columnwidth]{img/general-oracle} 
 \end{figure}
 
-\noindent This oracle will give the attacker a low-entropy key's value if the attacker can provide a computation result of it and all other related variables' value.
-But to model this oracle, we are facing several challenges.
-First, as a general oracle, the first input should be able to match all kinds of calculation results, which means it only can be a \emph{variable}. 
-Therefore, the oracle will not be able to determine whether other inputs are necessary variables to calculate this result.
-Second, since there is no specific structure for the calculation result, the oracle cannot determine the number of other variables needed to calculate it, that is, the number of \TFact{In} facts on the left side of the rule is uncertain. \Tamarin{} obviously does not support such a rule.
-Our methodology introduces two more fundamental oracles to solve these problems: a value-breaking oracle and a relationship-breaking oracle.
+% 为了建模这个oracle，我们首先要克服两个困难：
+% 函数的不确定性：作为一个通用的oracle，需要能够接收任意的函数输出。在符号模型中，函数符号的匹配都是精确的，不存在模糊匹配的情况。
+% 其他参数的不确定性：由于可能收到任意的函数输出，oracle需要根据收到的函数动态地判断还需要哪些其他的输入。
+% To model this oracle, two challenges must be overcome:
+% \begin{enumerate}
+%     \item \textbf{Function Uncertainty:} As a general oracle, it needs to accept the output of any function. In symbolic models, the matching of function symbols is exact, with no fuzzy matching.
+%     \item \textbf{Input Uncertainty:} Since any function output may be received, the oracle must dynamically determine which other inputs are required based on the received function.
+% \end{enumerate}
+
+\noindent
+To model this oracle, three are two challenges.
+\begin{enumerate}
+    \item \textbf{Uncertainty of the received function:} As a general oracle, it should accept any function. 
+    But in symbolic models, function symbol matching is precise, prohibiting using a single function symbol to generally match all functions.
+    \item \textbf{Uncertainty of additional inputs:} Given the uncertainty regarding which function will be received, the oracle must dynamically accommodate additional inputs contingent upon the specific function it encounters.
+\end{enumerate}
+To address the first challenge, we introduce the concept of message derivation relationships as a substitute for specific function symbols. 
+This concept will be explained in detail in \autoref{sec:oracle-modeling}.
+To overcome the second, we introduce two more fundamental oracles: the value-breaking oracle and the relationship-breaking oracle. 
 
 % a value-breaking oracle and an algorithm-breaking oracle.
 \subsubsection{Value-breaking Oracle}
-The value-breaking oracle grants attackers the capability to break low-entropy keys, assuming the attacker can identify a computation result in which the low-entropy key is the only variable.
-The procedure for this oracle is illustrated  as follows:
+The value-breaking oracle grants attackers the capability to break low-entropy keys, assuming the attacker can identify a computation result of a function in which a low-entropy key is the only input.
+The execution process of the value-breaking oracle is delineated as follows:
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.4653\columnwidth]{img/oracle1} 
 \end{figure}
 
-\noindent Attackers can submit the computation result, where the key is the sole variable, to the value-breaking oracle.
-The only thing the oracle needs to do is to verify whether the key possesses low entropy and return the key's value if it does.
-
+\noindent An attacker submits to the value-breaking oracle the output of a function that uses a low-entropy key as its sole input.
+The only thing the value-breaking oracle needs to do is to verify whether the key possesses a low entropy and return the key's value if it does.
 
 \subsubsection{Relationship-breaking Oracle}
 The relationship-breaking oracle is designed to eliminate the attacker's known variables from the key's computation.
-The execution process of the oracle is shown as follows:
-\begin{figure}[htbp]
+The execution process of the relationship-breaking oracle is shown as follows:
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.99\columnwidth]{img/oracle2} 
 \end{figure}
 
-\noindent  
-Given that an attacker can provide a function $f$ that incorporates a key $k$ and another input variable $x_i$, the oracle can identify another function $f'$ that excludes $x_i$.
-Attackers can access this oracle multiple times until all input variables are eliminated, except for the target key.
-When an attacker utilizes this oracle to identify a function that employs a low-entropy key as the sole variable and acquires the corresponding computation result, the attacker can subsequently utilize the value-breaking oracle to obtain the value of the low-entropy key.
-Similarly, due to the uncertainty of the input function, it is infeasible to directly model this oracle.
-As a result, we introduce a \emph{fact} to represent the relationship between the calculation result and input variables.
-In the subsequent subsection, we will illustrate the method to model the relationship-breaking oracle through a set of message derivation rules.
+% \noindent Given that an attacker can provide a function $f$ that incorporates a key $k$ and another input variable $x_i$, the oracle can identify another function $f'$ that excludes $x_i$.
+% 给定一个函数f，攻击者获得了一个函数输出f(X, k), 其中k是目标密钥，X是除了k之外的所有其他变量的集合。
+% 如果攻击者得知X中的某个变量x_i的值，和f(X, k)一起提供给RO，RO会找到一个函数f', 使得f'(k) = f(X, k)，并返回.
+Given a function $f$ where an attacker acquires the function output $f(X, k)$, in which $k$ represents the target key and $X$ denotes the set of all other input variables excluding $k$. 
+If the attacker knows the value of $x_i$, $x_i \in X$ and submits it together with $f(X, k)$ to the relationship-breaking oracle, the oracle will return a new function $f'$ where $f'(X \backslash \{x_i\}, k) = f(X, k)$.
+Attackers can access this oracle multiple times until all other input variables are eliminated, except for the target key.
+They then utilize the value-breaking oracle to obtain the value of the low-entropy key.
+
 
 \subsection{Oracle Modeling} \label{sec:oracle-modeling}
 
@@ -88,44 +108,6 @@ Once a derivation relationship between two messages is identified, the oracle ca
 If the oracle needs to identify a function where a certain key $k$ is the sole argument, it suffices to find the fact $\text{\TFact{MDerive}}(k, m)$,
 where $m$ is a message derived from $k$.
 
-% 消息派生规则 给定oracle $O$和敌手$A$，$df_O$代表oracle拥有的所有消息派生关系事实的集合，$dm_A$代表敌手所有可推断消息的集合。 在敌手$A$ 开始访问 $O$ 时，$O$ 会获取协议当前执行过程中所有的消息派生事实$\mathcal{P}(MessageDeriveFact)$，初始化$df_O$。$df_O$被如下规则被inductively定义：
-% \subsubsection{Message Derivation Rule}  Consider an oracle $ \mathcal{O} $ and an adversary $ \mathcal{A} $.
-
-% \[
-% \infer
-%     {\text{\TFact{MDerive}}(m_1, m_2) \in df_\mathcal{O}}
-%     {\text{\TFact{MDerive}}(m_1, m_2) \in df_\mathcal{P}}
-% \]
-
-% \[
-% \infer
-%     {\text{\TFact{MDerive}}(m_1, m_3) \in df_\mathcal{O}}
-%     {\begin{array}{c} 
-%         \text{\TFact{MDerive}}(m_1, m_2) \in df_\mathcal{O} \\ 
-%         \text{\TFact{MDerive}}(m_2, m_3) \in df_\mathcal{O}
-%     \end{array}}
-% \]
-
-% \[
-% \infer
-%     {\text{\TFact{MDerive}}(m_2, m_3) \in df_\mathcal{O}}
-%     {\begin{array}{c} 
-%         m_1 \in dm_\mathcal{A} \\ 
-%         \text{\TFact{MDerive}}(\langle m_1, m_2 \rangle, m_3) \in df_\mathcal{O}
-%     \end{array}}
-% \]
-
-% \[
-% \infer
-%     {\text{\TFact{MDerive}}(m_1, m_3) \in df_\mathcal{O}}
-%     {\begin{array}{c} 
-%         m_2 \in dm_\mathcal{A} \\ 
-%         \text{\TFact{MDerive}}(\langle m_1, m_2 \rangle, m_3) \in df_\mathcal{O}
-%     \end{array}}
-% \]
-
-% 消息派生规则 在攻击者开始访问oracle时，oracle 会获取协议当前执行过程中的所有派生事实，并使用如下的规则推断出所有对攻击者而言可计算的消息派生事实：
-% 其中，攻击者需要不断提供所 有已知的term，以辅助oracle推断出所有可见的派生事实。
 \subsubsection{Message Derivation Rule}  
 Upon the initiation of the attacker's access to the oracle, the oracle acquires all derivation facts present in the current execution process of the protocol.
 It then infers all existing derivation facts that are computable from the attacker's perspective.
@@ -159,20 +141,20 @@ The set $ df_\mathcal{O} $ is inductively defined by the following rules:
         \end{array}}
 \end{align*}
 
-These rules, if written in the format of multiset rewriting rules, would look like this:
-\begin{flalign*}
-    \text{\ruleNameText{Rul}} & \text{\ruleNameText{e OracleMsgDerive1}} :                               &\\
-    \TFacts{ &\text{\TFact{MDerive}}(m_1, m_2), \text{\TFact{MDerive}}(m_2, m_3) } \TEmpActFact \\
-    \TFacts{ &\text{\TFact{MDerive}}(m_1, m_3) }        
-    \\
-    \text{\ruleNameText{Rul}} & \text{\ruleNameText{e OracleMsgDerive2}} :                               &\\
-    \TFacts{ &\text{\TFact{MDerive}}(\langle m_1, m_2 \rangle, m_ 3), \text{\TFact{In}}(m_1) } \TEmpActFact \\
-    \TFacts{ &\text{\TFact{MDerive}}(m_2, m_3) }
-    \\
-    \text{\ruleNameText{Rul}} & \text{\ruleNameText{e OracleMsgDerive3}} :                               &\\
-    \TFacts{ &\text{\TFact{MDerive}}(\langle m_1, m_2 \rangle, m_3), \text{\TFact{In}}(m_2) } \TEmpActFact \\
-    \TFacts{ &\text{\TFact{MDerive}}(m_1, m_3) }
-\end{flalign*}
+% These rules, if written in the format of multiset rewriting rules, would look like this:
+% \begin{flalign*}
+%     \text{\ruleNameText{Rul}} & \text{\ruleNameText{e OracleMsgDerive1}} :                               &\\
+%     \TFacts{ &\text{\TFact{MDerive}}(m_1, m_2), \text{\TFact{MDerive}}(m_2, m_3) } \TEmpActFact \\
+%     \TFacts{ &\text{\TFact{MDerive}}(m_1, m_3) }        
+%     \\
+%     \text{\ruleNameText{Rul}} & \text{\ruleNameText{e OracleMsgDerive2}} :                               &\\
+%     \TFacts{ &\text{\TFact{MDerive}}(\langle m_1, m_2 \rangle, m_ 3), \text{\TFact{In}}(m_1) } \TEmpActFact \\
+%     \TFacts{ &\text{\TFact{MDerive}}(m_2, m_3) }
+%     \\
+%     \text{\ruleNameText{Rul}} & \text{\ruleNameText{e OracleMsgDerive3}} :                               &\\
+%     \TFacts{ &\text{\TFact{MDerive}}(\langle m_1, m_2 \rangle, m_3), \text{\TFact{In}}(m_2) } \TEmpActFact \\
+%     \TFacts{ &\text{\TFact{MDerive}}(m_1, m_3) }
+% \end{flalign*}
 In these rules, the attacker is required to continuously supply all known terms to assist the oracle in inferring all visible derivation facts.
 
 \subsubsection{Value Breaking Oracle} 

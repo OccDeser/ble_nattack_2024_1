@@ -2,7 +2,7 @@
 
 \begin{document}
 
-\section{Syntax Extension and Compilation} \label{sec:4extension-and-compilation}
+\section{Low-entropy analysis methodology} \label{sec:4extension-and-compilation}
 % In the preceding section, we detailed our methodology for modeling the attacker's brute-force capabilities using a set of general rules.
 % This section elucidates the application of our approach to protocol modeling.
 % To streamline the modeling of protocols, we extended TAMARIN's syntax by introducing new keywords that explicitly identify low-entropy keys requiring special attention within the protocol.
@@ -10,35 +10,24 @@
 % We also developed a compilation tool which translates the extended TAMARIN's syntax into a TAMARIN recognizable model.
 % Besides this, our tool will automatically add message derivation facts by analyzing the derivation relationships between variables in the model. 
 
-In this section, we explain how to apply our approach to protocol modeling.
-To facilitate the modeling of protocols, we have extended \Tamarin{}'s syntax by introducing new keywords that explicitly identify low-entropy keys, which require special attention within the protocol.
-% 
-Additionally, we developed a compilation tool that translates the extended \Tamarin{} syntax into a model recognizable by \Tamarin{}.
-Furthermore, our tool automatically adds message derivation facts by analyzing the derivation relationships between variables in the model.
+% In this section, we explain how to apply our approach to protocol modeling.
+% To facilitate the modeling of protocols, we have extended \Tamarin{}'s syntax by introducing new keywords that explicitly identify low-entropy keys, which require special attention within the protocol.
+% % 
+% Additionally, we developed a compilation tool that translates the extended \Tamarin{} syntax into a model recognizable by \Tamarin{}.
+% Furthermore, our tool automatically adds message derivation facts by analyzing the derivation relationships between variables in the model.
 
 % To facilitate automated model verification, our Tamarin-Compilation-Tool supports the definition of search boundaries for oracle rules tailored to different protocol scenarios.
 % This feature is crucial for preventing non-terminating analysis, ensuring that the verification process completes efficiently and reliably.
 
-\subsection{ \Tamarin{} Syntax Extension }
+In this section, we elucidate the application of our modeling approach to protocol analysis. 
+To enhance the modeling of protocols using our methodology, we have devised an innovative rule syntax that serves as a superset of \Tamarin{}'s syntax. 
+This new syntax incorporates several new keywords designed to identify low-entropy keys that require special attention. 
+Additionally, to facilitate our new syntax, we have developed an automated low-entropy analysis tool, EntropyVerif. 
+This tool integrates the key-breaking oracle discussed in the previous section, enabling attackers to generally compromise low-entropy keys, thus providing a comprehensive security analysis of protocols tolerant to such keys. 
+To support the operation of the key-breaking oracle, our tool automatically analyzes the derivation relationships among variables within the model and generates message derivation facts. 
+Finally, to ensure the automation and efficiency of the verification process, we have introduced restrictions on the oracle rules and provided an explanation for these measures.
 
-\begin{figure}[htb]
-    \centering
-    \includegraphics[width=\columnwidth]{img/tamarin-syntax} 
-    \caption{Tamarin Rule Syntax}
-    \label{fig:tamarin-syntax}
-\end{figure}
-
-% Tamarin 模型通常被定义在spthy文件中（.spthy 代表 security protocol theory）。图一展示了security protocol theory的语法的核心子集，我们的工具专门设计用于解析和分析其中的rule部分。 Tamarin 使用多多重集重写规则来规定协议的执行和敌手的行为。
-The models \Tamarin{} supported are typically defined within ``spthy'' files (spthy, representing security protocol theory).
-\autoref{fig:tamarin-syntax} presents the core subset of the security protocol theory syntax.
-Our tool is specifically designed to parse and analyze the rule part of these models.
-
-% \begin{figure}[hbtp]
-%     \centering
-%     \includegraphics[width=\columnwidth]{img/rule} 
-%     \caption{Rule Demo}
-%     \label{fig:rule-demo}
-% \end{figure}
+\subsection{ Rule syntax's extension } \label{sec:syntax-extension}
 
 \Tamarin{} utilizes multiset rewriting rules to define both protocol execution and adversarial behavior.
 For instance, consider the following rule demo:
@@ -47,45 +36,42 @@ For instance, consider the following rule demo:
     \TLetS & \text{\Tterm{ciphertext = senc("hello", key)}}   \\  
     \TInS & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFact{} \TFacts{ \text{\TFactTerm{Out}{ciphertext}} }
 \end{flalign*}
-A \Tamarin{} multiset rewriting rule comprises declarations of the rule's left-hand side, action facts that label the state transition represented by the rule, and the right-hand side of the rule.
-\Tamarin{} also supports local macro definitions in a rule which are defined within the $let \ldots in$ area called as the let-block, where each line specifies a substitution.
-In the above demo, \Tterm{ciphertext} in this rule will be replaced by \Tterm{senc("hello", key)} during execution.
+This rule delineates a simple behavior for sending encrypted data: an entity encrypts the message "hello" using a shared $key$ and sends the ciphertext to a public network.
+\Tamarin{} supports local macro definitions in a rule which are defined within the \TFact{let}$ \ldots $\TFact{in} area called as the let-block, where each line specifies a substitution.
+In the above demo, \Tterm{ciphertext} in this rule will be replaced by \Tterm{senc("hello", key)} when the rule is executed.
+
+To apply our methodology, we introduced a new operator ``:='' and a keyword ``\verb|`L`|''.
+These syntax elements facilitate the identification and labelling of low-entropy variables.
+In the extended syntax, as depicted in the following rule, the low-entropy label for the variable is defined within the let block.
 \begin{flalign*}
     \text{\Tterm{Rule S}}   & \text{\Tterm{endHello}} :                         & \\
     \TLetS                  & \text{\Tterm{key := `L`}}                         \\  
                             & \text{\Tterm{ciphertext = senc("hello", key)}}    \\  
     \TInS                   & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFact{} \TFacts{ \text{ \TFactTerm{Out}{ciphertext}} }
 \end{flalign*}
-To apply our methodology, we introduced a new operator ``:='' and a keyword ``\verb|`L`|''.
-These syntax elements streamline the marking of low-entropy variables.
-In the extended syntax, as depicted in the above rule, the low-entropy annotation for the variable~(line 3) is defined within the let block.
-Here, the operator ``:='' replaces ``='', and the label ``\verb|`L`|'' on the right signifies that the variable $key$ on the left possesses a low entropy.
-This annotation will be translated by our compilation tool into a fact $\text{\TFact{EntropyLow}}(key)$ and added to the right-hand side of the rule.
+Here, the label ``\verb|`L`|'' on the right size of ``:='' signifies that the variable $key$ on the left possesses a low entropy.
+This label will be recognized by EntropyVerif and translated into a fact $\text{\TFact{EntropyLow}}(key)$ added to the right-hand side of the rule.
 
-\subsection{ Design of the Compilation Tool}
-Our compilation tool is developed to create formal models that are compatible with \Tamarin{}.
-To implement the model specified in \autoref{sec:oracle-modeling}, it is necessary to supply the \TFact{EntropyLow} and \TFact{MDerive} facts.
-These facts are generated by our compilation tool.
-As shown in \autoref{fig:design-of-compilation-tool}, our compilation tool contains 4 modules:
+\subsection{ Design of EntropyVerif }
+EntropyVerif is a protocol analysis tool that supports low-entropy labeled protocol models and integrates an adversarial model with the capability to brute-force low-entropy keys.
+As shown in \autoref{fig:design-of-compilation-tool}, EntropyVerif contains 4 modules:
+
+\textbf{Label Interpretation:} This module is responsible for identifying and parsing the low-entropy labels of terms, subsequently generating the \TFact{EntropyLow} facts.
+
+\textbf{Derivation Generation:} this module analyzes the message derivation relationships between terms in symbolic models and generates \TFact{MDerive} facts.
+
+\textbf{Oracle Complement:} this module adds the key-breaking oracle to the model and incorporates reasonable restrictions to prevent automated verification from entering a non-terminating state.
+
+\textbf{Model Checker:} This module conducts a formal analysis of the model generated by preceding modules. 
+
+We successfully implemented Label Interpretation, Derivation Generation, and Oracle Complement modules, while employing \Tamarin{} as Model Checker in our study.
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\columnwidth]{img/compilation-tool-design}
-    \caption{Design of Our Compilation Tool}
+    \includegraphics[width=\columnwidth]{img/tool}
+    \caption{Design of EntropyVerif}
     \label{fig:design-of-compilation-tool}
 \end{figure}
-
-% Model parsing: 给定一个低熵标记的模型代码作为输入，这个模块复杂将模型代码解析为结构化的数据，方便后续模块处理。
-\textbf{Model parsing:} given the code of a low-entropy annotated model as input, this module parses the model code into structured data, facilitating subsequent processing by other modules.
-
-% Label interpretation:Tamarin-Compilation-Tool 然后根据模型中的低熵表情转译为对应变量的\TFact{EntropyLow} fact，添加到模型中。
-\textbf{Label interpretation:} the Tamarin-Compilation-Tool subsequently converts low entropy annotations into corresponding \TFact{EntropyLow} facts for the relevant variables, integrating them into the model.
-
-% Derivation generation: 这个模块负责分析rule中的消息生成关系，并生成消息派生fact。
-\textbf{Derivation generation:} this module analyzes the message derivation relationships within the rules and generates \TFact{MDerive} facts.
-
-% Oracle complement: 这个模块负责将密钥破解Oracle添加到模型中，并为其添加一些合理的restrictions，以确保模型的自动化验证不会陷入无法终止的状态。
-\textbf{Oracle complement:}  the module adds the key-breaking oracle to the model and incorporates reasonable restrictions to prevent the model's automated verification from entering a non-terminating state.
 
 
 \subsection{ Translation Details }
@@ -105,11 +91,11 @@ For a term sequence $T$ composed of $\llbracket t_1, t_2, \ldots, t_n \rrbracket
 $c(T)$ outputs a sequence of all terms only composed of \emph{constants} in $T$.
 
 % 在上述的notations的基础之上，我们将提出如何翻译一个低熵标记的多重集重写系统。
-Based on the aforementioned notations, we propose to detail the translation of a low-entropy labelled multiset rewriting system.
+Based on the aforementioned notations, we propose to detail the translation of a low-entropy labeled multiset rewriting system.
 
 % 标签翻译 给低熵term的标记，准确来说并不属于多重集重写系统，引入它是为了方便在现有的规则中标注出低熵term。对于规则$F_L \Longrightarrow F_R$，我们使用$T_{Low}$代表这条规则中被标记的低熵term，$T_{Low} \subseteq \varepsilon(\tau(F_L)) \circ \varepsilon(\tau(F_R))$。我们定义低熵标签被翻译的规则如下：
 % 其中，为了简洁，我们使用$\text{LE}(T_{Low})$来代表一个序列，that consists of fact $\text{\TFact{EntropyLow}}(t)$ for each term $t$ in $T_{Low}$.
-\textbf{Label interpretation:} 
+\textbf{Label Interpretation:} 
 Labels of low-entropy terms are not inherently part of the multiset rewriting system; it is introduced to facilitate the identification of such terms within existing rules.
 For a given rule $[F_L] \Longrightarrow [F_R]$, $T_{Low}$ denotes the set of low-entropy terms labeled in the rule, where $T_{Low} \subseteq \varepsilon(\tau(F_L)) \circ \varepsilon(\tau(F_R))$.
 The translated version of such rule with low-entropy labels is shown as follows:
@@ -118,10 +104,20 @@ The translated version of such rule with low-entropy labels is shown as follows:
 \]
 where, for brevity, we use $\text{\textsf{LE}}(T_{Low})$ to represent the sequence $\llbracket \text{\TFact{EntropyLow}}(t_i) \rrbracket$ for each term $t_i$ in $T_{Low}$.
 
+% 我们以\autoref{sec:syntax-extension}中低熵标记的规则为例，该规则中在Label Interpretation模块中会被翻译为如下的rule：
+We take the rule labeled with low entropy in \autoref{sec:syntax-extension} as an example. 
+In the Label Interpretation, it will be translated into the following rule:
+\begin{flalign*}
+    \text{\Tterm{Rule S}}   & \text{\Tterm{endHello}} :                         & \\
+    \TLetS                  & \text{\Tterm{ciphertext = senc("hello", key)}}    \\  
+    \TInS                   & \TFacts{ \text{\TFactTerm{Share}{key}} }          \\
+    \TEmpActFact{}          & \TFacts{ \text{ \TFactTerm{Out}{ciphertext} }, \text{ \TFactTerm{EntropyLow}{key} }  }
+\end{flalign*}
+
 % 派生生成 对于规则$[F_L] \Longrightarrow [F_R]$，$\tau(F_R)$代表了这条规则执行之后存在的term，而$\varepsilon(\tau(F_L))$则代表了这条规则所有的已知term。因此，我们可以使用$\tau(F_R) \setminus \varepsilon(\tau(F_L))$来表示规则执行所派生出的新term。我们定义添加消息派生事实之后的规则如下：
 % 这里我们使用$\text{\textsf{MD}}(T)$来表示消息派生事实序列，其中序列T的每个元素都是一个term的消息派生事实。对于单个term $t$，$\rho(t) \setminus c(\rho(t)) $ 包含了构建$t$所需的所有变量term。
 % 这里我们使用$\text{\textsf{MD}}(T)$来表示来表示使用序列T中每个term作为计算结果的消息派生事实。对于单个term $t$，$\rho(t) \setminus c(\rho(t)) $ 包含了构建$t$所需的所有变量term。那么$\text{\textsf{MD}}(T)$可以被定义为$\text{\TFact{MDerive}(\langle \rho(t) \setminus c(\rho(t)) \rangle, t)}$ for each term $t$ in $T$。
-\textbf{Derivation generation:} 
+\textbf{Derivation Generation:} 
 Given the rule $[F_L] \Longrightarrow [F_R]$, $\tau(F_R)$ denotes the terms present within the rule after executing, whereas $\varepsilon(\tau(F_L))$ represents all possibly accessible terms before the execution.
 
 Thus, $\tau(F_R) \setminus \varepsilon(\tau(F_L))$ can be used to represent the new terms derived during the execution of the rule.
@@ -134,6 +130,17 @@ For an individual term $t$, $\rho(t) \setminus c(\rho(t) $ contains all variable
 Hence $\text{\textsf{MD}}(T)$ can be defined as 
 % $\text{\TFact{MDerive}}(\langle \rho(t) \setminus c(\rho(t)) \rangle, t)$ for each term $t$ in $T$.
 $\llbracket \text{\TFact{MDerive}}(\langle \rho(t_i) \setminus c(\rho(t_i)) \rangle, t_i) \rrbracket$, where $t_i \in T$.
+
+We take the rule in \autoref{sec:syntax-extension} as an example as well. 
+A message derivation fact will be added to the right-hand side of the rule as follows:
+\begin{flalign*}
+    \text{\Tterm{Rule S}}   & \text{\Tterm{endHello}} :                         & \\
+    \TLetS                  & \text{\Tterm{ciphertext = senc("hello", key)}}    \\  
+    \TInS                   & \TFacts{ \text{\TFactTerm{Share}{key}} }          \\
+    \TEmpActFact{}          & \TFacts{ \text{ \TFactTerm{Out}{ciphertext} }, \text{ \TFactTerm{EntropyLow}{key} }, \\
+                            & \hspace{5em} \text{ \TFactTerm{MDerive}{key, ciphertext} }}
+\end{flalign*}
+
 
 % \subsection{An illustrative example}
 
