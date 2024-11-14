@@ -45,9 +45,9 @@ These syntax elements facilitate the identification and labelling of low-entropy
 In the extended syntax, as depicted in the following rule, the low-entropy label for the variable is defined within the let block.
 \begin{flalign*}
     \text{\Tterm{Rule S}}   & \text{\Tterm{endHello}} :                         & \\
-    \TLetS                  & \text{\Tterm{key := `L`}}                         \\  
-                            & \text{\Tterm{ciphertext = senc("hello", key)}}    \\  
-    \TInS                   & \TFacts{ \text{\TFactTerm{Share}{key}} }  \TEmpActFact{} \TFacts{ \text{ \TFactTerm{Out}{ciphertext}} }
+    \TLetS                  & \text{\Tterm{$key$ := `L`}}                         \\  
+                            & \text{\Tterm{$ciphertext$ = senc("hello", $key$)}}    \\  
+    \TInS                   & \TFacts{ \text{\TFactTerm{Share}{$key$}} }  \TEmpActFact{} \TFacts{ \text{ \TFactTerm{Out}{$ciphertext$}} }
 \end{flalign*}
 Here, the label ``\verb|`L`|'' on the right size of ``:='' signifies that the variable $key$ on the left possesses a low entropy.
 This label will be recognized by EntropyVerif and translated into a fact $\text{\TFact{EntropyLow}}(key)$ added to the right-hand side of the rule.
@@ -109,9 +109,9 @@ We take the rule labeled with low entropy in \autoref{sec:syntax-extension} as a
 In the Label Interpretation, it will be translated into the following rule:
 \begin{flalign*}
     \text{\Tterm{Rule S}}   & \text{\Tterm{endHello}} :                         & \\
-    \TLetS                  & \text{\Tterm{ciphertext = senc("hello", key)}}    \\  
-    \TInS                   & \TFacts{ \text{\TFactTerm{Share}{key}} }          \\
-    \TEmpActFact{}          & \TFacts{ \text{ \TFactTerm{Out}{ciphertext} }, \text{ \TFactTerm{EntropyLow}{key} }  }
+    \TLetS                  & \text{\Tterm{$ciphertext$ = senc("hello", $key$)}}    \\  
+    \TInS                   & \TFacts{ \text{\TFactTerm{Share}{$key$}} }          \\
+    \TEmpActFact{} \hspace{0.2em}& \TFacts{ \text{ \TFactTerm{Out}{$ciphertext$} }, \text{ \TFactTerm{EntropyLow}{$key$} }  }
 \end{flalign*}
 
 % 派生生成 对于规则$[F_L] \Longrightarrow [F_R]$，$\tau(F_R)$代表了这条规则执行之后存在的term，而$\varepsilon(\tau(F_L))$则代表了这条规则所有的已知term。因此，我们可以使用$\tau(F_R) \setminus \varepsilon(\tau(F_L))$来表示规则执行所派生出的新term。我们定义添加消息派生事实之后的规则如下：
@@ -135,10 +135,10 @@ We take the rule in \autoref{sec:syntax-extension} as an example as well.
 A message derivation fact will be added to the right-hand side of the rule as follows:
 \begin{flalign*}
     \text{\Tterm{Rule S}}   & \text{\Tterm{endHello}} :                         & \\
-    \TLetS                  & \text{\Tterm{ciphertext = senc("hello", key)}}    \\  
-    \TInS                   & \TFacts{ \text{\TFactTerm{Share}{key}} }          \\
-    \TEmpActFact{}          & \TFacts{ \text{ \TFactTerm{Out}{ciphertext} }, \text{ \TFactTerm{EntropyLow}{key} }, \\
-                            & \hspace{5em} \text{ \TFactTerm{MDerive}{key, ciphertext} }}
+    \TLetS                  & \text{\Tterm{$ciphertext$ = senc("hello", $key$)}}    \\  
+    \TInS                   & \TFacts{ \text{\TFactTerm{Share}{$key$}} }          \\
+    \TEmpActFact{} \hspace{0.2em}& \TFacts{ \text{ \TFactTerm{Out}{$ciphertext$} }, \text{ \TFactTerm{EntropyLow}{$key$} }, \\
+                            & \hspace{5em} \text{ \TFactTerm{MDerive}{$key$, $ciphertext$} }}
 \end{flalign*}
 
 

@@ -27,7 +27,7 @@ This attack is known as the PMKID attack\cite{pmkidattack} and is shown in \auto
 
 % 此外在WPA2-PSK中，PMK(PSK)仅需要用户选择的passphrase便可以计算，因此PMK的熵取决于Passphrase的熵。我们假设存在一个缺乏安全意识的用户，总是选择短且简单的passphrase，这样就导致了PMK的熵较低，我们在模型中添加了这一假设，将PMK标记为低熵的密钥。
 \textbf{Security assumption:} 
-in WPA2-PSK, the $PMK$ is calculated from the user-selected $Passphrase$, resulting in the $PMK$'s entropy being contingent on the $Passphrase$'s entropy.
+% in WPA2-PSK, the $PMK$ is calculated from the user-selected $Passphrase$, resulting in the $PMK$'s entropy being contingent on the $Passphrase$'s entropy.
 We assume the existence of a security-conscious user who always configures weak $Passphrase$ on the authenticator and the supplicant.
 
 % cremers_wpa2 提出了WPA2的 4-way handshake协议的形式化模型，该模型包括从PMK派生PTK和GTK的过程。由于该模型主要为了验证密钥重装攻击，因此在第一条握手消息中省略了PMKID，我们补全了这一部分：
@@ -36,12 +36,12 @@ We assume the existence of a security-conscious user who always configures weak 
 As the model primarily focuses on verifying key reinstallation attacks, the $PMKID$ is omitted in the first handshake message.
 We added $PMKID$ to the first message of the handshake as follows:
 \begin{flalign*}
-    \text{\ruleNameText{Rule A}}    & \text{\ruleNameText{uthSndM1}} :                                          & \\
-    \TLetS                          & \text{\Tterm{PMK := `L`}}                                                 \\  
-                                    & \text{\Tterm{PMKID = HMAC("PMK Name", PMK)}}                              \\  
-    \TInS \TFacts{                  & \text{\TFactTerm{AuthState}{"INIT", PMK}}, \; \text{\TFactTerm{Fr}{ANonce}}}  \\
-    \TEmpActFact{} \hspace{0.5em} \TFacts{& \text{\TFactTerm{AuthState}{"START", \TPairN{PMK, ANonce}}},            \\
-                                    & \text{\TFactTerm{AuthOut}{\TPairN{ANonce, PMKID}}}}
+    \text{\ruleNameText{Rule }}    & \text{\ruleNameText{AuthSndM1}} :                                          & \\
+    \TLetS                          & \text{\Tterm{$PMK$ := `L`}}                                                 \\  
+                                    & \text{\Tterm{$PMKID$ = HMAC("PMK Name", $PMK$)}}                              \\  
+    \TInS \TFacts{                  & \text{\TFactTerm{AuthState}{"INIT", $PMK$}}, \; \text{\TFactTerm{Fr}{$ANonce$}}}  \\
+    \TEmpActFact{} \hspace{0.2em} \TFacts{& \text{\TFactTerm{AuthState}{"START", \TPairN{$PMK$, $ANonce$}}},            \\
+                                    & \text{\TFactTerm{AuthOut}{\TPairN{$ANonce$, $PMKID$}}}}
 \end{flalign*}
 Here, we incorporate our security assumption into the model, marking the $PMK$ as a low-entropy key.
 
@@ -85,8 +85,8 @@ Given the computational capabilities of an adversary, shorter $LTK$s are suscept
 Existing research defines a rule that provides the attacker with the ability to access low-entropy keys:
 \begin{flalign*}
     \text{\ruleNameText{Rule R}}    & \text{\ruleNameText{evealLTK}} :                                   & \\
-                            \TLetS  & \text{\Tterm{LTK = resize(\_, "Low Entropy")}}       \\
-     \TInS \TFacts{                 & \text{\TFactTerm{In}{senc(m, LTK)}}} \TEmpActFact{} \TFacts{ \text{\TFactTerm{Out}{LTK}}}             
+                            \TLetS  & \text{\Tterm{$LTK$ = resize(\_, "Low Entropy")}}       \\
+     \TInS \TFacts{                 & \text{\TFactTerm{In}{senc(m, $LTK$)}}} \TEmpActFact{} \TFacts{ \text{\TFactTerm{Out}{$LTK$}}}             
 \end{flalign*}
 % 其中，resize函数代表了LTK的截断操作，第一个参数是待截断的密钥，第二个参数是截断后的密钥长度。虽然这条规则虽然赋予了攻击者获取低熵的LTK的能力，但是这条规则并没有还原真实的攻击行为。事实上，配对的蓝牙设备在使用LTK保护通信时，会首先使用LTK派生出SK，然后使用SK加密发往公开信道的数据。delov-yao模型中的攻击者无法获取到使用LTK加密的密文，也就无法使用这条规则来妥协低熵的LTK。这样的模型可以发现KNOB攻击，是因为这个模型简化了SK的参与，直接使用了LTK来保护通信数据。我们希望更加还原协议的行为，因此补充了LTK参与派生SK，以及SK用于保护通信。
 The \funcText{resize} function is designed to model the truncation operation of $LTK$, with the first parameter being the key to be truncated and the second parameter specifying the desired length of the truncated key.
@@ -113,11 +113,11 @@ The $LTK$ truncation process is modeled as follows:
 \begin{flalign*}
     \text{\ruleNameText{Rule R}}    & \text{\ruleNameText{esizeLTK}} :                                   & \\
         \TLetS                  & \text{\Tterm{LHalf, RHalf := `L`}}                     \\
-                                & \text{\Tterm{LTK = resize(LTK', KS)}}             \\
+                                & \text{\Tterm{$LTK$ = resize(LTK', KS)}}             \\
                                 & \text{\Tterm{LHalf = left(LTK')}}                  \\
                                 & \text{\Tterm{RHalf = right(LTK')}}                 \\
         \TInS \TFacts{          & \text{\TFactTerm{InitState}{"CALCING", \TPairN{LTK', KS}}}}   \\
-        \TEmpActFact{ } \hspace{0.5em} \TFacts{ & \text{\TFactTerm{InitState}{"CALCED", LTK}}}                  
+        \TEmpActFact{ } \hspace{0.5em} \TFacts{ & \text{\TFactTerm{InitState}{"CALCED", $LTK$}}}                  
 \end{flalign*}
 In this rule, \Tterm{KS} denotes the negotiated key length, while \Tterm{LHalf} and \Tterm{RHalf} represent the left and right halves of \Tterm{LTK'} respectively.
 Both halves are labeled as low-entropy keys.
@@ -250,9 +250,9 @@ In the rules of the model, these segments are categorized as low-entropy keys.
                                     & \text{\Tterm{l(r(SK')),r(r(SK')) := `L`}} \\
                                     & \text{\TPairN{l(l(SK')),r(l(SK'))} := \Tterm{`L`}} \\
                                     & \text{\TPairN{l(r(SK')),r(r(SK'))} := \Tterm{`L`}} \\
-                                    & \text{\Tterm{SK = resize(SK', KS)}}   \\
+                                    & \text{\Tterm{$SK$ = resize(SK', KS)}}   \\
     \TInS \TFacts{              & \text{\TFactTerm{State}{"SK CALC", \TPairN{SK', KS}}}}             \\
-    \TEmpActFact{} \TFacts{     & \text{\TFactTerm{State}{"SK CALCED", SK}}}                 
+    \TEmpActFact{} \TFacts{     & \text{\TFactTerm{State}{"SK CALCED", $SK$}}}                 
 \end{flalign*}
 
 % 在BC模型中我们同样考虑了会话密钥的保密性，我们定义了 \TFact{SKDistributed} 事实，分别代表了会话密钥成功被分发。我们定义了如下的规则来验证会话密钥的保密性：
