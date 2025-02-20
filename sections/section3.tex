@@ -59,14 +59,15 @@ To overcome the second, we introduce two more fundamental oracles: the value-bre
 
 % a value-breaking oracle and an algorithm-breaking oracle.
 \subsubsection{Value-Breaking Oracle}
-The value-breaking oracle grants attackers the capability to break low-entropy keys, assuming the attacker can identify a computation result of a function in which a low-entropy key is the only input.
+% The value-breaking oracle grants attackers the capability to break low-entropy keys, assuming the attacker can identify a computation result of a function in which a low-entropy key is the only input.
 The execution process of the value-breaking oracle is delineated as follows:
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.4653\columnwidth]{img/oracle1} 
 \end{figure}
 
-\noindent An attacker submits to the value-breaking oracle the output of a function that uses a low-entropy key as its sole input.
+\noindent The value-breaking oracle grants attackers the capability to break low-entropy keys, assuming the attacker can identify a computation result of a function in which a low-entropy key is the only input. 
+An attacker submits to the value-breaking oracle the output of such a function output.
 The only thing the value-breaking oracle needs to do is to verify whether the key possesses a low entropy and return the key's value if it does.
 
 \subsubsection{Relationship-Breaking Oracle}

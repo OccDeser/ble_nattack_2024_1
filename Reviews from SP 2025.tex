@@ -1,0 +1,339 @@
+\documentclass{article}
+
+\usepackage[a4paper,hscale=0.8,vscale=0.8]{geometry}
+\usepackage{hyperref}
+\linespread{1.3}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{ctex} 
+\usepackage{xcolor}
+\usepackage{pifont}
+\usepackage{bbding}
+\usepackage{threeparttable}
+\usepackage{booktabs}
+\usepackage{xurl}
+\newtheorem{comment}{}[section]
+
+\definecolor{ForestGreen}{rgb}{0.13, 0.55, 0.13}
+\newcommand{\satisfy}{\textcolor{ForestGreen}{\Checkmark}}
+\newcommand{\violate}{\textcolor{red}{\XSolidBrush}}
+\newcommand{\response}[1]{\textcolor{red}{\{#1\}}}
+
+\begin{document}
+
+\section{Review A and Authors' Responses/Revisions}
+\subsection{Review A}
+
+\noindent\textbf{Technical Correctness:} 2. Minor Issues\\
+\textbf{Presentation:} 2. Minor Flaws in Presentation\\
+\textbf{Recommended Decision:} 3. Weak Reject (Can be Convinced by a Champion)\\
+\textbf{Reviewer Confidence:} 2. Highly Confident
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Paper Summary}
+
+In this work, authors extend the Tamarin symbolic prover to perform semi-automatic analysis of protocols with potential low entropy.
+They extend the tool (calling the extension EntropyVerif) and apply it to update symbolic analyses of WP2-PSK, BLE and Bluetooth Classic (BC).
+These new analysis find existing issues in the protocol as well as a novel issue in Bluetooth Classic that was previously unknown.
+The authors submitted their attack to the Bluetooth Special Interest Group which acknowledged and are considering possible action.
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Technical Correctness Comments}
+
+The overall technical correctness of the approach is good, and while it is manually added to the model,
+the automation of the inclusion of low entropy secrets within the symbolic analysis will be an important factor for new attack discovery.
+
+Note: An important point for future submissions, it would have been for the reviewer to be able to access the full models for WP2-PSK, BLE and BC.
+With the current submission, the inlined snippets submitted within the paper don't allow to check if the newly discovered attack was actually found using Tamarin or by hand.
+\response{
+    The complete Tamarin models for WPA2-PSK, BLE, and BC, along with verification scripts and proof traces, are available at \url{https://anonymous.4open.science/r/EntropyVerif-F8DC}.
+    Detailed reproduction steps for the UMD attack discovered automatedly by Tamarin are provided in the repository's README, including environment setup, execution commands.
+}
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Scientific Contribution}\\
+3. Creates a New Tool to Enable Future Science\\
+5. Identifies an Impactful Vulnerability\\
+8. Other
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Scientific Contribution Comments}
+
+While the overall approach is useful, it is not novel that symbolic models take into consideration weak or compromised secrets in their analysis. 
+In my honest opinion, while useful, an extension of Tamarin with some syntax that allows to label secrets with low entropy is not a strong enough contribution by itself for acceptance to this conference. 
+The re-discovery of existing attacks does not reinforce the contribution much either. 
+\response{
+    我们的工作不仅仅是在Tamarin中做了语法扩展，而且引入了两个oracle赋予Tamarin分析低熵密钥的能力，同时动态地捕捉消息流中的低熵传递，为Tamarin中的攻击者模型赋予了低熵密钥的能力。
+    先前的工作仅止步于验证出已知的利用低熵密钥的攻击，无法发现新的攻击，因为他们需要提前知道攻击所需的函数与参数。
+    我们的工作使得用户不需要在建模时引入除了低熵密钥的标记以外的任何信息，就可以使用Tamarin自动发现利用低熵密钥的攻击。
+    UMD attacks的发现证明了这一点。
+}
+As the second novel contribution, the attack on BC is impactful but the submission doesn't contain any impact analysis of the vulnerability which means that it is not possible for the reader to understand how much more broken is BC than before.
+\response{
+    UMD attacks只需要边缘设备支持短密钥就可以攻击成功，而已有的KNOB attacks需要中心设备与边缘设备都支持短密钥。
+    这意味着UMD attacks的风险更高，更容易被攻击者利用。
+    中心设备通常是电脑、手机等设备，非常容易通过OTA的方式更新安全补丁，限制短密钥的使用，这足够抵抗KNOB攻击。
+    然而边缘设备通常是一些嵌入式设备，OTA更新困难，且更新率低，这意味着UMD attacks的风险仍然很高。
+    如果要杜绝UMD attacks，需要通过硬件升级来限制边缘设备对短密钥的支持，这个代价是非常高昂的。
+    此外，我们将添加对BC设备对短密钥支持的调研结果，添加到Section 6中，以辅助说明UMD攻击的危害性。
+}
+
+Even though one might argue that if the model is incorrectly omitting L then it is the user's fault, 
+an impactful contribution would be for Tamarin to detect possible secrets that are injected in the protocol without explicit annotation and handle their treatment for private functions. 
+\response{
+    我们完全同意这一点，由Tamarin去分析协议中所有可能的被妥协的密钥是一个很有意义的工作。
+    事实上我们的拓展完全支持对所有possible secrets的分析，只要隐式地将所有的secret进行低熵标记即可。
+    我们之所以让用户手动进行低熵标记有以下几个原因：
+    1. 出于对验证性能的考虑，对于所有可能的密钥进行分析会导致验证时间的大幅增加，这是不可接受的。
+    2. 协议使用的高熵secret，攻击者没有能力对其进行暴力破解，对其进行低熵分析是没有意义的。
+    3. 随着计算设备的不断更新，攻击者的计算能力也在不断提升，对攻击者的计算能力的假设也会发生改变，将影响到对secrets是否拥有足够的熵的判断。
+        用户选择性地对不同的secrets进行低熵标记，可以引入不同的攻击者能力，从而精确地评估协议的安全范围。
+    我们相信，作为用户完全有能力和责任去判断那些secret是低熵的，低熵标记也是模型中必要的部分。
+}
+In addition, extending more of the previously analyzed models and confirming whether new attacks can be detected or not would have been valuable.
+\response{
+    我们将提供对更多的协议（TLS、5G Authentication、FIDO2）进行分析，以展示我们的拓展工具的有效性。
+    我们将在Section 6中添加这些分析结果。
+}
+
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Presentation Comments}
+
+The presentation is fine and the submission easy to read. 
+Too much space is consumed to explain Tamarin that could be used to provide the full model or at least more comprehensive parts of the models and to extend the analysis to other protocols.
+\response{
+    我们将减少对Tamarin的介绍，并在Section 6中添加对更多协议的分析结果。
+}
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Comments to Authors}
+
+Overall, the submission is useful and demonstrates that the approach is valid through the discovery of a novel attack, however the overall contribution is limited. 
+I suggest extending the result with analyses of more protocol to demonstrate the efficiency of the tool to handle more complex protocols and confirm they are not vulnerable to low entropy issues. 
+\response{分析更多协议}
+While I am recommending weak reject, I would like to ask the PC to take the paper to R2 for additional review.
+
+\section{Review B and Authors' Responses/Revisions}
+\subsection{Review B}
+
+\noindent\textbf{Technical Correctness:} 1. No Apparent Flaws\\
+\textbf{Presentation:} 3. Major but Fixable Flaws in Presentation\\
+\textbf{Recommended Decision:} 3. Weak Reject (Can be Convinced by a Champion)\\
+\textbf{Reviewer Confidence:} 2. Highly Confident
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Paper Summary}
+
+This paper presents a formal analysis framework to systematically analyze network protocols susceptible to low-entropy attacks stemming from the use of low-entropy keys. 
+Unlike previous studies, it introduces a more generalized formalization of the key-breaking mechanism for such keys from an adversary's perspective, leveraging the Tamarin Prover. 
+As case studies, the authors enhance prior Tamarin models for three network pairing protocols: WiFi WPA2, Bluetooth Low Energy (BLE), and Bluetooth Classic (BC). 
+To achieve more faithful and fine-grained model representations, the framework refines some abstractions in existing protocol models and incorporates the proposed key-breaking mechanism. 
+For the BC protocol, the authors identify a novel attack exploiting repetitive key-size downgrade requests, while for the other protocols, they uncover existing vulnerabilities, including those overlooked in prior research.
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Scientific Contribution}\\
+3. Creates a New Tool to Enable Future Science
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Presentation Comments}
+
+Section 1 outlines the challenges but does not provide a high-level explanation of the methodologies proposed to address them.
+\response{
+    We have revised Section 1 to include a concise overview of the proposed methodologies immediately after outlining the challenges. 
+    This addition provides readers with a roadmap of our approach, including:
+        Challenge 1：我们引入新的语法，便于用户标记低熵密钥。
+        Challenge 2：我们将低熵标记转译为 EntropyLow Fact，并通过Derivation Generation算法与Relationship-Breaking Oracle动态地模拟消息流中的低熵传递，为暴力破解攻击提供前提条件。
+        Challenge 3：我们为攻击者设计了Value-Breaking Oracle，使得Tamarin可以定位符合暴力破解攻击条件的trace，赋予攻击者破解低熵密钥的能力。
+}
+
+Section 2 presents the protocol message flow but omits details about which messages are ciphered or integrity-protected, reducing clarity and comprehensibility for the reader.
+\response{
+    我们将在Section 2 中补充协议消息流的细节，包括哪些消息是加密的，哪些消息是完整性保护的。
+}
+
+Before or at the beginning of Section 3, a clear threat model of the analysis should be provided.
+\response{
+    A dedicated Threat Model subsection (3.1) now precedes the technical analysis. 
+    The threat model based on the Dolev-Yao Model enhances the adversary's capabilities to recover low-entropy keys.
+    It defines:
+        a. 完全控制网络：攻击者可以拦截、篡改、删除或注入任何消息。
+        b. 知晓协议规范：攻击者了解协议的规则、参与者的公钥以及使用的加密算法。
+        c. 计算能力：
+            攻击者能够执行任何多项式时间内的计算，包括加密、解密、签名和验证。
+            攻击者具备暴力破解较短密钥的能力，即对于密钥空间较小的加密算法（如短密钥对称加密或弱密钥的公钥加密），攻击者可以在多项式时间内枚举所有可能的密钥并尝试解密。
+}
+
+Please refer to the 4th and 5th points in the detailed comments for further suggestions.
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Comments to Authors}
+
+Low-entropy keys are known to be trivially vulnerable to security attacks. 
+However, how they impact security is still an interesting area to explore. 
+So, overall, I liked the idea of exploring the impact of low-entropy keys for security-sensitive network protocols. 
+The paper has done a good job in attempting to address this area. 
+However, I have several concerns.
+
+1. Novelty and Impact of Generalization: 
+Some prior works[9] have already explored the idea of relaxing the perfect encryption assumption. 
+The only difference I can find here is the granularity of the abstraction (Section 3.1). 
+\response{
+    我们确实受到了[9]的启发，但是我们的工作与[9]有很大的不同。
+    [9]的工作通过引入一个专门的rule赋予攻击者破解特定的secret的能力。
+    这要求用户在建模时就需要知道哪些secret是低熵的，以及用于暴力破解的函数。
+    这样的工作只能限制在验证已知的攻击，无法用于发现新攻击。
+    然而，我们的工作通过引入的两个oracle时动态的，并不针对任何secret和函数，用户不需要预先知道哪些secret是可以破解的，只需要根据协议设计标记较弱的secret即可。
+    事实上我们发现的UMD攻击也证明的这一点。
+}
+So, the paper introduces a more general approach compared to prior work to formalize the notion of the key-breaking mechanism in Section 3.2. 
+However, this paper has not provided any concrete evidence/proof showing how much impact generalization has in overall vulnerability detection. 
+In Section 5, the paper claims that it can identify existing and novel attacks overlooked by prior work because of their formalization. 
+However, this is not evident from the case studies. 
+For instance, Section 5.1 and Table 1 show that the authors' model can detect PMKID attacks, but the [21]'s model cannot. 
+However, there is no clear justification why [21]'s model cannot detect this. 
+Apparently, this is because [21] did not implement PMKID. 
+So, this additional finding does not have an impact on the generation. 
+\response{
+    [21] 确实没有使用 PMKID，但仅补全[21]模型的PMKID部分同样是无法检测到PMKID攻击的。
+    如果使用常见的方法引入专门的rule为攻击者提供破解PMKID的能力，与上一点回复的理由一样，用户需要提前得知PMKID攻击。
+    事实上，我们的工作中除了标记PMKID为低熵之外，没有额外提供任何有助于破解PMKID的信息，我们的拓展就可以发现PMKID攻击。
+}
+Similarly, no clear justification is provided for the other two case studies. 
+For BLE (Section 6.2, Table 2), the paper does not explain why the Method Confusion Attack is not detected by [9] + session. 
+Although Section 6.2 claims that both the KNOB and Method Confusion attacks are overlooked by [9]’s complemented version, 
+the original [9] paper explicitly states that their model can detect both attacks. 
+In both the BLE and BC case studies, it is not evident if new/existing attacks detected by the author's model are actually caused by the above generalization.
+\response{
+    工作 [9] 过分简化了BLE的模型，直接使用LTK加密会话，忽略了BLE的会话建立过程。
+    [9] 中用于破解LTK的Rule必须要输入使用短的LTK加密的数据才能发挥作用。
+    而我们为[9]补充了session的建立过程，使用SK加密数据，LTK不再用于加密数据，KNOB攻击相应的机制就丧失了作用，无法检查到KNOB攻击。
+    我们引入的低熵密钥分析，只需要标记低熵的LTK，无需关注具体的使用机制，因此无论有没有session过程都可以检测到KNOB攻击。
+    我们先前在论文中并未强调这一点，之后会在论文中补充，并为(Section 6.2, Table 2)添加[9]原本的模型和为[9]原本的模型引入低熵密钥分析的模型进行对比，以凸显出我们工作的generalization
+}
+
+2. UMD Attack: 
+While the UMD attack seems novel, it is unsurprising given the lack of integrity protection in legacy BC. 
+Also, it is obvious that the recommended key size is updated for BC protocol to reduce KNOB attacks, which apparently will also reduce UMD attacks as well. 
+\response{
+    BC协议的推荐密钥更新确实是会在一定程度上减少 UMD attacks，但是并不会像KNOB attacks那样受到剧烈影响。
+    KNOB attacks需要中心设备与边缘设备都支持短密钥，而UMD attacks只需要边缘设备支持短密钥就可以攻击成功。
+    中心设备通常是电脑、手机等设备，非常容易通过OTA的方式更新安全补丁，限制短密钥的使用。
+    然而边缘设备通常是一些嵌入式设备，OTA更新困难，且更新率低，这意味着UMD attacks的风险仍然很高。
+    如果要杜绝UMD attacks，需要通过硬件升级来限制边缘设备对短密钥的支持，这个代价是非常高昂的。
+}
+Thus, more substantial evidence, perhaps via additional case studies, is needed to substantiate the claim that the framework effectively detects low-entropy attacks.
+
+
+3. Performance Analysis: 
+Table 3 presents the time required for proving properties; 
+however, the impact of achieving greater granularity by replacing some abstractions mentioned above is unclear regarding overall performance and tractability. 
+A comparative analysis is needed to evaluate this trade-off. 
+\response{
+    引入低熵分析之后，验证时间确实会增加，以BLE协议为例，验证时间由2376.10s增加到14918.34s。
+    我们将在Section 6中添加更多的低熵密钥分析后的验证时间对比。
+}
+Additionally, Section 8 notes that some properties fail to terminate, raising concerns about the soundness and completeness of the model and the overall analysis.
+\response{
+    我们发现引入低熵密钥分析后，部分属性验证时间过长是因为原本模型使用的Tactic不适用导致的。
+    我们为这些属性重新设计了验证策略，使其能够在合理的时间内完成验证。
+}
+
+4. Contribution Overstatement: 
+The second contribution listed in the introduction is overstated. 
+The syntactic improvements to Tamarin seem minor and do not qualify to be termed as an extension of the tool.
+\response{
+    尽管我们的工作做了一些语法改变，但实际上我们赋予Tamarin分析低熵密钥的能力，拓展了新的攻击能力。
+    原本的Tamarin只能用于验证已有的利用低熵secret的攻击，而通过我们的扩展，Tamarin可以用于发现新的利用低熵secret的攻击。
+    我们通过引入两个oracle，并动态捕捉消息流中的低熵传递，才赋予了Tamarin这样的能力，这是语法优化做不到的。
+} 
+
+5. Writing Clarity: 
+The paper is unnecessarily difficult to follow. 
+Sections, especially Section 3, would benefit from informal and intuitive descriptions supported by examples before delving into technical details. 
+Improved readability would significantly enhance the paper’s accessibility.
+\response{
+    我们将根据提出的建议，包括在Presentation Comments中提到的问题进行修改，以提高文章的可读性。
+}
+
+
+\section{Review C and Authors' Responses/Revisions}
+\subsection{Review C}
+
+\noindent\textbf{Technical Correctness:} 1. No Apparent Flaws\\
+\textbf{Presentation:} 2. Minor Flaws in Presentation\\
+\textbf{Recommended Decision:} 3. Weak Reject (Can be Convinced by a Champion)\\
+\textbf{Reviewer Confidence:} 3. Fairly Confident
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Paper Summary}
+
+The paper proposes a method to enhance a protocol verification tool (Tamarind) in the symbolic model with the ability to reason about low entropy keys that let an attacker break protocols via brute force.
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Technical Correctness Comments}
+The paper looks correct to me.
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Scientific Contribution}\\
+6. Provides a Valuable Step Forward in an Established Field
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Scientific Contribution Comments}
+The paper proposes a method to encode assumptions about weak keys. 
+Basically, it adds a rule saying: if the attacker has access to all of the arguments of an encryption function except for the key, as well as its outputs, the attacker can recover the key. 
+The paper encodes this via two oracles: one which can recover the key if it's the only argument, and one which can remove arguments from a function, if they're known. 
+The paper also uncovers a new attack.
+
+All in all, this is interesting, but it seems the extension is somewhat straightforward.
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Presentation Comments}
+
+Overall the presentation is good. 
+The background section is a bit long to get through and generic. 
+It would be better to describe what's new about the paper right away, or start with the new attack.
+\response{
+    We will streamline the background section, foreground our novel contributions in the introduction, and restructure to highlight the new attack upfront for sharper focus.
+}
+
+
+\rule{0pt}{8pt}
+
+\noindent\textbf{Comments to Authors}
+
+Overall this is an interesting paper. 
+On the plus side, the paper encodes reasoning about low entropy keys into a protocol verification tool. 
+It also manages to discover a new attack.
+
+On the negative side, it's not clear to me how big of a step the encoding is. 
+At first glance, it seems rather straightforward. 
+A simpler version might be to instantiate the axiom "if all arguments and the function value are known, an attacker can recover the key" for all functions in the protocol. 
+Since the set of all functions is known statically, this should work, as far as I can see.
+Instead, the paper proposes the two oracles, which are somewhat more elegant, but as far as I can see, achieve the same purpose. 
+It seems therefore that the core technical contribution is a bit thin. 
+\response{
+    我们同意这一点，但是困难的是我们如何定位哪些低熵key和函数是可以被攻击者利用用于恢复密钥。
+    因此，之前的工作都是验证已知的低熵密钥相关的攻击，无法发现新攻击，因为他们需要提得知攻击必要的参数与函数。
+    我们的工作使得用户不需要在建模时引入除了低熵密钥的标记以外的任何信息，就可以使用Tamarin自动发现利用低熵密钥的攻击。
+    UMD attacks的发现证明了这一点。
+}
+On the positive side, the paper finds a new attack on a Bluetooth protocol. 
+This is quite interesting and highlights that the new encoding is useful.
+
+
+\end{document}
