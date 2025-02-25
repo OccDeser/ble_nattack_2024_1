@@ -94,10 +94,6 @@ an impactful contribution would be for Tamarin to detect possible secrets that a
     我们相信，作为用户完全有能力和责任去判断那些secret是低熵的，低熵标记也是模型中必要的部分。
 }
 In addition, extending more of the previously analyzed models and confirming whether new attacks can be detected or not would have been valuable.
-\response{
-    我们将提供对更多的协议（TLS、5G Authentication、FIDO2）进行分析，以展示我们的拓展工具的有效性。
-    我们将在Section 6中添加这些分析结果。
-}
 
 
 \rule{0pt}{8pt}
@@ -106,9 +102,6 @@ In addition, extending more of the previously analyzed models and confirming whe
 
 The presentation is fine and the submission easy to read. 
 Too much space is consumed to explain Tamarin that could be used to provide the full model or at least more comprehensive parts of the models and to extend the analysis to other protocols.
-\response{
-    我们将减少对Tamarin的介绍，并在Section 6中添加对更多协议的分析结果。
-}
 
 \rule{0pt}{8pt}
 
@@ -116,7 +109,6 @@ Too much space is consumed to explain Tamarin that could be used to provide the 
 
 Overall, the submission is useful and demonstrates that the approach is valid through the discovery of a novel attack, however the overall contribution is limited. 
 I suggest extending the result with analyses of more protocol to demonstrate the efficiency of the tool to handle more complex protocols and confirm they are not vulnerable to low entropy issues. 
-\response{分析更多协议}
 While I am recommending weak reject, I would like to ask the PC to take the paper to R2 for additional review.
 
 \section{Review B and Authors' Responses/Revisions}
@@ -135,7 +127,7 @@ This paper presents a formal analysis framework to systematically analyze networ
 Unlike previous studies, it introduces a more generalized formalization of the key-breaking mechanism for such keys from an adversary's perspective, leveraging the Tamarin Prover. 
 As case studies, the authors enhance prior Tamarin models for three network pairing protocols: WiFi WPA2, Bluetooth Low Energy (BLE), and Bluetooth Classic (BC). 
 To achieve more faithful and fine-grained model representations, the framework refines some abstractions in existing protocol models and incorporates the proposed key-breaking mechanism. 
-For the BC protocol, the authors identify a novel attack exploiting repetitive key-size downgrade requests, while for the other protocols, they uncover existing vulnerabilities, including those overlooked in prior research.
+For the BC protocol, the authors identify a novel attack exploiting repetitive key-size downgrade requests,  
 
 \rule{0pt}{8pt}
 
@@ -147,30 +139,30 @@ For the BC protocol, the authors identify a novel attack exploiting repetitive k
 \noindent\textbf{Presentation Comments}
 
 Section 1 outlines the challenges but does not provide a high-level explanation of the methodologies proposed to address them.
-\response{
-    We have revised Section 1 to include a concise overview of the proposed methodologies immediately after outlining the challenges. 
-    This addition provides readers with a roadmap of our approach, including:
-        Challenge 1：我们引入新的语法，便于用户标记低熵密钥。
-        Challenge 2：我们将低熵标记转译为 EntropyLow Fact，并通过Derivation Generation算法与Relationship-Breaking Oracle动态地模拟消息流中的低熵传递，为暴力破解攻击提供前提条件。
-        Challenge 3：我们为攻击者设计了Value-Breaking Oracle，使得Tamarin可以定位符合暴力破解攻击条件的trace，赋予攻击者破解低熵密钥的能力。
-}
+% \response{
+%     We have revised Section 1 to include a concise overview of the proposed methodologies immediately after outlining the challenges. 
+%     This addition provides readers with a roadmap of our approach, including:
+%         Challenge 1：我们引入新的语法，便于用户标记低熵密钥。
+%         Challenge 2：我们将低熵标记转译为 EntropyLow Fact，并通过Derivation Generation算法与Relationship-Breaking Oracle动态地模拟消息流中的低熵传递，为暴力破解攻击提供前提条件。
+%         Challenge 3：我们为攻击者设计了Value-Breaking Oracle，使得Tamarin可以定位符合暴力破解攻击条件的trace，赋予攻击者破解低熵密钥的能力。
+% }
 
 Section 2 presents the protocol message flow but omits details about which messages are ciphered or integrity-protected, reducing clarity and comprehensibility for the reader.
-\response{
-    我们将在Section 2 中补充协议消息流的细节，包括哪些消息是加密的，哪些消息是完整性保护的。
-}
+% \response{
+%     我们将在Section 2 中补充协议消息流的细节，包括哪些消息是加密的，哪些消息是完整性保护的。
+% }
 
 Before or at the beginning of Section 3, a clear threat model of the analysis should be provided.
-\response{
-    A dedicated Threat Model subsection (3.1) now precedes the technical analysis. 
-    The threat model based on the Dolev-Yao Model enhances the adversary's capabilities to recover low-entropy keys.
-    It defines:
-        a. 完全控制网络：攻击者可以拦截、篡改、删除或注入任何消息。
-        b. 知晓协议规范：攻击者了解协议的规则、参与者的公钥以及使用的加密算法。
-        c. 计算能力：
-            攻击者能够执行任何多项式时间内的计算，包括加密、解密、签名和验证。
-            攻击者具备暴力破解较短密钥的能力，即对于密钥空间较小的加密算法（如短密钥对称加密或弱密钥的公钥加密），攻击者可以在多项式时间内枚举所有可能的密钥并尝试解密。
-}
+% \response{
+%     A dedicated Threat Model subsection (3.1) now precedes the technical analysis. 
+%     The threat model based on the Dolev-Yao Model enhances the adversary's capabilities to recover low-entropy keys.
+%     It defines:
+%         a. 完全控制网络：攻击者可以拦截、篡改、删除或注入任何消息。
+%         b. 知晓协议规范：攻击者了解协议的规则、参与者的公钥以及使用的加密算法。
+%         c. 计算能力：
+%             攻击者能够执行任何多项式时间内的计算，包括加密、解密、签名和验证。
+%             攻击者具备暴力破解较短密钥的能力，即对于密钥空间较小的加密算法（如短密钥对称加密或弱密钥的公钥加密），攻击者可以在多项式时间内枚举所有可能的密钥并尝试解密。
+% }
 
 Please refer to the 4th and 5th points in the detailed comments for further suggestions.
 
@@ -307,9 +299,9 @@ All in all, this is interesting, but it seems the extension is somewhat straight
 Overall the presentation is good. 
 The background section is a bit long to get through and generic. 
 It would be better to describe what's new about the paper right away, or start with the new attack.
-\response{
-    We will streamline the background section, foreground our novel contributions in the introduction, and restructure to highlight the new attack upfront for sharper focus.
-}
+% \response{
+%     We will streamline the background section, foreground our novel contributions in the introduction, and restructure to highlight the new attack upfront for sharper focus.
+% }
 
 
 \rule{0pt}{8pt}
