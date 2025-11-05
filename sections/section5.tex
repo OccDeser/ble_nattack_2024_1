@@ -73,7 +73,8 @@ This alteration substantially reduces the complexity of brute-forcing $LTK$.
 The Bluetooth core specification\cite{bluetooth6} states that Bluetooth Low Energy devices can support key lengths of 7 to 16 bytes. For convenience, we assume that the devices involved in pairing support key lengths of 8 to 16 bytes. In this scenario, without the involvement of an attacker, these devices will negotiate a full-length LTK.
 Additionally, we assume that the attacker can brute-force an 8-byte key, meaning the attacker can quickly traverse the key space of 8 bytes or fewer.
 \BlueQuote{[Vol 3, Part H, 2.3.4]}{ 
-The maximum and minimum encryption key length parameters shall be between 7 octets (56 bits) and 16 octets (128 bits), in 1 octet (8~bit) steps.}
+    The maximum and minimum encryption key length parameters shall be between 7 octets (56 bits) and 16 octets (128 bits), in 1 octet (8~bit) steps.
+}
 
 \begin{figure}[t]
     \centering

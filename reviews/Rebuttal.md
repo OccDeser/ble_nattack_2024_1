@@ -2,7 +2,6 @@ We sincerely thank the reviewers for their constructive feedback. Due to the wor
 
 ## Review A
 
-1. The full models, automatic verification scripts, and proof traces are provided in [16] [https://anonymous.4open.science/r/EntropyVerif-F8DC](https://anonymous.4open.science/r/EntropyVerif-F8DC).
 
 2. Our work introduces two oracles that enable Tamarin to brute-force low-entropy secrets *without prior knowledge* needed by attacks, thereby automating new attack discovery. Specifically, we eliminate the need for manual rules for arguments and functions exploited by each brute-force attack.
 
