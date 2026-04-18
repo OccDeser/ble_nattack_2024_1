@@ -1,124 +1,30 @@
-%%
-%% This is file `sample-sigconf.tex',
-%% generated with the docstrip utility.
-%%
-%% The original source files were:
-%%
-%% samples.dtx  (with options: `all,proceedings,bibtex,sigconf')
-%% 
-%% IMPORTANT NOTICE:
-%% 
-%% For the copyright see the source file.
-%% 
-%% Any modified versions of this file must be renamed
-%% with new filenames distinct from sample-sigconf.tex.
-%% 
-%% For distribution of the original source see the terms
-%% for copying and modification in the file samples.dtx.
-%% 
-%% This generated file may be distributed as long as the
-%% original source files, as listed above, are part of the
-%% same distribution. (The sources need not necessarily be
-%% in the same archive or directory.)
-%%
-%%
-%% Commands for TeXCount
-%TC:macro \cite [option:text,text]
-%TC:macro \citep [option:text,text]
-%TC:macro \citet [option:text,text]
-%TC:envir table 0 1
-%TC:envir table* 0 1
-%TC:envir tabular [ignore] word
-%TC:envir displaymath 0 word
-%TC:envir math 0 word
-%TC:envir comment 0 0
-%%
-%% The first command in your LaTeX source must be the \documentclass
-%% command.
-%%
-%% For submission and review of your manuscript please change the
-%% command to \documentclass[manuscript, screen, review]{acmart}.
-%%
-%% When submitting camera ready or to TAPS, please change the command
-%% to \documentclass[sigconf]{acmart} or whichever template is required
-%% for your publication.
-%%
-%%
-\documentclass[sigconf]{acmart}
-%%
-%% \BibTeX command to typeset BibTeX logo in the docs
-\AtBeginDocument{%
-  \providecommand\BibTeX{{%
-    Bib\TeX}}}
+%% NDSS 2026 submission — based on bare_conf_NDSS2026.tex (IEEEtran)
+%% Original ACM sigconf boilerplate replaced with IEEEtran conference class.
 
-%% Rights management information.  This information is sent to you
-%% when you complete the rights form.  These commands have SAMPLE
-%% values in them; it is your responsibility as an author to replace
-%% the commands and values with those provided to you when you
-%% complete the rights form.
-\setcopyright{acmlicensed}
-\copyrightyear{2018}
-\acmYear{2018}
-\acmDOI{XXXXXXX.XXXXXXX}
-%% These commands are for a PROCEEDINGS abstract or paper.
-\acmConference[Conference acronym 'XX]{Make sure to enter the correct
-  conference title from your rights confirmation email}{June 03--05,
-  2018}{Woodstock, NY}
-%%
-%%  Uncomment \acmBooktitle if the title of the proceedings is different
-%%  from ``Proceedings of ...''!
-%%
-%%\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
-%%  June 03--05, 2018, Woodstock, NY}
-\acmISBN{978-1-4503-XXXX-X/2018/06}
+\documentclass[conference]{IEEEtran}
 
+\pagestyle{plain}
 
-%%
-%% Submission ID.
-%% Use this when submitting an article to a sponsored event. You'll
-%% receive a unique submission ID from the organizers
-%% of the event, and this ID should be used as the parameter to this command.
-%%\acmSubmissionID{123-A56-BU3}
-
-%%
-%% For managing citations, it is recommended to use bibliography
-%% files in BibTeX format.
-%%
-%% You can then either use BibTeX with the ACM-Reference-Format style,
-%% or BibLaTeX with the acmnumeric or acmauthoryear sytles, that include
-%% support for advanced citation of software artefact from the
-%% biblatex-software package, also separately available on CTAN.
-%%
-%% Look at the sample-*-biblatex.tex files for templates showcasing
-%% the biblatex styles.
-%%
-
-%%
-%% The majority of ACM publications use numbered citations and
-%% references.  The command \citestyle{authoryear} switches to the
-%% "author year" style.
-%%
-%% If you are preparing content for an event
-%% sponsored by ACM SIGGRAPH, you must use the "author year" style of
-%% citations and references.
-%% Uncommenting
-%% the next command will enable that style.
-%%\citestyle{acmauthoryear}
-
-
-% \usepackage{amsmath, mathtools, amssymb, amsthm}
-\usepackage{amsmath, mathtools, amsthm}
+% *** MATH AND PROOF PACKAGES ***
+\usepackage{amsmath, mathtools, amsthm, amssymb}
 \usepackage{proof}
-\usepackage{xcolor}
-\usepackage{subfiles}
 \usepackage{stmaryrd}
+
+% *** LAYOUT / UTILITY PACKAGES ***
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
 \usepackage{hyperref}
 \usepackage{tcolorbox}
 \usepackage{tabularx}
+\usepackage{booktabs}
 \usepackage{pifont}
 \usepackage{enumitem}
 \usepackage{threeparttable}
 \usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{rotating}
+\usepackage{makecell}
+\usepackage{cite}
 
 \tcbuselibrary{skins}
 
@@ -133,7 +39,7 @@
 \definecolor{xhs_ex}{HTML}{2885a9}
 
 
-\NewTotalTColorBox{\BlueQuote}{ +m +m }{ 
+\NewTotalTColorBox{\BlueQuote}{ +m +m }{
     notitle,
     colback=xhs_blue_light,
     colbacklower=white,
@@ -144,9 +50,9 @@
     borderline west={2.5pt}{0pt}{xhs_blue}
 }{
     \textcolor{xhs_blue}{ \textbf{#1} }
-    #2 
+    #2
 }
-\renewcommand{\subsectionautorefname}{Section} 
+\renewcommand{\subsectionautorefname}{Section}
 
 \newcommand{\funcText}[1]{{\ttfamily #1}}
 
@@ -190,185 +96,42 @@
 
 \newcolumntype{S}{>{\centering\arraybackslash}m{3cm}@{*}}
 
-%%
-%% end of the preamble, start of the body of the document source.
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+
 \begin{document}
 
-%%
-%% The "title" command has an optional parameter,
-%% allowing the author to define a "short title" to be used in page headers.
-\title{ Small Leaks Sink Great Ships: \\Automated Analysis of Protocols that Tolerate Low-Entropy Keys }
+\title{Small Leaks Sink Great Ships:\\ Automated Analysis of Protocols that Tolerate Low-Entropy Keys}
 
-% %%
-% %% The "author" command and its associated commands are used to define
-% %% the authors and their affiliations.
-% %% Of note is the shared affiliation of the first two authors, and the
-% %% "authornote" and "authornotemark" commands
-% %% used to denote shared contribution to the research.
-% \author{Ben Trovato}
-% \authornote{Both authors contributed equally to this research.}
-% \email{trovato@corporation.com}
-% \orcid{1234-5678-9012}
-% \author{G.K.M. Tobin}
-% \authornotemark[1]
-% \email{webmaster@marysville-ohio.com}
-% \affiliation{%
-%   \institution{Institute for Clarity in Documentation}
-%   \city{Dublin}
-%   \state{Ohio}
-%   \country{USA}
-% }
+\author{\IEEEauthorblockN{Anonymous Authors}
+    \IEEEauthorblockA{Affiliation withheld for double-blind review}}
 
-% \author{Lars Th{\o}rv{\"a}ld}
-% \affiliation{%
-%   \institution{The Th{\o}rv{\"a}ld Group}
-%   \city{Hekla}
-%   \country{Iceland}}
-% \email{larst@affiliation.org}
 
-% \author{Valerie B\'eranger}
-% \affiliation{%
-%   \institution{Inria Paris-Rocquencourt}
-%   \city{Rocquencourt}
-%   \country{France}
-% }
-
-% \author{Aparna Patel}
-% \affiliation{%
-%  \institution{Rajiv Gandhi University}
-%  \city{Doimukh}
-%  \state{Arunachal Pradesh}
-%  \country{India}}
-
-% \author{Huifen Chan}
-% \affiliation{%
-%   \institution{Tsinghua University}
-%   \city{Haidian Qu}
-%   \state{Beijing Shi}
-%   \country{China}}
-
-% \author{Charles Palmer}
-% \affiliation{%
-%   \institution{Palmer Research Laboratories}
-%   \city{San Antonio}
-%   \state{Texas}
-%   \country{USA}}
-% \email{cpalmer@prl.com}
-
-% \author{John Smith}
-% \affiliation{%
-%   \institution{The Th{\o}rv{\"a}ld Group}
-%   \city{Hekla}
-%   \country{Iceland}}
-% \email{jsmith@affiliation.org}
-
-% \author{Julius P. Kumquat}
-% \affiliation{%
-%   \institution{The Kumquat Consortium}
-%   \city{New York}
-%   \country{USA}}
-% \email{jpkumquat@consortium.net}
-
-% %%
-% %% By default, the full list of authors will be used in the page
-% %% headers. Often, this list is too long, and will overlap
-% %% other information printed in the page headers. This command allows
-% %% the author to define a more concise list
-% %% of authors' names for this purpose.
-% \renewcommand{\shortauthors}{Trovato et al.}
-
-%%
-%% The abstract is a short summary of the work to be presented in the
-%% article.
-\begin{abstract}
-Entropy is crucial for cryptographic security as it prevents adversaries from brute-forcing keys.
-However, modern protocols like WPA2-PSK and Bluetooth usually tolerate low-entropy keys for user-friendliness or compatibility.
-% ! Rewrite following
-The protocol's tolerance for using keys susceptible to brute force attacks by adversaries introduces significant potential security risks. 
-Indeed, several real-world attacks have successfully exploited these vulnerabilities.
-Current symbolic model analysis tools do not emphasize the strength of keys within protocols, resulting in a limitation where these tools are unable to generally identify attacks associated with low-entropy keys.
-This paper introduced a general and automated methodology for modeling low-entropy keys and capturing brute-force attacks.
-We developed EntropyVerif, an extension of the symbolic analysis tool \Tamarin{}, which allows users to specify the entropy of keys and automatically detect brute-force attacks.
-% Comprehensive case studies were conducted using our EntropyVerif tool to analyze real-world protocols that are tolerant to low-entropy keys. 
-Through comprehensive case studies using EntropyVerif, we not only rediscovered known attacks but also uncovered a novel attack on Bluetooth Classic devices, which is termed the Unilateral Multi-Downgrade (UMD) attack. 
-This newly identified attack significantly reduces the complexity for adversaries attempting to compromise session keys, thereby enhancing the efficiency of such attacks by a factor of $2^{116}$. 
-The results from our case studies highlight the effectiveness of our approach in identifying potential vulnerabilities in protocols that tolerate low-entropy keys.
-
-\end{abstract}
-
-%%
-%% The code below is generated by the tool at http://dl.acm.org/ccs.cfm.
-%% Please copy and paste the code instead of the example below.
-%%
-\begin{CCSXML}
-<ccs2012>
- <concept>
-  <concept_id>00000000.0000000.0000000</concept_id>
-  <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
-  <concept_significance>500</concept_significance>
- </concept>
- <concept>
-  <concept_id>00000000.00000000.00000000</concept_id>
-  <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
-  <concept_significance>300</concept_significance>
- </concept>
- <concept>
-  <concept_id>00000000.00000000.00000000</concept_id>
-  <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
-  <concept_significance>100</concept_significance>
- </concept>
- <concept>
-  <concept_id>00000000.00000000.00000000</concept_id>
-  <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
-  <concept_significance>100</concept_significance>
- </concept>
-</ccs2012>
-\end{CCSXML}
-
-\ccsdesc[500]{Do Not Use This Code~Generate the Correct Terms for Your Paper}
-\ccsdesc[300]{Do Not Use This Code~Generate the Correct Terms for Your Paper}
-\ccsdesc{Do Not Use This Code~Generate the Correct Terms for Your Paper}
-\ccsdesc[100]{Do Not Use This Code~Generate the Correct Terms for Your Paper}
-
-%%
-%% Keywords. The author(s) should pick words that accurately describe
-%% the work being presented. Separate the keywords with commas.
-\keywords{Do, Not, Use, This, Code, Put, the, Correct, Terms, for,
-  Your, Paper}
-%% A "teaser" image appears between the author and affiliation
-%% information and the body of the document, and typically spans the
-%% page.
-% \begin{teaserfigure}
-%   \includegraphics[width=\textwidth]{sampleteaser}
-%   \caption{Seattle Mariners at Spring Training, 2010.}
-%   \Description{Enjoying the baseball game from the third-base
-%   seats. Ichiro Suzuki preparing to bat.}
-%   \label{fig:teaser}
-% \end{teaserfigure}
-
-\received{20 February 2007}
-\received[revised]{12 March 2009}
-\received[accepted]{5 June 2009}
-
-%%
-%% This command processes the author and affiliation and title
-%% information and builds the first part of the formatted document.
 \maketitle
 
+\begin{abstract}
+Modern cryptographic protocols such as WPA2-PSK, Bluetooth Low Energy (BLE), and Bluetooth Classic (BC) tolerate low-entropy keys for user-friendliness, backward compatibility, or resource-constrained deployment, yet existing symbolic protocol verifiers rely on the perfect-encryption assumption and therefore cannot reason about brute-force attackers at all.
+Prior work addresses this gap only through protocol-specific, manually encoded reveal rules, which neither generalize across protocols nor systematically explore compound-key decomposition.
+We introduce the first protocol-agnostic, automated symbolic methodology for low-entropy keys, built on three abstractions: the message-derivation fact \texttt{MDerive}, which captures brute-force prerequisites independently of concrete function symbols; a three-tier breaking-oracle design (value-breaking, relationship-breaking, message-derivation) that composes with the standard Dolev-Yao attacker; and a graded bit-level attacker model (semi-attacker at 64 bits, quart-attacker at 32 bits) that anchors verification results to a concrete computational budget.
+We realize the methodology as EntropyVerif, a syntax-sugar extension of \Tamarin{} that requires no kernel modification: users annotate low-entropy terms with \texttt{:= L} and the compiler emits standard multiset-rewriting rules.
+Using EntropyVerif we automatically rediscover the PMKID, KNOB, and Method Confusion attacks, and uncover a new attack on BC which we call the Unilateral Multi-Downgrade (UMD) attack: by repeatedly downgrading one side of a BC session and recombining the recovered key fragments, an attacker reduces session-key recovery against devices using the maximum 128-bit key from $2^{128}$ to $n \cdot 2^{128/n}$, bottoming out at $2^{12}$ for $n=16$---a factor of $2^{116}$ reduction that has been responsibly disclosed to the vendor.
+Across three real-world protocols and six BC device configurations, our results show that entropy-aware symbolic analysis is both feasible and necessary.
+\end{abstract}
 
-\subfile{sections/section1.tex}
-\subfile{sections/section2.tex}
-\subfile{sections/section3.tex}
-\subfile{sections/section4.tex}
-\subfile{sections/section5.tex}
-\subfile{sections/section6.tex}
-\subfile{sections/section7.tex}
-\subfile{sections/section8.tex}
+\IEEEpeerreviewmaketitle
 
-\bibliographystyle{ACM-Reference-Format}
+
+\input{sections/introduction.tex}
+\input{sections/background.tex}
+\input{sections/brute-force-modeling.tex}
+\input{sections/methodology.tex}
+\input{sections/case-studies.tex}
+\input{sections/results.tex}
+\input{sections/related-work.tex}
+\input{sections/discussion-conclusion.tex}
+\input{sections/ethics.tex}
+
+\bibliographystyle{IEEEtran}
 \bibliography{library}
 
 \end{document}
-\endinput
-%%
-%% End of file `sample-sigconf.tex'.

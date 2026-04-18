@@ -1,7 +1,3 @@
-\documentclass[../main.tex]{subfiles}  % 使用主文件的文档类
-
-\begin{document}
-
 \section{ Case Studies } \label{sec:5case-study}
 
 In this section, to demonstrate the effectiveness of our methodology, we will conduct case studies of several real-world protocols that have issues with low-entropy keys. 
@@ -202,6 +198,9 @@ Furthermore, devices are classified according to their support for the SC featur
 These categories correspond to devices that only support Secure Connections, those that support both Legacy and Secure Connections, and those limited to Legacy connections, respectively.
 \cite{padgette2017guide} recommends that devices adhere to the following guidelines: only use secure connections and only use the maximum key length.
 By integrating the SC feature with key support characteristics, six distinct device types emerge.
+Throughout the paper we refer to these six combinations using a compact \textsc{Sc}-\textsc{Key} notation: the first component is one of \textbf{ScOn} (Secure-Connections only), \textbf{ScLg} (Secure plus Legacy), or \textbf{LgOn} (Legacy only); the second is one of \textbf{Secure} (16-byte keys only), \textbf{Enhanc} (7--16 byte keys), or \textbf{Legacy} (1--16 byte keys).
+For example, \textbf{ScOn-Secure} denotes a device that supports only Secure Connections and accepts only full-length session keys, while \textbf{LgOn-Legacy} denotes a legacy-only device that accepts any key length down to 1 byte.
+These abbreviations also index the rows of Table~\ref{tab:bc-session-result} in Section~\ref{sec:6results}.
 
 % 考虑到最小的密钥长度可以低至1字节，我们假设存在两类攻击者：
 % \begin{itemize}
@@ -269,5 +268,3 @@ The property is specified as follows:
 \end{flalign*}
 where \TFact{Role} could be either "Central" or "Peripheral".
 This formula indicates that the attacker can't the session key while the central or peripheral device has successfully distributed it.
-
-\end{document}

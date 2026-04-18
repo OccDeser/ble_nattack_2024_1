@@ -1,0 +1,19 @@
+\section*{Ethics Considerations}
+
+\noindent
+\textbf{Responsible disclosure.}
+We reported the UMD vulnerability to the Bluetooth Special Interest Group~(SIG) security team on July~15, 2024.
+The SIG acknowledged receipt and, in their February~7, 2025 response, stated that ``the scenario posited for identifying the session key used during BR/EDR encryption establishment appears much more practical'' than previously known attacks.
+The SIG is conducting a detailed analysis and will provide further feedback.
+
+\noindent
+\textbf{Experimental setup.}
+All analysis in this paper is conducted entirely within the symbolic model using \Tamarin{}.
+No real Bluetooth devices were involved in the discovery or validation of the UMD attack.
+The attack traces are produced by the automated verifier and do not require physical proximity to any device.
+
+\noindent
+\textbf{User-side risk assessment.}
+The UMD attack targets Bluetooth Classic peripheral devices that accept session keys shorter than 7~bytes.
+Until specification updates and firmware patches are deployed, users can mitigate risk by: (i)~avoiding pairing with untrusted or unknown devices, (ii)~preferring devices that enforce Secure Connections and maximum key lengths, and (iii)~monitoring for unexpected re-pairing events that may indicate an active downgrade attack.
+

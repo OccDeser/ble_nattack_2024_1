@@ -438,3 +438,8 @@ Temporary Items
 
 .vscode
 .texvsctmp
+
+.claude/*
+CLAUDE.md
+review/*
+workspace/*

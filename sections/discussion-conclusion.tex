@@ -1,0 +1,32 @@
+\section{Discussion and Conclusion} \label{sec:8discussion-conclusion}
+
+\noindent\textbf{Threats to validity.}
+Our methodology rests on three explicit assumptions that readers should bear in mind when interpreting the verification results.
+First, we assume that all keys are uniformly distributed over their value space, so that the Shannon entropy and min-entropy of a key coincide with $\log_2 N_K$.
+Protocols in which keys are drawn from non-uniform distributions---for example, user-chosen passwords whose effective entropy is much lower than their nominal length---may be over-approximated as secure by our current model; extending \texttt{MDerive} with non-uniform entropy annotations is an explicit direction for future work.
+Second, the oracle-activation budget $B$ is a termination heuristic rather than a soundness condition: a verification that succeeds at budget $B$ rules out attacks using at most $B$ oracle invocations per target term, but a larger budget could in principle surface additional attacks, so reported bounds should be read as ``secure under the stated budget.''
+Third, our case studies, while substantial, cover three protocol families and six BC device configurations; generalizing empirical claims about scalability and automation to arbitrary protocols requires further evaluation.
+
+\noindent\textbf{Verification effort.}
+Although we impose a budget on the value-breaking oracle, verification may still fail to terminate or take an excessively long time on densely interleaved multi-session models; the worst-case BC configuration in our evaluation takes roughly $9.9 \times 10^4$ seconds.
+Compared with baseline models that do not carry low-entropy annotations, the analysis cost grows substantially because the relationship-breaking oracle introduces many new derivation branches.
+In practice, difficult BC configurations still benefit from \Tamarin{}'s oracle-heuristic and from a small number of auxiliary lemmas that prune search space; we disclose each case where such human guidance is applied in Section~\ref{sec:6results}.
+Engineering further automation---for example, learned heuristics for oracle scheduling or automatic auxiliary-lemma synthesis---is an orthogonal line of work that we see as directly benefiting our approach.
+
+\noindent\textbf{Implications for the Bluetooth Classic specification.}
+The UMD attack is not an implementation bug but a weakness in the protocol design: as long as two endpoints can repeatedly renegotiate the session-key length asymmetrically, and as long as the resulting session keys remain derivable fragments of a shared long-term secret, the attack complexity $C(n) = n \cdot 2^{128/n}$ applies regardless of which device vendor is in use.
+Based on the attack, we argue that the Bluetooth SIG should consider the following revisions.
+(i) Impose a \emph{hard floor} on the session-key length in the core specification (e.g., 16~bytes for Secure, and at least 7~bytes for Enhanced devices communicating with modern peers), so that the $n = 16$ optimum of $C(n)$ becomes unreachable.
+(ii) Require \emph{bilateral confirmation} of any key-length downgrade, so that an attacker coercing one side into a short-key session cannot proceed without simultaneously coercing the other.
+(iii) Bind short-key negotiations to the pair of \texttt{BDADDR}s that initiated the long-term key, so that fragments obtained in one session cannot be recombined into a key that targets an unrelated session.
+We have shared these recommendations with the Bluetooth SIG as part of responsible disclosure.
+
+\noindent\textbf{Scope of the methodology.}
+Our methodology currently does not model private (secret) functions, because the prerequisites for brute-force attacks are defined in terms of publicly-known cryptographic operators.
+When a real protocol uses a private function, one can often replace it with a combination of public functions and private variables, and this replacement is sound with respect to our attacker model; we leave native support for private functions to future work.
+Similarly, our modeling focuses on brute-force attacks whose cost depends solely on key length and does not cover side-channel-assisted or differential attacks whose cost depends on implementation-level details.
+
+\noindent\textbf{Conclusion.}
+We proposed the first protocol-agnostic symbolic methodology for analyzing protocols that tolerate low-entropy keys, built on the \texttt{MDerive} derivation abstraction and a three-tier breaking-oracle design, and realized as EntropyVerif---a syntax-sugar extension of \Tamarin{} whose verification soundness is inherited from the unmodified \Tamarin{} backend.
+Our case studies on WPA2-PSK, BLE pairing, and Bluetooth Classic automatically rediscover PMKID, KNOB, and Method Confusion without any protocol-specific reveal rules, and reveal a new protocol-level attack on Bluetooth Classic---the Unilateral Multi-Downgrade (UMD) attack (Section~\ref{sec:umd-attack})---that, via the compound-key decomposition $C(n) = n \cdot 2^{128/n}$ attained at $n=16$, reduces 128-bit session-key recovery by a factor of $2^{116}$.
+Together, these results demonstrate that entropy-aware symbolic verification is both feasible and necessary for modern protocols that compromise on key strength for usability or compatibility, and they argue for treating brute-force reachability as a first-class citizen in future protocol design and analysis.
