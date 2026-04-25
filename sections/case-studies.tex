@@ -105,7 +105,6 @@ Furthermore, we modeled the \funcText{resize} function with a finer granularity.
 From the attacker's perspective, we define two key lengths, $N_1$ and $N_2$, where $N_1$ denotes the key lengths susceptible to attack, and $N_2$ denotes those remaining secure.
 To provide a detailed model of the $LTK$ truncation process, we introduce two functions, \funcText{left} and \funcText{right}, which respectively denote the left and right halves of the key.
 The \funcText{resize} function satisfies the following equations:
-
 \begin{flalign*}
     \text{\Tterm{resize(k, $N_1$)}} & \text{ = \Tterm{left(k)}}    & \\
     \text{\Tterm{resize(k, $N_2$)}} & \text{ = \TPairN{left(k), right(k)}}    
