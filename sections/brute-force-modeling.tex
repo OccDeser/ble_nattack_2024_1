@@ -30,9 +30,9 @@ Such a rule of \cite{claverie2023tamarin} is as follows:
     \TFacts{ &\text{\TFact{Out}}(s)}    
 \end{flalign*}
 In this rule, the fact \TFact{LowEntropyf4} indicates that the last input $s$ of the function $f4$ possesses a low entropy.
-Attackers can obtain the value of $s$ by providing all other inputs of $f4$ and its output.
-This rule is highly intuitive and checks the three essential prerequisites we have summarized for a brute-force attack: knowledge of the function, knowledge of all inputs except the key, and knowledge of the computation result. 
-It can effectively capture brute-force attacks targeting the $f4$ function.
+Attackers can recover the value of $s$ by providing all other inputs of $f4$ and its output.
+This rule is intuitive and checks the three essential prerequisites for a brute-force attack: knowledge of the function, knowledge of all inputs except the key, and knowledge of the computation result. 
+It effectively captures brute-force attacks targeting the $f4$ function.
 
 However, this is not a general modeling method.
 The design of this rule implicitly relies on a critical hypothesis: an attacker is capable of, and restricted to, exploiting the function $f4$ to execute a brute force attack on the low-entropy variable $s$.
@@ -115,7 +115,7 @@ where $\langle \cdot \rangle$ denotes a function of $n$ arguments, representing 
 Similarly, a composite function $f \circ g$ can be modeled as the message derivation fact $\text{\TFact{MDerive}}(x, f(g(x)))$.
 
 The relationship-breaking oracle maintains a collection of all functions.
-Once a derivation relationship between two messages is identified, the oracle can directly locate the specific mapping function.
+Once a derivation relationship between two messages is identified, the oracle can locate the specific mapping function.
 If the oracle needs to identify a function where a certain key $k$ is the sole argument, it suffices to find the fact $\text{\TFact{MDerive}}(k, m)$,
 where $m$ is a message derived from $k$.
 

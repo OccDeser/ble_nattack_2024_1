@@ -1,7 +1,7 @@
 \section{Introduction}
 
 Entropy is a fundamental concept that is directly correlated with the security of the cryptographic system.
-A key with high entropy indicates a high level of difficulty for an attacker attempting to recover the key from the ciphertext.
+A key with high entropy indicates a high level of difficulty for an attacker to recover the key from the ciphertext.
 However, in practice, modern cryptographic protocols, such as WPA2-PSK, Bluetooth Low Energy~(BLE), and Bluetooth Classic~(BC), usually tolerate low-entropy keys to accommodate user-friendly designs, maintain backward compatibility, or support resource-constrained devices.
 This raises a security issue concerning the recovery of low-entropy keys in these protocols, as demonstrated by attacks like PMKID~\cite{pmkidattack} and KNOB~\cite{antonioli2019knob}.
 
@@ -52,7 +52,8 @@ The attack has been responsibly disclosed to the Bluetooth SIG.
 Our primary contributions are as follows:
 \begin{itemize}[leftmargin=*]
     \item \emph{Protocol-agnostic methodology.} We relax the \emph{perfect encryption assumption} in the symbolic model and introduce the \texttt{MDerive} message-derivation fact together with a three-tier breaking-oracle design (value-breaking, relationship-breaking, message-derivation). Unlike prior ad-hoc extensions~\cite{shi2023blesc,claverie2023tamarin,jangid2023bluepe} that hard-code reveal rules for a specific protocol, our abstractions are function-symbol agnostic and support recursive decomposition of compound keys.
-    \item \emph{Tool without kernel modification.} We developed EntropyVerif, a syntax-sugar extension of \Tamarin{}, in which users annotate low-entropy terms with \texttt{:= L}. The compiler emits standard multiset-rewriting rules so that verification soundness is inherited directly from the unmodified \Tamarin{} backend.
+    \item \emph{Tool without kernel modification.} We developed EntropyVerif, a syntax-sugar extension of \Tamarin{}, in which users annotate low-entropy terms with \texttt{:= L}.
+          \emph{The compiler emits multiset-rewriting rules so that verification soundness is inherited directly from the unmodified \Tamarin{} backend.}
     \item \emph{Rediscovery of known attacks.} Using EntropyVerif we automatically reproduce the PMKID attack on WPA2-PSK, the KNOB attack and the Method Confusion attack on BLE pairing, without protocol-specific reveal rules.
     \item \emph{A new attack on Bluetooth Classic (UMD).} Beyond rediscovery, the compound-key decomposition naturally supported by \texttt{MDerive} leads the verifier to a previously unknown protocol-level attack: the Unilateral Multi-Downgrade attack on BC, which reduces 128-bit session-key recovery from $2^{128}$ to $n \cdot 2^{128/n}$, i.e.\ as low as $2^{12}$ when $n = 16$---a factor of $2^{116}$ reduction. The attack has been responsibly disclosed to the Bluetooth SIG.
 \end{itemize}
@@ -64,4 +65,4 @@ Section \ref{sec:3symbolic-modeling} introduces our modeling approach for low-en
 Section \ref{sec:4extension-and-compilation} discusses EntropyVerif, our extension of \Tamarin{}.
 Section \ref{sec:5case-study} presents case studies where we apply our method to analyze real-world protocols. 
 Finally, in Section \ref{sec:6results}, we present the results of our case studies, where we discover known vulnerabilities and a novel attack. 
-We additionally offer a review of related work in Section \ref{sec:7related-work} and provide a conclusion and discussion of our work in Section \ref{sec:8discussion-conclusion}.
+We offer a review of related work in Section \ref{sec:7related-work} and provide a conclusion and discussion of our work in Section \ref{sec:8discussion-conclusion}.

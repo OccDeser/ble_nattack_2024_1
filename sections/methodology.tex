@@ -109,7 +109,7 @@ For a term sequence $T$ composed of $\llbracket t_1, t_2, \ldots, t_n \rrbracket
 $c(T)$ outputs a sequence of all terms only composed of \emph{constants} in $T$.
 
 % 在上述的notations的基础之上，我们将解释我们的工具如何验证低熵标记的协议模型
-Based on the aforementioned notations, we will explain how our EntropyVerif verifies the protocol models with low-entropy labels.
+Based on the aforementioned notations, we explain how EntropyVerif verifies protocol models with low-entropy labels.
 
 % 标签翻译 给低熵term的标记，准确来说并不属于多重集重写系统，引入它是为了方便在现有的规则中标注出低熵term。对于规则$F_L \rightarrow F_R$，我们使用$T_{Low}$代表这条规则中被标记的低熵term，$T_{Low} \subseteq \varepsilon(\tau(F_L)) \circ \varepsilon(\tau(F_R))$。我们定义低熵标签被翻译的规则如下：
 % 其中，为了简洁，我们使用$\text{LE}(T_{Low})$来代表一个序列，that consists of fact $\text{\TFact{EntropyLow}}(t)$ for each term $t$ in $T_{Low}$.

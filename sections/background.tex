@@ -5,12 +5,11 @@
 Entropy was introduced by Shannon~\cite{shannon1948communicationtheory} to quantify the randomness and uncertainty within a system.
 In the domain of cryptography, the entropy of a key serves as a crucial metric for assessing its strength.
 
-The method of trying all possible keys until the correct one is found is called a brute-force attack.
-Brute-force attacks can be categorized into online and offline attacks.
-In an online attack, the adversary must persistently send the attempted keys to the target system to verify their correctness.
-In an offline attack, the attacker only needs to obtain the ciphertext and attempt all possible keys to decrypt it.
-Since online attacks require continuous interaction with the target system, they are less efficient than offline attacks.
-In this paper, we focus on offline brute-force attacks; all subsequent references to brute-force attacks pertain to the offline variant unless stated otherwise.
+The method of enumerating all possible keys until the correct one is found is called a brute-force attack, which can be classified as either an online or an offline attack.
+In an online attack, the adversary persistently sends the attempted keys to the target system to verify their correctness.
+In an offline attack, the attacker need only obtain the ciphertext and test all possible keys to decrypt it.
+% Since online attacks require continuous interaction with the target system, they are less efficient than offline attacks.
+In this paper, we focus on offline brute-force attacks; all subsequent references to brute-force attacks refer to the offline variant unless stated otherwise.
 
 \subsection{Protocols Tolerating Low-Entropy Keys}
 Low-entropy keys are common in practice.

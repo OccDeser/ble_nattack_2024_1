@@ -51,7 +51,7 @@ Here, we incorporate our security assumption into the model, marking the $PMK$ a
 \noindent
 \textbf{Property Specification:} We will verify the secrecy of $PTK$ to analyze whether attackers can exploit a low-entropy $PMK$ to compromise the security of WPA2-PSK.
 We introduce a fact, \TFact{SuppInsPTK}, indicating that the supplicant has installed a $PTK$.
-The formal definition of the secrecy of the $PTK$ is as follows:
+The definition of the secrecy of the $PTK$ is as follows:
 \begin{flalign*}
     & \hspace{0em} \TNot \, (\TEx \;\, \text{\Tterm{suppID  PTK \#i \#j.}} \;\, &\\
     & \hspace{1em} \text{\TFact{K(PTK)@\#i}} \; \land \; \text{\TFact{SuppInsPTK(suppID, PTK)@\#j}})
