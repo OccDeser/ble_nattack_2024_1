@@ -24,28 +24,6 @@ This tool integrates the key-breaking oracle discussed in the previous section, 
 To support the operation of the key-breaking oracle, our tool automatically analyzes the derivation relationships among variables within the model and generates message derivation facts. 
 Finally, to ensure the automation and efficiency of the verification process, we have introduced restrictions on the oracle rules and explained these restrictions.
 
-\begin{table}[t]
-    \centering
-    \caption{Notation used throughout the methodology.}
-    \label{tab:notation}
-    \renewcommand{\arraystretch}{1.15}
-    \small
-    \begin{tabular}{@{}ll@{}}
-    \toprule
-    Symbol & Meaning \\
-    \midrule
-    $\delta(t)$                 & Sub-terms that can be deconstructed from $t$ \\
-    $\rho(t)$                   & Atomic terms required to construct $t$ \\
-    $c(T)$                      & Terms in $T$ composed only of constants \\
-    $\tau(F)$                   & Terms extracted from a fact sequence $F$ \\
-    $\varepsilon(T)$            & Deconstruction of every term in $T$ \\
-    $df_\mathcal{P}$            & Derivation facts emitted from protocol rules \\
-    $df_\mathcal{O}$            & Oracle-side closure of derivation facts \\
-    $dm_\mathcal{A}$            & Messages derivable by the Dolev--Yao attacker \\
-    \bottomrule
-    \end{tabular}
-\end{table}
-
 \subsection{ Labeled Rule Syntax } \label{sec:syntax-extension}
 
 \Tamarin{} utilizes multiset rewriting rules to define protocol execution and adversarial behaviors.
@@ -72,6 +50,14 @@ Here, the label ``\verb|`L`|'' on the right side of ``:='' signifies that the va
 This label will be recognized by EntropyVerif and translated into a fact $\text{\TFact{EntropyLow}}(key)$ added to the right-hand side of the rule.
 
 \subsection{ Design of EntropyVerif }
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{img/tool}
+    \caption{Architecture of EntropyVerif}
+    \label{fig:design-of-compilation-tool}
+\end{figure}
+
 EntropyVerif is an extension of \Tamarin{} and 
 supports low-entropy labeled protocol models and integrates an adversarial model with the capability to brute-force low-entropy keys.
 As shown in \autoref{fig:design-of-compilation-tool}, EntropyVerif contains 4 modules:
@@ -84,15 +70,29 @@ As shown in \autoref{fig:design-of-compilation-tool}, EntropyVerif contains 4 mo
 
 We successfully implemented Label Interpretation, Derivation Generation, and Oracle Complement modules, while employing \Tamarin{} as the Verifier in our study.
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\columnwidth]{img/tool}
-    \caption{Architecture of EntropyVerif}
-    \label{fig:design-of-compilation-tool}
-\end{figure}
-
-
 \subsection{ Analysis Details }
+
+\begin{table}[t]
+    \centering
+    \caption{Notation used throughout the methodology.}
+    \label{tab:notation}
+    \renewcommand{\arraystretch}{1.15}
+    \small
+    \begin{tabular}{@{}ll@{}}
+    \toprule
+    Symbol & Meaning \\
+    \midrule
+    $\delta(t)$                 & Sub-terms that can be deconstructed from $t$ \\
+    $\rho(t)$                   & Atomic terms required to construct $t$ \\
+    $c(T)$                      & Terms in $T$ composed only of constants \\
+    $\tau(F)$                   & Terms extracted from a fact sequence $F$ \\
+    $\varepsilon(T)$            & Deconstruction of every term in $T$ \\
+    $df_\mathcal{P}$            & Derivation facts emitted from protocol rules \\
+    $df_\mathcal{O}$            & Oracle-side closure of derivation facts \\
+    $dm_\mathcal{A}$            & Messages derivable by the Dolev--Yao attacker \\
+    \bottomrule
+    \end{tabular}
+\end{table}
 
 % All terms in the translated multiset rewriting rules remain consistent with their original form.
 To aid in the description, we define the following operations.

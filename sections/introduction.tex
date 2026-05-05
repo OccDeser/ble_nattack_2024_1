@@ -58,11 +58,11 @@ Our primary contributions are as follows:
     \item \emph{A new attack on Bluetooth Classic (UMD).} Beyond rediscovery, the compound-key decomposition naturally supported by \texttt{MDerive} leads the verifier to a previously unknown protocol-level attack: the Unilateral Multi-Downgrade attack on BC, which reduces 128-bit session-key recovery from $2^{128}$ to $n \cdot 2^{128/n}$, i.e.\ as low as $2^{12}$ when $n = 16$---a factor of $2^{116}$ reduction. The attack has been responsibly disclosed to the Bluetooth SIG.
 \end{itemize}
 
-\noindent\textbf{Overview.} 
-% Section \ref{sec:2background} reviews protocols that tolerate low-entropy keys and the protocol analysis tool \Tamarin{}.
-Section \ref{sec:2background} reviews the definition of entropy and brute-force attacks, protocols that tolerate low-entropy keys, and the protocol analysis tool \Tamarin{}.
-Section \ref{sec:3symbolic-modeling} introduces our modeling approach for low-entropy analysis, detailing the key-breaking oracles. 
-Section \ref{sec:4extension-and-compilation} discusses EntropyVerif, our extension of \Tamarin{}.
-Section \ref{sec:5case-study} presents case studies where we apply our method to analyze real-world protocols. 
-Finally, in Section \ref{sec:6results}, we present the results of our case studies, where we discover known vulnerabilities and a novel attack. 
-We offer a review of related work in Section \ref{sec:7related-work} and provide a conclusion and discussion of our work in Section \ref{sec:8discussion-conclusion}.
+% \noindent\textbf{Overview.} 
+% % Section \ref{sec:2background} reviews protocols that tolerate low-entropy keys and the protocol analysis tool \Tamarin{}.
+% Section \ref{sec:2background} reviews the definition of entropy and brute-force attacks, protocols that tolerate low-entropy keys, and the protocol analysis tool \Tamarin{}.
+% Section \ref{sec:3symbolic-modeling} introduces our modeling approach for low-entropy analysis, detailing the key-breaking oracles. 
+% Section \ref{sec:4extension-and-compilation} discusses EntropyVerif, our extension of \Tamarin{}.
+% Section \ref{sec:5case-study} presents case studies where we apply our method to analyze real-world protocols. 
+% Finally, in Section \ref{sec:6results}, we present the results of our case studies, where we discover known vulnerabilities and a novel attack. 
+% We offer a review of related work in Section \ref{sec:7related-work} and provide a conclusion and discussion of our work in Section \ref{sec:8discussion-conclusion}.

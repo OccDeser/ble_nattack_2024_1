@@ -179,7 +179,7 @@ L\_min\_c and L\_min\_p \emph{should} be set to at least 7 octets.
 % 在蓝牙specification中，\textbf{shall} 代表了强制要求，\textbf{should} 代表了建议。因此，支持最大的密钥长度低于7字节的BC设备是不符合规范的。然而，我们在最新的规范中找到了有关BC设备允许的最大密钥长度的另一处表述，如下所示：
 In the Bluetooth specification, the term \emph{shall} denotes a mandatory requirement, whereas \emph{should} indicates a recommended practice.
 So BC devices that support a maximum key size of less than 7 bytes are deemed non-compliant with the specification.
-Nonetheless, in the same specification, we have identified an alternative statement about the permissible maximum key length for BC devices, which is detailed as follows:
+Nonetheless, in the same specification, we have identified an alternative statement about the permissible maximum key length for BC devices, which is as follows:
 \BlueQuote{[Vol 2, Part H, 4.1]}{ 
 Each device implementing the Baseband specification shall have a parameter defining the maximal allowed key length, L\_max, $1 \leq \text{L\_max} \leq 16$ (number of octets in the key).}
 % 这里表述BC设备支持的最大密钥长度可以是1字节到16字节，与之前的表述明显存在矛盾。
@@ -199,7 +199,7 @@ These categories correspond to devices that only support Secure Connections, tho
 By integrating the SC feature with key support characteristics, six distinct device types emerge.
 Throughout the paper we refer to these six combinations using a compact \textsc{Sc}-\textsc{Key} notation: the first component is one of \textbf{ScOn} (Secure-Connections only), \textbf{ScLg} (Secure plus Legacy), or \textbf{LgOn} (Legacy only); the second is one of \textbf{Secure} (16-byte keys only), \textbf{Enhanc} (7--16 byte keys), or \textbf{Legacy} (1--16 byte keys).
 For example, \textbf{ScOn-Secure} denotes a device that supports only Secure Connections and accepts only full-length session keys, while \textbf{LgOn-Legacy} denotes a legacy-only device that accepts any key length down to 1 byte.
-These abbreviations also index the rows of Table~\ref{tab:bc-session-result} in Section~\ref{sec:6results}.
+These abbreviations also index the rows of Table~\ref{tab:bc-session-result}.
 
 % 考虑到最小的密钥长度可以低至1字节，我们假设存在两类攻击者：
 % \begin{itemize}
