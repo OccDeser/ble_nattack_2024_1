@@ -440,6 +440,7 @@ Temporary Items
 .texvsctmp
 
 .claude/*
+.develop/*
 CLAUDE.md
 review/*
 workspace/*
