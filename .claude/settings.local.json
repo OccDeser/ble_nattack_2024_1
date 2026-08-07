@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "PowerShell(*)",
+      "WebFetch(domain:anonymous.4open.science)",
+      "WebFetch(domain:tamarin-prover.com)",
+      "WebFetch(domain:downloads.haskell.org)",
+      "WebFetch(domain:secartifacts.github.io)",
+      "WebFetch(domain:www.acm.org)"
+    ]
+  }
+}
