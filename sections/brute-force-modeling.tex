@@ -1,15 +1,19 @@
-\section{General Brute-Force Attack Modeling} \label{sec:3symbolic-modeling}
+\section{Brute-Force Attack Modeling} \label{sec:3symbolic-modeling}
 
 % In the previous section, we introduced the verification tool, \Tamarin{}, in detail.
 In this section, we will discuss the limitations of existing models and introduce our methodology for capturing brute force behaviors in a general manner.
 
 \subsection{Threat Model and Low-Entropy Adversary} \label{sec:threat-model}
 
-Our adversary extends the classical Dolev-Yao attacker~\cite{dolev1983security} with a bounded brute-force capability.
+Our adversary extends the classical Dolev-Yao attacker~\cite{dolev1983security}
+with a bounded brute-force capability.
 As in the Dolev-Yao model, the attacker fully controls the public network: they can intercept, drop, reorder, forge, and replay messages, and they can derive any term that is the result of applying a public function to knowledge already in their possession.
 Beyond these capabilities, the attacker may attempt to recover the value of a term $k$ from a function output $f(\ldots, k, \ldots)$ whenever (i)~$k$ has been labeled as low-entropy in the protocol model, and (ii)~every non-$k$ argument of $f$ is either a constant or derivable by the Dolev-Yao attacker.
-The cost of each such recovery is $2^{|k|}$ elementary operations, where $|k|$ is the nominal bit-length of $k$; an attacker is admitted to perform the recovery only if $|k|$ lies within an a priori computational budget.
+The recovery is forward: the attacker recomputes $f$ for each candidate value of $k$
+and keeps the one whose output matches the observed one exactly.
 
+Such a recovery takes up to $2^{|k|}$ trials, where $|k|$ is the nominal bit-length of $k$,
+and is admitted only if $|k|$ lies within a budget fixed in advance by the modeler.
 To anchor that budget at a concrete bit level we introduce two graded adversaries used throughout the case studies.
 A \emph{semi-attacker} (SA) is budgeted to $\lambda_{\mathrm{SA}} = 64$ bits and can therefore brute-force any key up to 8 bytes in length, matching the computational scale of the documented KNOB attack.
 A \emph{quart-attacker} (QA) is budgeted to $\lambda_{\mathrm{QA}} = 32$ bits and can brute-force any key up to 4 bytes, representing a lower-resource adversary.
