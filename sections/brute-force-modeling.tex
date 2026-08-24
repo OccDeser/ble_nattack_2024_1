@@ -1,7 +1,8 @@
 \section{Brute-Force Attack Modeling} \label{sec:3symbolic-modeling}
 
 % In the previous section, we introduced the verification tool, \Tamarin{}, in detail.
-In this section, we will discuss the limitations of existing models and introduce our methodology for capturing brute force behaviors in a general manner.
+In this section, we will discuss the limitations of existing models and introduce our methodology
+for capturing brute force behaviors without encoding them separately for each protocol.
 
 \subsection{Threat Model and Low-Entropy Adversary} \label{sec:threat-model}
 
@@ -11,6 +12,8 @@ As in the Dolev-Yao model, the attacker fully controls the public network: they 
 Beyond these capabilities, the attacker may attempt to recover the value of a term $k$ from a function output $f(\ldots, k, \ldots)$ whenever (i)~$k$ has been labeled as low-entropy in the protocol model, and (ii)~every non-$k$ argument of $f$ is either a constant or derivable by the Dolev-Yao attacker.
 The recovery is forward: the attacker recomputes $f$ for each candidate value of $k$
 and keeps the one whose output matches the observed one exactly.
+We call an attack that reaches its goal through one or more such recoveries a
+\emph{forward brute-force attack}, and this is the class of attacks we capture.
 
 Such a recovery takes up to $2^{|k|}$ trials, where $|k|$ is the nominal bit-length of $k$,
 and is admitted only if $|k|$ lies within a budget fixed in advance by the modeler.
@@ -43,8 +46,10 @@ The design of this rule implicitly relies on a critical hypothesis: an attacker 
 This hypothesis is confirmed manually, rather than automatically.
 This presents a challenge, as the inability to ascertain which function an attacker might utilize to brute force the key renders the application of such a rule infeasible.
 
-To generally capture all brute force attacks, we designed a key-breaking oracle.
-This oracle accepts any function and is capable of returning the value of the low-entropy key, provided that the attacker can furnish the function output along with the values of all other relevant variables, as shown below:
+To capture forward brute-force attacks, we designed a key-breaking oracle.
+This oracle accepts any function symbol declared in the model and returns the value of the
+low-entropy key, provided that the attacker can furnish the function output along with the values
+of all other arguments, as shown below:
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.7755\columnwidth]{img/general-oracle} 
@@ -62,7 +67,8 @@ This oracle accepts any function and is capable of returning the value of the lo
 \noindent
 To model this oracle, there are two challenges.
 \begin{enumerate}[leftmargin=*]
-    \item \textbf{Uncertainty of Received Functions:} As a general oracle, it should accept any function. 
+    \item \textbf{Uncertainty of Received Functions:} The oracle is not written for one protocol,
+    so it has to accept any function symbol the model declares.
     But in symbolic models, function symbol matching is precise, prohibiting using a single function symbol to generally match all functions.
     \item \textbf{Uncertainty of Additional Inputs:} Given the uncertainty regarding which function will be received, the oracle must dynamically accommodate additional inputs contingent upon the specific function it encounters.
 \end{enumerate}
@@ -118,7 +124,8 @@ For the sake of consistency, multi-arity functions are modeled as:
 where $\langle \cdot \rangle$ denotes a function of $n$ arguments, representing the concatenation of $n$ function arguments.
 Similarly, a composite function $f \circ g$ can be modeled as the message derivation fact $\text{\TFact{MDerive}}(x, f(g(x)))$.
 
-The relationship-breaking oracle maintains a collection of all functions.
+The relationship-breaking oracle maintains a collection of all function symbols declared in the
+model.
 Once a derivation relationship between two messages is identified, the oracle can locate the specific mapping function.
 If the oracle needs to identify a function where a certain key $k$ is the sole argument, it suffices to find the fact $\text{\TFact{MDerive}}(k, m)$,
 where $m$ is a message derived from $k$.
