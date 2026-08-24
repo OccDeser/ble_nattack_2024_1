@@ -11,9 +11,9 @@ function forward and matching the result exactly: it does not invert a function 
 does not know, does not accept a candidate on probabilistic evidence, and does not use partial
 information about the arguments.
 Third, the budget on the nominal key length is chosen by the modeler rather than derived from the
-protocol; if the modeler overstates what the attacker can do and picks a budget looser than that
-attacker, the analysis can report attacks that are valid in the symbolic model but infeasible in
-practice.
+protocol.
+If the modeler overstates what the attacker can do and picks a budget looser than that attacker,
+the analysis can report attacks that are valid in the symbolic model but infeasible in practice.
 
 \noindent\textbf{Verification effort.}
 Although we impose a budget on the value-breaking oracle, verification may still fail to terminate or take an excessively long time on densely interleaved multi-session models; the worst-case BC configuration in our evaluation takes roughly $9.9 \times 10^4$ seconds.
