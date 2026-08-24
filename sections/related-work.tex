@@ -1,51 +1,25 @@
 \section{Related Work} \label{sec:7related-work}
 
-\newcommand{\cmk}{\textcolor{xhs_green}{\ding{51}}}
-\newcommand{\xmk}{\textcolor{xhs_red}{\ding{55}}}
-
-\begin{table}[t]
-\centering
-\caption{Comparison with prior symbolic and probabilistic approaches to protocols with compromisable keys. See legend below for the meaning of criteria C1--C5.}
-\label{tab:related-work-comparison}
-\small
-\renewcommand{\arraystretch}{1.2}
-\begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}X ccccc@{}}
-\toprule
-\textbf{Work} & \textbf{C1} & \textbf{C2} & \textbf{C3} & \textbf{C4} & \textbf{C5} \\
-\midrule
-Shi et al.~\cite{shi2023blesc}                       & \xmk & \xmk & \xmk & \cmk & \xmk \\
-Claverie et al.~\cite{claverie2023tamarin}           & \xmk & \xmk & \xmk & \cmk & \xmk \\
-Jangid et al.~\cite{jangid2023bluepe}                & \xmk & \xmk & \xmk & \cmk & \xmk \\
-Cheval et al.~\cite{cheval2023hash}                  & \cmk & \xmk & \xmk & \xmk & \cmk \\
-Cremers et al.~\cite{cremers2019prime}               & \cmk & \xmk & \xmk & \xmk & \cmk \\
-Siedlecka-Lamch et al.~\cite{siedlecka2016probabilistic} & \cmk & \xmk & \xmk & --- & \xmk \\
-\midrule
-\textbf{EntropyVerif (ours)}                         & \cmk & \cmk & \cmk & \cmk & \cmk \\
-\bottomrule
-\end{tabularx}
-
-\vspace{0.4em}
-\begin{flushleft}
-\footnotesize
-\textbf{C1}~Protocol-agnostic modeling. \hspace{0.4em}
-\textbf{C2}~Compound-key decomposition. \hspace{0.4em}
-\textbf{C3}~Graded attacker with bit-level bound. \hspace{0.4em}
-\textbf{C4}~No kernel modification (\cmk{} only if the approach does not recompile \Tamarin{} or alter the term-rewriting engine; ``---'' marks Siedlecka-Lamch et al., who use PRISM instead). \hspace{0.4em}
-\textbf{C5}~New protocol-level attack discovered.
-\end{flushleft}
-\end{table}
-
-Table~\ref{tab:related-work-comparison} positions our work against five lines of prior research. We next elaborate on each.
+We discuss five lines of prior work: empirical studies of low-entropy vulnerabilities, enhanced
+attacker models for specific primitives, protocol-specific reveal rules, equivalence-based
+analysis of off-line guessing, and probabilistic model checking.
 
 \noindent\textbf{Empirical studies of low-entropy vulnerabilities.}
 Early studies~\cite{gong1993protecting,kelsey1997secure} highlighted the profound impact of low-entropy keys on cryptographic-protocol security.
 In practice, a long list of severe vulnerabilities has been attributed to low-entropy cryptographic variables, including those disclosed in~\cite{jangid2023bluepe,schneier1998cryptanalysis,ferguson1999cryptographic,gpgcracking} in addition to the KNOB and PMKID attacks examined in this paper.
-These studies identify the problem but do not offer an analysis methodology; our work provides the first automated tool that discovers such vulnerabilities at the protocol design stage.
+These studies identify the problem but do not offer an analysis methodology.
 
 \noindent\textbf{Enhanced attacker models for specific primitives.}
 Several works extend symbolic tools with enhanced attackers against specific cryptographic primitives, such as weak hash functions~\cite{cheval2023hash}, unsafe Diffie-Hellman groups~\cite{cremers2019prime}, malleable digital signatures~\cite{jackson2019sign}, and AEAD schemes~\cite{cremers2023aead}.
 These works target primitive-level weaknesses rather than key-length-induced weaknesses, and typically require modifications to the tool's internal term-rewriting logic.
-Brute-force attacks across arbitrary compound keys are not covered by any of them and remain, to the best of our knowledge, unstudied in symbolic models prior to this work.
+None of them addresses keys that are weak because of their length, or the decomposition of a
+compound key into separately breakable parts.
+
+\noindent\textbf{Protocol-specific reveal rules.}
+Shi et al.~\cite{shi2023blesc} proposed an ad-hoc approach to discover brute-force-associated attacks in BLE, where a fixed reveal rule allows the attacker to compromise one particular key.
+Claverie et al.~\cite{claverie2023tamarin} and Jangid et al.~\cite{jangid2023bluepe} follow a similar protocol-specific pattern to enable compromise of a single cryptographic variable in BLE pairing.
+These approaches are tailored to a known attack and cannot generalize, because (i) the reveal rule hard-codes one specific function symbol, (ii) there is no notion of compound-key decomposition, and (iii) no graded-attacker model constrains which keys are actually within reach of a realistic adversary.
+In contrast, our \texttt{MDerive} abstraction is function-symbol agnostic, our three-tier oracle design supports recursive decomposition of compound keys, and our SA/QA attacker model anchors breakability to a concrete bit-level bound.
 
 \noindent\textbf{Equivalence-based analysis of off-line guessing.}
 A separate line of work decides whether an attacker can tell a correct guess from a wrong one, by
@@ -57,7 +31,8 @@ method, and Parad\v{z}ik and Derek~\cite{paradzik2022conditional} extend it with
 obtain the first verification of off-line guessing resistance in the multiset rewriting setting,
 applied to the EAP-EKE password-authenticated key exchange.
 Their question is whether a guess is checkable at all, which is decided from the messages the
-protocol emits, and it covers candidate validation that we leave out.
+protocol emits, and it covers candidate validation that our attacker model leaves out
+(\autoref{sec:threat-model}).
 What the answer does not record is how large the guessed value is. A 128-bit key that is checkable
 in principle receives the same verdict as a 4-byte one, so the verdict alone does not separate a
 key that a given attacker can enumerate from one that no attacker can.
@@ -69,17 +44,16 @@ UMD attack needs.
 The two lines are complementary. An equivalence check tells whether a guess can be confirmed, and
 our analysis tells whether confirming it is within a stated attacker's reach.
 
-
-\noindent\textbf{Protocol-specific reveal rules.}
-Shi et al.~\cite{shi2023blesc} proposed an ad-hoc approach to discover brute-force-associated attacks in BLE, where a fixed reveal rule allows the attacker to compromise one particular key.
-Claverie et al.~\cite{claverie2023tamarin} and Jangid et al.~\cite{jangid2023bluepe} follow a similar protocol-specific pattern to enable compromise of a single cryptographic variable in BLE pairing.
-These approaches are tailored to a known attack and cannot generalize, because (i) the reveal rule hard-codes one specific function symbol, (ii) there is no notion of compound-key decomposition, and (iii) no graded-attacker model constrains which keys are actually within reach of a realistic adversary.
-In contrast, our \texttt{MDerive} abstraction is function-symbol agnostic, our three-tier oracle design supports recursive decomposition of compound keys, and our SA/QA attacker model anchors breakability to a concrete bit-level bound.
-
 \noindent\textbf{Probabilistic model checking.}
 Siedlecka-Lamch et al.~\cite{siedlecka2016probabilistic} developed a probabilistic model checker for security protocols.
 Given a per-key compromise probability, the tool computes a risk tree and outputs a sensitivity assessment.
 This line of work is complementary to ours: probabilistic tools quantify leakage risk but cannot produce the kind of concrete attack trace that a symbolic verifier produces, nor can they surface protocol-level multi-step attacks such as UMD.
 
 \noindent\textbf{Summary.}
-No prior work simultaneously supports protocol-agnostic modeling, compound-key decomposition, a graded bit-level attacker, and a non-intrusive implementation path; EntropyVerif is, to our knowledge, the first to check all four boxes, and is the first automated symbolic tool to discover a new protocol-level attack on Bluetooth Classic.
+Across the works above we are not aware of one that combines protocol-agnostic modeling,
+compound-key decomposition, and a graded bit-level attacker in a trace-based verifier without
+modifying it.
+Equivalence-based analyses decide a different and in places broader question, as discussed above,
+but do not relate a guess to an attacker's budget.
+EntropyVerif occupies that gap, and used it to find a previously unreported protocol-level attack
+on Bluetooth Classic.
