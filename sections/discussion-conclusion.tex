@@ -1,11 +1,19 @@
 \section{Discussion and Conclusion} \label{sec:8discussion-conclusion}
 
 \noindent\textbf{Threats to validity.}
-Our methodology rests on three explicit assumptions that readers should bear in mind when interpreting the verification results.
-First, we assume that all keys are uniformly distributed over their value space, so that the Shannon entropy and min-entropy of a key coincide with $\log_2 N_K$.
-Protocols in which keys are drawn from non-uniform distributions---for example, user-chosen passwords whose effective entropy is much lower than their nominal length---may be over-approximated as secure by our current model; extending \texttt{MDerive} with non-uniform entropy annotations is an explicit direction for future work.
-Second, the oracle-activation budget $B$ is a termination heuristic rather than a soundness condition: a verification that succeeds at budget $B$ rules out attacks using at most $B$ oracle invocations per target term, but a larger budget could in principle surface additional attacks, so reported bounds should be read as ``secure under the stated budget.''
-Third, our case studies, while substantial, cover three protocol families and six BC device configurations; generalizing empirical claims about scalability and automation to arbitrary protocols requires further evaluation.
+Our methodology rests on three explicit assumptions that readers should bear in mind when
+interpreting the verification results.
+First, our case studies, while substantial, cover three protocol families and six BC device
+configurations; generalizing empirical claims about scalability and automation to arbitrary
+protocols requires further evaluation.
+Second, the attacker of Section~\ref{sec:threat-model} recovers a key only by recomputing a
+function forward and matching the result exactly: it does not invert a function over arguments it
+does not know, does not accept a candidate on probabilistic evidence, and does not use partial
+information about the arguments.
+Third, the budget on the nominal key length is chosen by the modeler rather than derived from the
+protocol; if the modeler overstates what the attacker can do and picks a budget looser than that
+attacker, the analysis can report attacks that are valid in the symbolic model but infeasible in
+practice.
 
 \noindent\textbf{Verification effort.}
 Although we impose a budget on the value-breaking oracle, verification may still fail to terminate or take an excessively long time on densely interleaved multi-session models; the worst-case BC configuration in our evaluation takes roughly $9.9 \times 10^4$ seconds.
@@ -27,6 +35,9 @@ When a real protocol uses a private function, one can often replace it with a co
 Similarly, our modeling focuses on brute-force attacks whose cost depends solely on key length and does not cover side-channel-assisted or differential attacks whose cost depends on implementation-level details.
 
 \noindent\textbf{Conclusion.}
-We proposed the first protocol-agnostic symbolic methodology for analyzing protocols that tolerate low-entropy keys, built on the \texttt{MDerive} derivation abstraction and a three-tier breaking-oracle design, and realized as EntropyVerif---a syntax-sugar extension of \Tamarin{} whose verification soundness is inherited from the unmodified \Tamarin{} backend.
+We proposed the first protocol-agnostic symbolic methodology for analyzing protocols that tolerate
+low-entropy keys, built on the \texttt{MDerive} derivation abstraction and a three-tier
+breaking-oracle design, and realized as EntropyVerif---a syntax-sugar extension of \Tamarin{} that
+emits standard multiset-rewriting rules and leaves the \Tamarin{} backend unmodified.
 Our case studies on WPA2-PSK, BLE pairing, and Bluetooth Classic automatically rediscover PMKID, KNOB, and Method Confusion without any protocol-specific reveal rules, and reveal a new protocol-level attack on Bluetooth Classic---the Unilateral Multi-Downgrade (UMD) attack (Section~\ref{sec:umd-attack})---that, via the compound-key decomposition $C(n) = n \cdot 2^{128/n}$ attained at $n=16$, reduces 128-bit session-key recovery by a factor of $2^{116}$.
 Together, these results demonstrate that entropy-aware symbolic verification is both feasible and necessary for modern protocols that compromise on key strength for usability or compatibility, and they argue for treating brute-force reachability as a first-class citizen in future protocol design and analysis.

@@ -20,7 +20,9 @@ In this section we describe how to apply our oracle modeling approach to analyze
 To enhance the modeling of protocols using our methodology, we have devised an innovative rule syntax that serves as a superset of \Tamarin{}'s syntax. 
 This new syntax incorporates several new keywords designed to identify low-entropy keys that require special attention. 
 Additionally, to facilitate our new syntax, we have developed an automated low-entropy analysis tool, EntropyVerif. 
-This tool integrates the key-breaking oracle discussed in the previous section, enabling attackers to generally compromise low-entropy keys, thus providing a comprehensive security analysis of protocols tolerant to such keys. 
+This tool integrates the key-breaking oracle discussed in the previous section, enabling attackers
+to compromise low-entropy keys, thus providing a security analysis of protocols tolerant to such
+keys.
 To support the operation of the key-breaking oracle, our tool automatically analyzes the derivation relationships among variables within the model and generates message derivation facts. 
 Finally, to ensure the automation and efficiency of the verification process, we have introduced restrictions on the oracle rules and explained these restrictions.
 
