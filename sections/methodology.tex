@@ -84,11 +84,11 @@ We successfully implemented Label Interpretation, Derivation Generation, and Ora
     \toprule
     Symbol & Meaning \\
     \midrule
-    $\delta(t)$                 & Sub-terms that can be deconstructed from $t$ \\
-    $\rho(t)$                   & Atomic terms required to construct $t$ \\
-    $c(T)$                      & Terms in $T$ composed only of constants \\
-    $\tau(F)$                   & Terms extracted from a fact sequence $F$ \\
-    $\varepsilon(T)$            & Deconstruction of every term in $T$ \\
+    $\mathsf{sub}(t)$           & Syntactic subterms of $t$ \\
+    $\mathsf{atoms}(t)$         & Atomic terms occurring in $t$ \\
+    $\mathsf{vars}(t)$          & Atomic terms of $t$ that are not constants \\
+    $\mathsf{const}(T)$         & Constants and public names in $T$ \\
+    $\mathsf{terms}(F)$         & Terms occurring as arguments of the facts in $F$ \\
     $df_\mathcal{P}$            & Derivation facts emitted from protocol rules \\
     $df_\mathcal{O}$            & Oracle-side closure of derivation facts \\
     $dm_\mathcal{A}$            & Messages derivable by the Dolev--Yao attacker \\
@@ -97,18 +97,45 @@ We successfully implemented Label Interpretation, Derivation Generation, and Ora
 \end{table}
 
 % All terms in the translated multiset rewriting rules remain consistent with their original form.
-To aid in the description, we define the following operations.
-For a given term $t$, $\delta(t)$ denotes the sequence of all sub-terms that can be deconstructed from $t$.
-$\rho(t)$ represents all the terms necessary to construct $t$ that cannot be deconstructed.
-We denote $\llbracket e_1, e_2, \ldots, e_n \rrbracket$ as a sequence where all $e_i$ must be of the same type, which can be a term, fact, or sequence.
-With the sequence notation, we can represent the left-hand side and right-hand side of a multiset rewriting rule using sequences.
-For instance, $[F_{L}] \rightarrow [F_{R}]$ denotes a rule where $F_{L}$ and $F_{R}$ are sequences of facts.
-We additionally define operations for sequences.
-$S_1 \circ S_2$ represents the concatenation of two sequences $S_1$ and $S_2$.
-The operation $S_1 \setminus S_2$ generates a new sequence containing all elements present in $S_1$ but absent in $S_2$.
-Let $F$ be a sequence of facts, and $\tau(F)$ represents the sequence of terms extracted from all facts.
-For a term sequence $T$ composed of $\llbracket t_1, t_2, \ldots, t_n \rrbracket$, $\varepsilon(T)$ denotes the sequence $\delta(t_1) \circ \delta(t_2) \circ \ldots \circ \delta(t_n)$.
-$c(T)$ outputs a sequence of all terms only composed of \emph{constants} in $T$.
+To describe the translation we use the operations listed in \autoref{tab:notation}, all of which
+are defined on sets.
+Throughout, a term is \emph{atomic} if it is a variable, a fresh name, or a public constant. Every
+other term has the form $f(t_1,\ldots,t_n)$ for a function symbol $f$ declared in the model.
+
+For a term $t$, $\mathsf{sub}(t)$ is the set of syntactic subterms of $t$:
+\[
+    \mathsf{sub}(t) =
+    \begin{cases}
+        \{t\} & \text{$t$ atomic,} \\[2pt]
+        \{t\} \cup \bigcup_{i=1}^{n} \mathsf{sub}(t_i) & \text{$t = f(t_1,\ldots,t_n)$.}
+    \end{cases}
+\]
+The definition is purely syntactic. It does not close the set under the equational theory, and it
+does not refer to what an attacker is able to derive. Both of those are left to \Tamarin{} during
+verification.
+
+Dually, $\mathsf{atoms}(t)$ is the set of atomic terms out of which $t$ is built:
+\[
+    \mathsf{atoms}(t) =
+    \begin{cases}
+        \{t\} & \text{$t$ atomic,} \\[2pt]
+        \bigcup_{i=1}^{n} \mathsf{atoms}(t_i) & \text{$t = f(t_1,\ldots,t_n)$.}
+    \end{cases}
+\]
+Reading $t$ as a tree, $\mathsf{sub}(t)$ collects every node and $\mathsf{atoms}(t)$ collects the
+leaves. Both operations are lifted to a set of terms $T$ by taking the union over its elements, so
+that $\mathsf{sub}(T) = \bigcup_{t \in T} \mathsf{sub}(t)$, and likewise for $\mathsf{atoms}$.
+
+We write $\mathsf{const}(T)$ for the subset of $T$ consisting of constants and public names, and
+abbreviate $\mathsf{vars}(t) = \mathsf{atoms}(t) \setminus \mathsf{const}(\mathsf{atoms}(t))$ for
+the non-constant leaves of $t$. For a collection of facts $F$, $\mathsf{terms}(F)$ is the set of
+terms occurring as arguments of those facts.
+
+As in \Tamarin{}, the two sides of a multiset rewriting rule are multisets of facts, written
+$[F_L] \rightarrow [F_R]$, and $\uplus$ denotes multiset union. Every other collection in this
+section is a set. A fact argument must be a single term, so wherever a set of terms has to be
+passed to a fact we arrange it in a fixed order and pass the resulting tuple, written $\langle
+\cdot \rangle$. That order belongs to the encoding and carries no meaning.
 
 % 在上述的notations的基础之上，我们将解释我们的工具如何验证低熵标记的协议模型
 Based on the aforementioned notations, we explain how EntropyVerif verifies protocol models with low-entropy labels.
@@ -119,12 +146,15 @@ Based on the aforementioned notations, we explain how EntropyVerif verifies prot
 \textbf{Label Interpretation:} 
 Labels of low-entropy terms are not inherently part of the multiset rewriting system. 
 It is introduced to facilitate the identification of such terms within existing rules.
-For a given rule $[F_L] \rightarrow [F_R]$, $T_{Low}$ denotes the set of low-entropy terms labeled in the rule, where $T_{Low} \subseteq \varepsilon(\tau(F_L)) \circ \varepsilon(\tau(F_R))$.
+For a given rule $[F_L] \rightarrow [F_R]$, $T_{Low}$ denotes the set of low-entropy terms labeled
+in the rule, where $T_{Low} \subseteq \mathsf{sub}(\mathsf{terms}(F_L)) \cup
+\mathsf{sub}(\mathsf{terms}(F_R))$.
 The translated version of such a rule with low-entropy labels is shown as follows:
 \[
-    [F_L] \rightarrow [F_R \circ \text{\textsf{LE}}(T_{Low})]
+    [F_L] \rightarrow [F_R \uplus \text{\textsf{LE}}(T_{Low})]
 \]
-where, for brevity, we use $\text{\textsf{LE}}(T_{Low})$ to represent the sequence $\llbracket \text{\TFact{EntropyLow}}(t_i) \rrbracket$ for each term $t_i$ in $T_{Low}$.
+where, for brevity, we write $\text{\textsf{LE}}(T_{Low})$ for the multiset $\{\,
+\text{\TFact{EntropyLow}}(t) \mid t \in T_{Low} \,\}$.
 
 % 我们以\autoref{sec:syntax-extension}中低熵标记的规则为例，该规则中在Label Interpretation模块中会被翻译为如下的rule：
 We take the rule labeled with low entropy in \autoref{sec:syntax-extension} as an example. 
@@ -141,18 +171,21 @@ In the Label Interpretation, it will be translated into the following rule:
 % 这里我们使用$\text{\textsf{MD}}(T)$来表示来表示使用序列T中每个term作为计算结果的消息派生事实。对于单个term $t$，$\rho(t) \setminus c(\rho(t)) $ 包含了构建$t$所需的所有变量term。那么$\text{\textsf{MD}}(T)$可以被定义为$\text{\TFact{MDerive}(\langle \rho(t) \setminus c(\rho(t)) \rangle, t)}$ for each term $t$ in $T$。
 \noindent
 \textbf{Derivation Generation:} 
-Given the rule $[F_L] \rightarrow [F_R]$, $\tau(F_R)$ denotes the terms present within the rule after executing, whereas $\varepsilon(\tau(F_L))$ represents all possibly accessible terms before the execution.
+Given the rule $[F_L] \rightarrow [F_R]$, $\mathsf{terms}(F_R)$ denotes the terms present within
+the rule after executing, whereas $\mathsf{sub}(\mathsf{terms}(F_L))$ represents all possibly
+accessible terms before the execution.
 
-Thus, $\tau(F_R) \setminus \varepsilon(\tau(F_L))$ can be used to represent the new terms derived during the execution of the rule.
+Thus, $\mathsf{terms}(F_R) \setminus \mathsf{sub}(\mathsf{terms}(F_L))$ can be used to represent
+the new terms derived during the execution of the rule.
 We define the rules incorporating message derivation facts as follows:
 \[
-    [F_L] \rightarrow [F_R \circ \text{\textsf{MD}}(\tau(F_R) \setminus \varepsilon(\tau(F_L)))]
+    [F_L] \rightarrow [F_R \uplus \text{\textsf{MD}}(\mathsf{terms}(F_R) \setminus \mathsf{sub}(\mathsf{terms}(F_L)))]
 \]
-Here, $\text{\textsf{MD}}(T)$ denotes a sequence that consists of message derivation facts.
-For an individual term $t$, $\rho(t) \setminus c(\rho(t) $ contains all variable terms needed to construct it.
-Hence $\text{\textsf{MD}}(T)$ can be defined as 
-% $\text{\TFact{MDerive}}(\langle \rho(t) \setminus c(\rho(t)) \rangle, t)$ for each term $t$ in $T$.
-$\llbracket \text{\TFact{MDerive}}(\langle \rho(t_i) \setminus c(\rho(t_i)) \rangle, t_i) \rrbracket$, where $t_i \in T$.
+Here, $\text{\textsf{MD}}(T)$ denotes the set of message derivation facts.
+For an individual term $t$, $\mathsf{vars}(t)$ contains the non-constant leaves needed to
+construct it.
+Hence $\text{\textsf{MD}}(T)$ can be defined as
+$\{\, \text{\TFact{MDerive}}(\langle \mathsf{vars}(t) \rangle, t) \mid t \in T \,\}$.
 
 We take the rule in \autoref{sec:syntax-extension} as an example as well. 
 A message derivation fact will be added to the right-hand side of the rule as follows:
@@ -186,10 +219,10 @@ A message derivation fact will be added to the right-hand side of the rule as fo
 The Oracle Complement module adds the key-breaking oracle to protocol models and generates appropriate restrictions.
 Despite the aforementioned work enabling the oracle to operate, additional restrictions on the oracle's rules are necessary to ensure automation, and efficiency, and to prevent the system from entering a non-terminating state.
 
-For a given term $t$, we previously defined $\rho(t) \setminus c(\rho(t))$, which contains all variables required to construct $t$.
-% 由于$\rho(t) \setminus c(\rho(t))$的元素个数是有限的，而每次oracle rule的执行都会消耗一个元素，因此，如何t可以被oracle破解，那么oracle rule的执行次数一定小于等于$\rho(t) \setminus c(\rho(t))$的中的元素个数。
-Since the number of elements in $\rho(t) \setminus c(\rho(t))$ is finite and each execution of an oracle rule consumes one element, 
-if $t$ can be compromised by the oracle, the number of times the oracle rule can be executed must be less than the number of elements in $\rho(t) \setminus c(\rho(t))$.
+For a given term $t$, $\mathsf{vars}(t)$ contains all variables required to construct it.
+Since $\mathsf{vars}(t)$ is finite and each execution of an oracle rule consumes one of its
+elements, if $t$ can be compromised by the oracle then the oracle rule is executed at most
+$|\mathsf{vars}(t)|$ times.
 So in the Oracle Complement module, we reserved a verification option to dynamically restrict the number of times the oracle rule can be executed.
 
 \noindent
