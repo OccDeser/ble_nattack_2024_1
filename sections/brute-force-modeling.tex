@@ -10,10 +10,12 @@ Our adversary extends the classical Dolev-Yao attacker~\cite{dolev1983security}
 with a bounded brute-force capability.
 As in the Dolev-Yao model, the attacker fully controls the public network: they can intercept, drop, reorder, forge, and replay messages, and they can derive any term that is the result of applying a public function to knowledge already in their possession.
 Beyond these capabilities, the attacker may attempt to recover the value of a term $k$ from a function output $f(\ldots, k, \ldots)$ whenever (i)~$k$ has been labeled as low-entropy in the protocol model, and (ii)~every non-$k$ argument of $f$ is either a constant or derivable by the Dolev-Yao attacker.
-The recovery is forward: the attacker recomputes $f$ for each candidate value of $k$
-and keeps the one whose output matches the observed one exactly.
-We call an attack that reaches its goal through one or more such recoveries a
-\emph{forward brute-force attack}, and this is the class of attacks we capture.
+The recovery is deterministic and forward: for each candidate value of $k$ the attacker recomputes
+$f$ and keeps the candidate whose output matches the observed one exactly.
+It never applies an inverse of $f$ to the observed output, and checks a candidate by recomputing
+$f$ rather than by inverting it.
+We call an attack that reaches its goal through one or more such recoveries a \emph{forward
+brute-force attack}, and this is the class of attacks we capture.
 
 Such a recovery takes up to $2^{|k|}$ trials, where $|k|$ is the nominal bit-length of $k$,
 and is admitted only if $|k|$ lies within a budget fixed in advance by the modeler.
