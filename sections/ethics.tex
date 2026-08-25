@@ -2,18 +2,43 @@
 
 \noindent
 \textbf{Responsible disclosure.}
-We reported the UMD vulnerability to the Bluetooth Special Interest Group~(SIG) security team on July~15, 2024.
-The SIG acknowledged receipt and, in their February~7, 2025 response, stated that ``the scenario posited for identifying the session key used during BR/EDR encryption establishment appears much more practical'' than previously known attacks.
-The SIG is conducting a detailed analysis and will provide further feedback.
+We reported the vulnerability to the Bluetooth Special Interest Group~(SIG) security team on
+July~15, 2024, under the heading of a unilateral key downgrade and covering two scenarios, of
+which the one this paper reports is the second.
+On February~7, 2025 the SIG replied with the results of its internal analysis. For our scenario it
+wrote that ``the scenario posited for identifying the session key used during BR/EDR encryption
+establishment appears much more practical'', a comparison with the other scenario in the same
+letter rather than with previously published attacks, and noted that accepting short encryption
+key lengths remains an implementation decision made for backward compatibility.
+
+\noindent
+\textbf{Disclosure channel.}
+UMD is a weakness in how the Bluetooth Classic specification permits key-length negotiation, not a
+defect in one product, so we disclosed it to the SIG rather than to individual manufacturers, and
+we did not contact any manufacturer directly.
+Notification of affected members went through the SIG, which asked for a disclosure timeline on
+their behalf and which we authorized to pass our plans on.
 
 \noindent
 \textbf{Experimental setup.}
 All analysis in this paper is conducted entirely within the symbolic model using \Tamarin{}.
 No real Bluetooth devices were involved in the discovery or validation of the UMD attack.
-The attack traces are produced by the automated verifier and do not require physical proximity to any device.
+The attack traces are produced by the automated verifier and do not require physical proximity to
+any device.
+We have therefore not demonstrated the attack against a physical device, and the SIG's February
+2025 reply invites exactly such a demonstration.
 
 \noindent
 \textbf{User-side risk assessment.}
-The UMD attack targets Bluetooth Classic peripheral devices that accept session keys shorter than 7~bytes.
-Until specification updates and firmware patches are deployed, users can mitigate risk by: (i)~avoiding pairing with untrusted or unknown devices, (ii)~preferring devices that enforce Secure Connections and maximum key lengths, and (iii)~monitoring for unexpected re-pairing events that may indicate an active downgrade attack.
+The UMD attack requires a Bluetooth Classic peer that still negotiates the encryption key length
+in the legacy manner and accepts a session key of eight octets or fewer. That is the same
+precondition as the published key-negotiation downgrade attacks~\cite{antonioli2019knob}, so the
+devices at risk are the old ones already at risk from those attacks, not a new population.
+After the KNOB disclosure the SIG updated the Core Specification to ``recommend a minimum
+encryption key length of 7 octets for BR/EDR connections''~\cite{sig2019knob}. That is a
+recommendation rather than a requirement, and it does not exclude the key lengths this attack
+needs.
+Users can reduce exposure by: (i)~avoiding pairing with untrusted or unknown devices,
+(ii)~preferring devices that enforce Secure Connections and maximum key lengths on both sides, and
+(iii)~monitoring for unexpected re-pairing events that may indicate an active downgrade attack.
 

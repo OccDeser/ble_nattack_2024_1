@@ -27,7 +27,6 @@ Based on the attack, we argue that the Bluetooth SIG should consider the followi
 (i) Impose a \emph{hard floor} on the session-key length in the core specification (e.g., 16~bytes for Secure, and at least 7~bytes for Enhanced devices communicating with modern peers), so that the $n = 16$ optimum of $C(n)$ becomes unreachable.
 (ii) Require \emph{bilateral confirmation} of any key-length downgrade, so that an attacker coercing one side into a short-key session cannot proceed without simultaneously coercing the other.
 (iii) Bind short-key negotiations to the pair of \texttt{BDADDR}s that initiated the long-term key, so that fragments obtained in one session cannot be recombined into a key that targets an unrelated session.
-We have shared these recommendations with the Bluetooth SIG as part of responsible disclosure.
 
 \noindent\textbf{Scope of the methodology.}
 Our methodology currently does not model private (secret) functions, because the prerequisites for brute-force attacks are defined in terms of publicly-known cryptographic operators.
