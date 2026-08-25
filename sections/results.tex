@@ -1,7 +1,14 @@
 \section{Results} \label{sec:6results}
-This section presents the analysis results of the previous three cases and compares them with models from the literature.
-Our experiment was conducted on a server running Ubuntu 22.04 with an AMD 7950X3D CPU and 192GB RAM.
-We will provide a detailed description of the process for the novel attack discovered from the BC analysis results.
+This section presents the analysis results of the previous three cases and compares them with
+models from the literature.
+Our experiment was conducted on a server running Ubuntu 22.04 with an AMD 7950X3D CPU and
+192GB RAM.
+We used \Tamarin{} as the unmodified verification backend, and EntropyVerif operates purely as
+a source-to-source front-end that emits standard \Tamarin{} input.
+The source models, the generated models and our own runs are in the repository~\cite{toolrepo},
+which also ships the container images that pin the toolchains we used.
+We will provide a detailed description of the process for the novel attack discovered from the
+BC analysis results.
 
 \subsection{WPA2-PSK}
 
@@ -144,36 +151,64 @@ When $n$ is 16, the complexity of brute-forcing a 16-byte session key is signifi
 The discovery of the UMD attack implies that even if the central device only accepts 16-byte session keys, an attacker can still compromise the session key.
 This attack highlights the inherent risks associated with compatibility with legacy devices, as it enables attackers to compromise session keys without eventually downgrading them.
 
-\noindent
-\textbf{Disclosure.}
-To ensure responsible disclosure, we reported our findings to the Bluetooth Special Interest Group (SIG) security team.
-They gave us a positive response to our novel attack. 
-They stated that they are currently conducting a detailed analysis of the report and will provide further feedback and clarification once their analysis is complete.
-We will keep communicating with the Bluetooth SIG to ensure that our findings are addressed promptly.
+\subsection{Performance Evaluation} \label{sec:performance}
 
-\subsection{Reproducibility and Effort Disclosure} \label{sec:reproducibility}
+This subsection reports three things: what our translation costs on protocols that contain a
+low-entropy value but no reachable brute-force attack, how the annotated models compare against
+the same models without annotations, and where the additional proof effort goes.
 
-To support independent re-examination of our results, we disclose the resources required to reproduce every case study.
+\noindent\textbf{Version attribution.}
+The WPA2-PSK, BLE and BC results were produced with \Tamarin{}~1.8.0 and Maude~2.7.1.
+The Alipay models below use syntax that \Tamarin{}~1.8.0 does not accept, so they were run with
+\Tamarin{}~1.10.0 and Maude~3.1.
+Each pair of numbers we compare comes from one version on one machine, and we never place numbers
+from the two versions in the same comparison.
 
-\noindent\textbf{Hardware and software configuration.}
-All verifications were executed on a single workstation running Ubuntu 22.04 LTS with an AMD Ryzen 9~7950X3D CPU (16 cores, 32 threads) and 192~GB of RAM.
-We used \Tamarin{} as the unmodified verification backend; EntropyVerif operates purely as a source-to-source front-end and emits standard \Tamarin{} input.
+\noindent\textbf{Protocols with no reachable attack.}
+To see what the translation costs when there is nothing to find, we applied EntropyVerif to three
+models of the Alipay payment protocols developed by Xiao et al.~\cite{xiao2026payment}: payment
+from the mobile application, payment from the mobile web page, and payment by scanning an order
+code.
+All three carry a user payment password, which is low entropy, but none of them exposes a function
+output from which the password could be recomputed.
+The change to each model is one label marking the password as low entropy. For the order-code
+model we also report a variant in which one line is added to the existing tactic, in both the
+annotated and the unannotated version.
+In all four, every lemma reaches the same verdict as in the unannotated model and the finished
+proofs have the same number of steps, so the analysis outcome does not change.
+\autoref{tab:perf-baseline} gives the running times. For the first two models EntropyVerif adds
+about twelve seconds. The order-code model is far more expensive in both versions, and the
+one-line tactic adjustment brings them to 42\% and 32\% of the unadjusted times, which
+indicates that its long runtime comes from a suboptimal tactic in the original model rather than
+from the annotation.
 
-\noindent\textbf{Per-lemma cost.}
-The WPA2-PSK model terminates in under one minute per lemma.
-The BLE pairing model terminates in under one hour per lemma.
-BC configurations span the widest range: the easiest Legacy--Legacy case terminates in 18~seconds, while the hardest configuration (LgOn-Legacy $\times$ LgOn-Enhanc under the QA model) requires roughly $9.9 \times 10^4$~seconds (about 27 hours) to terminate.
-Per-lemma timings for each BC configuration appear in Table~\ref{tab:bc-session-result}.
+\begin{table}[t]
+    \centering
+    \caption{Verification time of the Alipay models with and without low-entropy annotations, under \Tamarin{}~1.10.0.}
+    \label{tab:perf-baseline}
+    \small
+    \renewcommand{\arraystretch}{1.15}
+    \begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}X r r r@{}}
+    \toprule
+    \textbf{Model} & \textbf{Plain (s)} & \textbf{EntropyVerif (s)} & \textbf{$\Delta$ (s)} \\
+    \midrule
+    Alipay, application          & 134.41 & 146.03 & $+11.62$ \\
+    Alipay, mobile web           & 134.10 & 146.16 & $+12.06$ \\
+    Alipay, order code           & 456.57 & 1384.68 & $+928.11$ \\
+    Alipay, order code (adjusted)& 191.08 & 438.45 & $+247.37$ \\
+    \bottomrule
+    \end{tabularx}
+\end{table}
 
 \noindent\textbf{Human guidance.}
-For the three BC configurations whose verification exceeds $10^4$~seconds we supply a small number of auxiliary source lemmas and one oracle-heuristic script that prioritizes goals containing \TFact{MDerive} over goals containing \TFact{K}.
-Every such auxiliary artifact is committed alongside the corresponding \verb|.spthy| file in our repository.
-The remaining configurations terminate without any human guidance beyond the default \Tamarin{} invocation.
+Two kinds of input are supplied by hand, and neither is a lemma.
+The first is the low-entropy labeling, which asks for protocol knowledge: for BC, that the session
+key is assembled from parts whose lengths the two sides agree on separately.
+The second is a heuristic tactic that adjusts goal and branch priorities so that infeasible
+branches are closed earlier. It deprioritizes the brute-force goals involving \TFact{MDerive} and
+\TFact{EntropyLow}, letting \Tamarin{} analyze them after the others. A tactic restricts no trace
+the model admits, so a proof that closes means the same with it as without it.
+This strategy is general, although applying it takes minor adjustments for each model: six lines
+in each BLE tactic and fourteen in BC. The BC models use tactics alone and carry one, identical in
+the SA and QA templates, so all eleven configurations use it, not only the slow ones.
 
-\noindent\textbf{Artifact availability.}
-We will release the complete artifact---EntropyVerif source, compiled \Tamarin{} models for all three protocols, oracle-heuristic scripts, and a driver script that reproduces every row of Tables~\ref{tab:4-way-handshake-result},~\ref{tab:ble-pairing-result},~and~\ref{tab:bc-session-result}---on acceptance, and we will submit it to the NDSS artifact evaluation track.
-
-\subsection{Summary}
-
-We demonstrated the effectiveness of our proposed methodology through case studies on WPA2-PSK, the BLE pairing protocol, and the BC session establishment protocol. 
-Our methodology discovered known attacks and the novel UMD attack overlooked by former model, successfully introducing low-entropy keys to protocol analysis in symbolic models.
