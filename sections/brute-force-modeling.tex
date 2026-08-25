@@ -103,10 +103,19 @@ The execution process of the relationship-breaking oracle is shown as follows:
 % 给定一个函数f，攻击者获得了一个函数输出f(X, k), 其中k是目标密钥，X是除了k之外的所有其他变量的集合。
 % 如果攻击者得知X中的某个变量x_i的值，和f(X, k)一起提供给RO，RO会找到一个函数f', 使得f'(k) = f(X, k)，并返回.
 \noindent
-Given a function $f$ where an attacker acquires the function output $f(X, k)$, in which $k$ represents the target key and $X$ denotes the set of all other input variables excluding $k$. 
-If the attacker knows the value of $x_i$, $x_i \in X$ and submits it together with $f(X, k)$ to the relationship-breaking oracle, the oracle will return a new function $f'$ where $f'(X \backslash \{x_i\}, k) = f(X, k)$.
-Attackers can access this oracle multiple times until all other input variables are eliminated, except for the target key.
-They then utilize the value-breaking oracle to obtain the value of the low-entropy key.
+Consider a function $f$ of arity $n+1$ whose output $f(x_1,\ldots,x_n,k)$ the attacker has
+observed, where $k$ is the target key and $x_1,\ldots,x_n$ are the remaining arguments.
+Suppose the attacker learns that argument $x_i$ has the value $a_i$ and submits that value
+together with the observed output to the relationship-breaking oracle.
+The oracle returns the partial application of $f$ in which the $i$-th argument is fixed to $a_i$:
+\begin{flalign*}
+    & f'_{a_i}(x_1,\ldots,x_{i-1},x_{i+1},\ldots,x_n,k) &\\
+    & \quad = f(x_1,\ldots,x_{i-1},a_i,x_{i+1},\ldots,x_n,k). &
+\end{flalign*}
+The subscript is part of the definition. Fixing the same position to a different value yields a
+different function, so $f'$ is determined by $f$, the position $i$, and the value $a_i$ together.
+Repeating this removes known arguments one at a time until $k$ is the only argument left, at which
+point the attacker calls the value-breaking oracle on the remaining output.
 
 
 \subsection{Oracle Modeling} \label{sec:oracle-modeling}
