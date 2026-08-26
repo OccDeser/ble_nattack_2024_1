@@ -18,8 +18,9 @@ the analysis can report attacks that are valid in the symbolic model but infeasi
 \noindent\textbf{Verification effort.}
 Although we impose a budget on the value-breaking oracle, verification may still fail to terminate or take an excessively long time on densely interleaved multi-session models; the worst-case BC configuration in our evaluation takes roughly $9.9 \times 10^4$ seconds.
 Compared with baseline models that do not carry low-entropy annotations, the analysis cost grows substantially because the relationship-breaking oracle introduces many new derivation branches.
-In practice, difficult BC configurations still benefit from \Tamarin{}'s oracle-heuristic and from a small number of auxiliary lemmas that prune search space; we disclose each case where such human guidance is applied in Section~\ref{sec:6results}.
-Engineering further automation---for example, learned heuristics for oracle scheduling or automatic auxiliary-lemma synthesis---is an orthogonal line of work that we see as directly benefiting our approach.
+In practice, the BC and BLE models rely on hand-written \Tamarin{} tactics that reorder goals so
+that infeasible branches close earlier, and use no auxiliary lemmas. Section~\ref{sec:6results}
+describes this guidance.
 
 \noindent\textbf{Implications for the Bluetooth Classic specification.}
 The UMD attack is not an implementation bug but a weakness in the protocol design: as long as two endpoints can repeatedly renegotiate the session-key length asymmetrically, and as long as the resulting session keys remain derivable fragments of a shared long-term secret, the attack complexity $C(n) = n \cdot 2^{128/n}$ applies regardless of which device vendor is in use.
@@ -39,4 +40,3 @@ low-entropy keys, built on the \texttt{MDerive} derivation abstraction and a thr
 breaking-oracle design, and realized as EntropyVerif---a syntax-sugar extension of \Tamarin{} that
 emits standard multiset-rewriting rules and leaves the \Tamarin{} backend unmodified.
 Our case studies on WPA2-PSK, BLE pairing, and Bluetooth Classic automatically rediscover PMKID, KNOB, and Method Confusion without any protocol-specific reveal rules, and reveal a new protocol-level attack on Bluetooth Classic---the Unilateral Multi-Downgrade (UMD) attack (Section~\ref{sec:umd-attack})---that, via the compound-key decomposition $C(n) = n \cdot 2^{128/n}$ attained at $n=16$, reduces 128-bit session-key recovery by a factor of $2^{116}$.
-Together, these results demonstrate that entropy-aware symbolic verification is both feasible and necessary for modern protocols that compromise on key strength for usability or compatibility, and they argue for treating brute-force reachability as a first-class citizen in future protocol design and analysis.

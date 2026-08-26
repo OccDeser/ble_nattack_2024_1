@@ -2,14 +2,11 @@
 
 \noindent
 \textbf{Responsible disclosure.}
-We reported the vulnerability to the Bluetooth Special Interest Group~(SIG) security team on
-July~15, 2024, under the heading of a unilateral key downgrade and covering two scenarios, of
-which the one this paper reports is the second.
+We reported the vulnerability to the Bluetooth Special Interest Group~(SIG) security team on July~15, 2024, 
+under the heading of a unilateral key downgrade.
 On February~7, 2025 the SIG replied with the results of its internal analysis, considering the
 scenario this paper reports to be practical.
 
-\noindent
-\textbf{Disclosure channel.}
 UMD is a weakness in how the Bluetooth Classic specification permits key-length negotiation, not a
 defect in one product, so we disclosed it to the SIG rather than to individual manufacturers, and
 we did not contact any manufacturer directly.
@@ -22,8 +19,7 @@ All analysis in this paper is conducted entirely within the symbolic model using
 No real Bluetooth devices were involved in the discovery or validation of the UMD attack.
 The attack traces are produced by the automated verifier and do not require physical proximity to
 any device.
-We have therefore not demonstrated the attack against a physical device, and the SIG's February
-2025 reply invites exactly such a demonstration.
+We have therefore not demonstrated the attack against a physical device.
 
 \noindent
 \textbf{User-side risk assessment.}

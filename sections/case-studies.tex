@@ -94,12 +94,12 @@ Existing research defines a rule that provides the attacker with the ability to 
      \TInS \TFacts{                 & \text{\TFactTerm{In}{senc(m, $LTK$)}}} \TEmpActFact{} \TFacts{ \text{\TFactTerm{Out}{$LTK$}}}             
 \end{flalign*}
 % 其中，resize函数代表了LTK的截断操作，第一个参数是待截断的密钥，第二个参数是截断后的密钥长度。虽然这条规则虽然赋予了攻击者获取低熵的LTK的能力，但是这条规则并没有还原真实的攻击行为。事实上，配对的蓝牙设备在使用LTK保护通信时，会首先使用LTK派生出SK，然后使用SK加密发往公开信道的数据。delov-yao模型中的攻击者无法获取到使用LTK加密的密文，也就无法使用这条规则来妥协低熵的LTK。这样的模型可以发现KNOB攻击，是因为这个模型简化了SK的参与，直接使用了LTK来保护通信数据。我们希望更加还原协议的行为，因此补充了LTK参与派生SK，以及SK用于保护通信。
-The \funcText{resize} function is designed to model the truncation operation of $LTK$, with the first parameter being the key to be truncated and the second parameter specifying the desired length of the truncated key.
-While this rule provides the attacker with the theoretical ability to obtain a low-entropy $LTK$, it does not accurately replicate the actual attack scenario.
-In fact, paired Bluetooth devices utilize the $LTK$ to secure communications by first deriving a Session Key (SK) from the $LTK$, and subsequently employing the SK to encrypt data transmitted over the public channel.
-In the Dolev-Yao model, the attacker is unable to intercept the ciphertext encrypted with the $LTK$, thus making it impossible to exploit this rule to compromise a low-entropy $LTK$.
-The model's ability to discover the KNOB attack arises from its simplification of SK involvement, where the $LTK$ is directly used to secure communication data.
-In our efforts to more faithfully model the protocol's execution, we have incorporated the derivation of the SK from the $LTK$ and the use of the SK in securing communications.
+Here \funcText{resize} truncates the key given in its first argument to the length given in its
+second. This rule gives the attacker a low-entropy $LTK$ in principle, but not in the protocol as
+deployed: paired devices derive a session key (SK) from the $LTK$ and encrypt with the SK, so a
+Dolev-Yao attacker never sees a ciphertext under the $LTK$ and the rule never fires. That model
+finds the KNOB attack only because it lets the $LTK$ protect the traffic directly. We therefore
+model the derivation of the SK from the $LTK$ and its use in securing communications.
 
 % 此外，我们还以更细的粒度建模了reszie函数。定义两种种密钥长度$N_1$与$N_2$，其中$N_1$表示攻击者可以破解的密钥长度，$N_2$表示攻击者无法破解的密钥长度。为了详细地建模出LTK的截取操作，我们定义两个函数 left/1 与 right/1，分别代表了截取密钥的左侧一半与右侧一半。在此基础上，resize函数满足以下等式：
 Furthermore, we modeled the \funcText{resize} function with a finer granularity.
@@ -170,24 +170,13 @@ The attacker compromises the security by altering the negotiated session key len
 \noindent
 \textbf{Security Assumption:} 
 % 在蓝牙Core Specification v5.1以及之前的版本中，BC设备支持的最短密钥长度可以是1字节。在蓝牙v5.2及之后的规范中建议BC设备支持的最短密钥长度至少为7字节。以下是在最新的蓝牙v6.0标准文件中相关内容的表述：
-In the Bluetooth Core Specification version 5.1\cite{bluetooth51} and preceding versions, the minimum key size allowed by BC devices is 1 byte.
-However, starting from Bluetooth version 5.2\cite{bluetooth52}, it is advised that BC devices support the minimum key size should not be less than 7 bytes.
-The subsequent text is extracted from the most recent Bluetooth Core Specification version 6.0\cite{bluetooth6}, which elaborates on this recommendation.
-\BlueQuote{[Vol 2, Part C, 4.2.5.2]}{ 
-L\_max\_c and L\_max\_p \emph{shall} be set to at least 7 octets.
-L\_min\_c and L\_min\_p \emph{should} be set to at least 7 octets.
-}
-% 在蓝牙specification中，\textbf{shall} 代表了强制要求，\textbf{should} 代表了建议。因此，支持最大的密钥长度低于7字节的BC设备是不符合规范的。然而，我们在最新的规范中找到了有关BC设备允许的最大密钥长度的另一处表述，如下所示：
-In the Bluetooth specification, the term \emph{shall} denotes a mandatory requirement, whereas \emph{should} indicates a recommended practice.
-So BC devices that support a maximum key size of less than 7 bytes are deemed non-compliant with the specification.
-Nonetheless, in the same specification, we have identified an alternative statement about the permissible maximum key length for BC devices, which is as follows:
-\BlueQuote{[Vol 2, Part H, 4.1]}{ 
-Each device implementing the Baseband specification shall have a parameter defining the maximal allowed key length, L\_max, $1 \leq \text{L\_max} \leq 16$ (number of octets in the key).}
-% 这里表述BC设备支持的最大密钥长度可以是1字节到16字节，与之前的表述明显存在矛盾。
-It is indicated that the maximum key length accepted by BC devices ranges from 1 byte to 16 bytes, which contradicts the previous statement.
-
-% 鉴于the specification 对最短的密钥长度并没有严格的要求，而且表述前后混乱，我们假定BC设备支持的密钥长度范围存在三种类型：
-Since there is no strict requirement regarding the minimum key length in the specification, and the statements are inconsistent, we assume that there are three types of key length ranges accepted by BC devices:
+The Bluetooth Core Specification is inconsistent about the minimum key size. Since
+version~5.2~\cite{bluetooth52} it states that \Tterm{L\_max} \emph{shall} and \Tterm{L\_min}
+\emph{should} be at least 7~octets~[Vol~2, Part~C, 4.2.5.2], where \emph{shall} is mandatory and
+\emph{should} is a recommendation, while a second passage requires only $1 \leq
+\text{\Tterm{L\_max}} \leq 16$~[Vol~2, Part~H, 4.1]~\cite{bluetooth6}.
+Version~5.1~\cite{bluetooth51} and earlier allow a minimum of 1~byte.
+We therefore assume three types of key length ranges accepted by BC devices:
 \begin{itemize}[leftmargin=*]
     \item \textbf{Secure Keysize:} The BC device only accepts keys of 16 bytes and rejects any keys shorter than 16 bytes.
     \item \textbf{Enhancing Keysize:} The BC device accepts keys ranging from 7 to 16 bytes, but prefers 16-byte keys.
@@ -209,15 +198,8 @@ These abbreviations also index the rows of Table~\ref{tab:bc-session-result}.
 % \end{itemize}
 % 这两类攻击者分别代表了计算能力较强的攻击者（可以暴力破解8字节的密钥）与计算能力较弱的攻击者（可以暴力破解4字节的密钥）。
 % 我们将在模型中分别考虑SA与QA两种攻击者，以验证BC设备在不同的安全假设下的安全性。
-Considering that the minimum key length can be as low as 1 byte, we assume the existence of two types of attackers:
-% !
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Semi-Attacker(SA):} An attacker capable of cracking a key that is half the maximum length.
-    \item \textbf{Quart-Attacker(QA):} An attacker capable of cracking a key that is a quarter of the maximum length.
-\end{itemize}
-These two types of attackers represent different levels of computational power: a stronger attacker who can brute-force an 8-byte key and a weaker attacker who can brute-force a 4-byte key.
-So the attacker model we consider in BLE is the SA attacker.
-We will consider both SA and QA attackers in our model to evaluate the security of BC devices under different security assumptions.
+We evaluate BC under both graded adversaries of Section~\ref{sec:threat-model}, the semi-attacker
+(SA) and the quart-attacker (QA), since the minimum key length can be as low as 1 byte.
 
 % 我们建模了BC-SC与BC-Legacy进行了全面的形式化建模，以支持我们安全假设中不同的设备类型的验证。我们通过如下的equations来建模协议中设备交换双方的认证需求，来选择会话建立方法的过程：
 \noindent
