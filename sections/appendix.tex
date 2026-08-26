@@ -1,0 +1,172 @@
+\section{Verification Time of the Alipay Models}
+\label{app:alipay-time}
+
+The three Alipay models of Xiao et al.~\cite{xiao2026payment} contain a low-entropy payment password 
+but no function output from which that password could be recomputed, 
+so they carry a low-entropy value without carrying a reachable brute-force attack.
+They therefore measure what the translation costs when there is nothing for the oracles to find.
+Table~\ref{tab:perf-baseline} places each annotated model beside the same model without annotations.
+Every lemma reaches the same verdict in both versions and the finished proofs have the same number of steps, 
+so the annotation changes the cost of the analysis and not its outcome.
+
+For the application and mobile-web models the annotation adds about twelve seconds, 
+under nine percent of the running time.
+The order-code model is more expensive in both versions.
+Its original tactic leaves attacker-knowledge goals about session values ahead of everything else,
+and adding a single deprioritisation line brings the unannotated model to 42\% and the annotated
+model to 32\% of its unadjusted time.
+We report both variants, and add that line to both versions of the model, so that the pair being
+compared differs only in the annotation.
+The remaining gap of about four minutes is what the translation costs on this model.
+
+\begin{table}[t]
+    \centering
+    \caption{Verification time of the Alipay models with and without low-entropy annotations, under \Tamarin{}~1.10.0 and Maude~3.1. ``Adjusted'' adds one deprioritisation line to the tactic of both versions.}
+    \label{tab:perf-baseline}
+    \small
+    \renewcommand{\arraystretch}{1.15}
+    \begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}X r r r@{}}
+    \toprule
+    \textbf{Model} & \textbf{Plain (s)} & \textbf{EntropyVerif (s)} & \textbf{$\Delta$ (s)} \\
+    \midrule
+    Alipay, application          & 134.41 & 146.03 & $+11.62$ \\
+    Alipay, mobile web           & 134.10 & 146.16 & $+12.06$ \\
+    Alipay, order code           & 456.57 & 1384.68 & $+928.11$ \\
+    Alipay, order code, adjusted & 191.08 & 438.45 & $+247.37$ \\
+    \bottomrule
+    \end{tabularx}
+\end{table}
+
+\section{Where the Proof Effort Goes}
+\label{app:breakdown}
+
+This appendix gives a detailed breakdown of the proof effort, using the BC case study as the example, 
+and reports how much of a completed proof is spent on the goals our translation
+introduces.
+\Tamarin{} solves constraints in an interdependent way, so its running time cannot be divided
+among individual goals, and we decompose the finished proofs instead.
+We use BC because it is the only case study with verified all-traces lemmas, 
+which are the proofs where the search has to be exhausted and the cost of the translation therefore shows.
+
+\subsection{Method}
+
+\Tamarin{} reports a step count for each lemma.
+In the proof script that count corresponds to the \Tterm{case} lines: a \Tterm{solve} on a goal
+splits into one or more cases, 
+siblings are separated by \Tterm{next}, and the goal is discharged by \Tterm{qed}.
+For the \Tterm{SecrecyCentralSK} lemma of one configuration, for instance, the script contains
+3292 \Tterm{solve} lines, 3292 \Tterm{qed} lines, 6359 \Tterm{next} lines 
+and 9651 \Tterm{case} lines, and \Tamarin{} reports 9653 steps.
+Counting cases therefore reproduces the reported figure, and we take one case to be one step.
+We assign each step to the goal of the innermost enclosing \Tterm{solve}, and read the kind of that goal from its fact:
+\TFact{MDerive0}, \TFact{MDerive1} and \TFact{EntropyLow} are the facts our translation adds, 
+\TFact{KU} is attacker knowledge, and the remaining facts belong to the protocol model.
+We also record which rule closes each step.
+
+We restrict the count to the lemmas \Tamarin{} verified.
+A falsified lemma stops at the first counterexample it finds, so its proof is a single path and
+its step count measures how quickly an attack was reached rather than the cost of a search.
+A verified all-traces lemma is the opposite case: every branch has to be closed for the property to hold, 
+so every case in the script is work that was actually carried out.
+The \Tterm{Executability} lemma is also excluded, being an existence property that closes in thirteen to fifteen steps everywhere.
+Eleven verified lemmas remain, 1{,}779{,}376 steps in total.
+
+\subsection{Results}
+
+Table~\ref{tab:perf-breakdown-kind} gives the split by kind of goal.
+The facts our translation adds account for 86.4\% of the steps, while the goals of the protocol
+model itself account for 54 steps out of 1{,}779{,}376.
+The tactic sorts the protocol goals ahead of everything else, so they are settled early and the
+remainder of the search runs on derivation facts and attacker knowledge.
+
+\begin{table}[t]
+    \centering
+    \caption{Proof steps of the eleven verified BC lemmas, by kind of goal.}
+    \label{tab:perf-breakdown-kind}
+    \small
+    \renewcommand{\arraystretch}{1.15}
+    \begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}X r r@{}}
+    \toprule
+    \textbf{Goal} & \textbf{Steps} & \textbf{Share} \\
+    \midrule
+    \TFact{MDerive0}          & 1495256 & 84.0\% \\
+    \TFact{MDerive1}          &   42504 &  2.4\% \\
+    \TFact{KU}                &  241562 & 13.6\% \\
+    Protocol state and action &      54 &  0.0\% \\
+    \midrule
+    Total                     & 1779376 & \\
+    \bottomrule
+    \end{tabularx}
+\end{table}
+
+The \TFact{MDerive0} steps are the largest group, and the rules that close them show what they
+are: 72\% are closed by a rule of the BC model, led by \Tterm{PerLegacyEncRsp} with 265{,}936
+steps, \Tterm{PerLegacyRecvAuRand} with 153{,}552 and \Tterm{PerSendKeysizeReq} with 139{,}216,
+while the remaining 28\% are closed by the two derivation rules the compiler emits.
+A \TFact{MDerive0} goal asks which terms an observed message was computed from, and \Tamarin{}
+answers it by trying the protocol rules that could have produced that message.
+The cost of the translation therefore grows with the number of protocol rules that can produce an
+observed message, not with the number of keys marked as low entropy.
+
+The \TFact{KU} steps are spent rebuilding key material.
+Constructing the BC key-derivation functions accounts for most of them, \Tterm{c\_h4} alone for
+118{,}826 steps, or 49\% of the group, followed by \Tterm{c\_combine} with 69{,}316 steps, or
+29\%, which assembles a key from separately recovered parts.
+Propagation is minor: the \TFact{MDerive1} facts, which the propagation rule produces, take 42{,}504
+steps, one thirty-fifth of the \TFact{MDerive0} total.
+
+The rule that performs the recovery itself, \Tterm{bf\_low\_entropy\_message}, closes 4{,}980
+steps, which is 0.28\% of the proofs.
+
+Table~\ref{tab:perf-breakdown} gives the same split per lemma.
+Within one configuration the proportions are close to constant across lemmas, so what the
+translation costs is a property of the configuration rather than of a particular security
+property.
+
+\begin{table}[t]
+    \centering
+    \caption{Proof steps per verified lemma. MD0, MD1: the derivation facts our translation adds. KU: attacker knowledge. Prot.: goals of the protocol model.}
+    \label{tab:perf-breakdown}
+    \small
+    \renewcommand{\arraystretch}{1.15}
+    \begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}X l r r r r@{}}
+    \toprule
+    \textbf{Configuration} & \textbf{Lemma} & \textbf{MD0} & \textbf{MD1} & \textbf{KU} & \textbf{Prot.} \\
+    \midrule
+    \multirow{3}{*}{\makecell[l]{LgOn-Legacy $\times$\\LgOn-Enhanc, QA}}
+        & SecCenSK & 169584 & 5010 &  2254 &  1 \\
+        & SecPerSK & 261624 & 7998 &  4682 &  7 \\
+        & MitM     & 169584 & 5010 &  2254 &  5 \\
+    \midrule
+    \multirow{3}{*}{\makecell[l]{ScLg-Secure $\times$\\ScLg-Enhanc, QA}}
+        & SecCenSK & 133264 & 3000 & 30028 &  2 \\
+        & SecPerSK & 221184 & 4980 & 52477 &  8 \\
+        & MitM     & 266528 & 6000 & 60084 & 10 \\
+    \midrule
+    \multirow{3}{*}{\makecell[l]{ScOn-Secure $\times$\\ScOn-Enhanc, QA}}
+        & SecCenSK &  10176 &  324 & 12226 &  1 \\
+        & SecPerSK &  15632 &  486 & 19549 &  3 \\
+        & MitM     &  10176 &  324 & 12240 &  5 \\
+    \midrule
+    \multirow{2}{*}{\makecell[l]{ScOn-Secure $\times$\\ScOn-Legacy, QA}}
+        & SecCenSK &   7776 &  324 &  1550 &  1 \\
+        & MitM     &   7776 &  324 &  1564 &  5 \\
+    \midrule
+    \multirow{2}{*}{\makecell[l]{ScOn-Secure $\times$\\ScOn-Legacy, SA}}
+        & SecCenSK & 110976 & 4362 & 21320 &  1 \\
+        & MitM     & 110976 & 4362 & 21334 &  5 \\
+    \bottomrule
+    \end{tabularx}
+\end{table}
+
+\subsection{Summary}
+
+Three things follow.
+The goals our translation adds take 86.4\% of the steps of a verified BC proof, and the protocol
+model's own goals take 54 of 1{,}779{,}376.
+Those steps are not new cryptographic reasoning but a second traversal of the protocol rules,
+asking of each observed message which rule could have produced it, which is why 72\% of them are
+closed by a protocol rule.
+Recovering a key is almost free at 0.28\% of the steps and propagation is cheap at 2.4\%, so what
+the analysis pays for is reaching the point at which a recovery becomes possible, and it pays most
+where no attack exists and every branch has to be closed.

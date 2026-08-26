@@ -32,12 +32,12 @@ obtain the first verification of off-line guessing resistance in the multiset re
 applied to the EAP-EKE password-authenticated key exchange.
 Their question is whether a guess is checkable at all, which is decided from the messages the
 protocol emits, and it covers candidate validation that our attacker model leaves out
-(\autoref{sec:threat-model}).
+(Section~\ref{sec:threat-model}).
 What the answer does not record is how large the guessed value is. A 128-bit key that is checkable
 in principle receives the same verdict as a 4-byte one, so the verdict alone does not separate a
 key that a given attacker can enumerate from one that no attacker can.
 That separation is what the low-entropy annotation and the graded attacker of
-\autoref{sec:threat-model} supply.
+Section~\ref{sec:threat-model} supply.
 We also work in \Tamarin{}'s trace mode, so a recovered value is an ordinary term in the
 attacker's knowledge and remains usable in later rules and in other sessions, which is what the
 UMD attack needs.

@@ -153,16 +153,8 @@ This attack highlights the inherent risks associated with compatibility with leg
 
 \subsection{Performance Evaluation} \label{sec:performance}
 
-This subsection reports three things: what our translation costs on protocols that contain a
-low-entropy value but no reachable brute-force attack, how the annotated models compare against
-the same models without annotations, and where the additional proof effort goes.
-
-\noindent\textbf{Version attribution.}
-The WPA2-PSK, BLE and BC results were produced with \Tamarin{}~1.8.0 and Maude~2.7.1.
-The Alipay models below use syntax that \Tamarin{}~1.8.0 does not accept, so they were run with
-\Tamarin{}~1.10.0 and Maude~3.1.
-Each pair of numbers we compare comes from one version on one machine, and we never place numbers
-from the two versions in the same comparison.
+This subsection reports what our translation costs on protocols that contain a low-entropy value
+but no reachable brute-force attack, and where the additional proof effort goes.
 
 \noindent\textbf{Protocols with no reachable attack.}
 To see what the translation costs when there is nothing to find, we applied EntropyVerif to three
@@ -171,34 +163,22 @@ from the mobile application, payment from the mobile web page, and payment by sc
 code.
 All three carry a user payment password, which is low entropy, but none of them exposes a function
 output from which the password could be recomputed.
-The change to each model is one label marking the password as low entropy. For the order-code
-model we also report a variant in which one line is added to the existing tactic, in both the
-annotated and the unannotated version.
-In all four, every lemma reaches the same verdict as in the unannotated model and the finished
-proofs have the same number of steps, so the analysis outcome does not change.
-\autoref{tab:perf-baseline} gives the running times. For the first two models EntropyVerif adds
-about twelve seconds. The order-code model is far more expensive in both versions, and the
-one-line tactic adjustment brings them to 42\% and 32\% of the unadjusted times, which
-indicates that its long runtime comes from a suboptimal tactic in the original model rather than
-from the annotation.
+The change to each model is one label marking the password as low entropy.
+Every lemma reaches the same verdict as in the unannotated model and the finished proofs have the
+same number of steps, so the analysis outcome does not change. The annotation adds about twelve
+seconds to the two simpler models and about four minutes to the order-code model.
+Appendix~\ref{app:alipay-time} gives the times.
 
-\begin{table}[t]
-    \centering
-    \caption{Verification time of the Alipay models with and without low-entropy annotations, under \Tamarin{}~1.10.0.}
-    \label{tab:perf-baseline}
-    \small
-    \renewcommand{\arraystretch}{1.15}
-    \begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}X r r r@{}}
-    \toprule
-    \textbf{Model} & \textbf{Plain (s)} & \textbf{EntropyVerif (s)} & \textbf{$\Delta$ (s)} \\
-    \midrule
-    Alipay, application          & 134.41 & 146.03 & $+11.62$ \\
-    Alipay, mobile web           & 134.10 & 146.16 & $+12.06$ \\
-    Alipay, order code           & 456.57 & 1384.68 & $+928.11$ \\
-    Alipay, order code (adjusted)& 191.08 & 438.45 & $+247.37$ \\
-    \bottomrule
-    \end{tabularx}
-\end{table}
+\noindent\textbf{Where the proof effort goes.}
+\Tamarin{} solves constraints in an interdependent way, so its running time cannot be divided
+among individual goals. We therefore count the proof steps of each verified BC lemma and assign
+each step to the goal it solves. The facts our translation adds take 86.4\% of the steps, and the
+goals of the protocol model itself take 54 out of 1{,}779{,}376. Those steps are not new
+cryptographic reasoning: a derivation goal asks which terms an observed message was computed from,
+and 72\% of them are closed by a rule of the protocol model, so the cost grows with the number of
+rules that could have produced a message rather than with the number of low-entropy keys.
+Recovering a key is itself almost free, at 0.28\% of the steps. Appendix~\ref{app:breakdown} gives the
+method and the per-lemma split.
 
 \noindent\textbf{Human guidance.}
 Two kinds of input are supplied by hand, and neither is a lemma.
