@@ -31,7 +31,7 @@ Based on the attack, we argue that the Bluetooth SIG should consider the followi
 
 \noindent\textbf{Scope of the methodology.}
 Our methodology currently does not model private (secret) functions, because the prerequisites for brute-force attacks are defined in terms of publicly-known cryptographic operators.
-When a real protocol uses a private function, one can often replace it with a combination of public functions and private variables, and this replacement is sound with respect to our attacker model; we leave native support for private functions to future work.
+When a real protocol uses a private function, one can often replace it with a combination of public functions and private variables, and the resulting model stays within the attacker model of Section~\ref{sec:threat-model}; we leave native support for private functions to future work.
 Similarly, our modeling focuses on brute-force attacks whose cost depends solely on key length and does not cover side-channel-assisted or differential attacks whose cost depends on implementation-level details.
 
 \noindent\textbf{Conclusion.}
